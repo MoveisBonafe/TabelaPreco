@@ -924,56 +924,413 @@
             }
 
             renderCategoriesTab() {
+                const categories = productManager.getCategories();
+                const products = productManager.getProducts();
+                
                 return `
-                    <h2>📂 Gerenciar Categorias</h2>
-                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
-                        Funcionalidade em desenvolvimento...
-                    </p>
+                    <div class="products-header">
+                        <h2>📂 Gerenciar Categorias</h2>
+                        <button class="btn btn-primary" data-action="add-category">
+                            ➕ Nova Categoria
+                        </button>
+                    </div>
+
+                    <div id="addCategoryForm" class="form-container" style="display: none;">
+                        <h3 class="form-title">Nova Categoria</h3>
+                        <form id="categoryForm">
+                            <div class="form-group">
+                                <label class="form-label">Nome da Categoria</label>
+                                <input type="text" name="categoryName" class="form-input" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" data-action="save-category">
+                                    Salvar Categoria
+                                </button>
+                                <button type="button" class="btn btn-outline" data-action="cancel-category">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    ${categories.length === 0 ? `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📂</div>
+                            <h3 class="empty-state-title">Nenhuma categoria encontrada</h3>
+                            <p>As categorias são criadas automaticamente quando você adiciona produtos.</p>
+                        </div>
+                    ` : `
+                        <div class="products-grid">
+                            ${categories.map(category => {
+                                const categoryProducts = products.filter(p => p.category === category);
+                                return `
+                                    <div class="product-card">
+                                        <div class="product-name">📂 ${category}</div>
+                                        <div class="product-category">${categoryProducts.length} produtos</div>
+                                        <div class="product-actions">
+                                            <button class="btn btn-secondary" data-action="view-category" data-category="${category}">
+                                                👁️ Ver Produtos
+                                            </button>
+                                        </div>
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `}
                 `;
             }
 
             renderPricesTab() {
+                const users = auth.users;
                 return `
-                    <h2>💰 Gerenciar Preços</h2>
-                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
-                        Funcionalidade em desenvolvimento...
-                    </p>
+                    <h2>💰 Gerenciar Preços e Multiplicadores</h2>
+                    
+                    <div class="form-container">
+                        <h3 class="form-title">Multiplicadores por Usuário</h3>
+                        <div class="products-grid">
+                            ${Object.entries(users).map(([username, userData]) => `
+                                <div class="product-card">
+                                    <div class="product-name">👤 ${username}</div>
+                                    <div class="product-category">Nível: ${userData.level === 'admin' ? 'Admin VIP' : 'Básico'}</div>
+                                    <div class="product-price">Multiplicador: ${userData.multiplier}x</div>
+                                    <div class="form-group" style="margin-top: 1rem;">
+                                        <input type="number" 
+                                               value="${userData.multiplier}" 
+                                               step="0.1" 
+                                               min="0.1" 
+                                               max="5"
+                                               class="form-input"
+                                               data-action="update-multiplier"
+                                               data-username="${username}">
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <h3 class="form-title">Informações de Preços</h3>
+                        <div style="background: hsl(var(--muted)); padding: 1rem; border-radius: 6px;">
+                            <p><strong>Como funciona:</strong></p>
+                            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                                <li>Produtos com <strong>preço fixo 🔒</strong> não sofrem alteração</li>
+                                <li>Produtos normais têm o preço multiplicado pelo valor do usuário</li>
+                                <li>Admin VIP geralmente tem multiplicador 1.0 (preço original)</li>
+                                <li>Usuários básicos podem ter multiplicadores maiores</li>
+                            </ul>
+                        </div>
+                    </div>
                 `;
             }
 
             renderUsersTab() {
+                const users = auth.users;
                 return `
                     <h2>👥 Gerenciar Usuários</h2>
-                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
-                        Funcionalidade em desenvolvimento...
-                    </p>
+                    
+                    <div class="products-header">
+                        <h3>Usuários do Sistema</h3>
+                        <button class="btn btn-primary" data-action="add-user">
+                            ➕ Novo Usuário
+                        </button>
+                    </div>
+
+                    <div id="addUserForm" class="form-container" style="display: none;">
+                        <h3 class="form-title">Novo Usuário</h3>
+                        <form id="userForm">
+                            <div class="form-group">
+                                <label class="form-label">Nome de Usuário</label>
+                                <input type="text" name="username" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Senha</label>
+                                <input type="password" name="password" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nível de Acesso</label>
+                                <select name="level" class="form-input" required>
+                                    <option value="basic">Básico</option>
+                                    <option value="admin">Admin VIP</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Multiplicador de Preço</label>
+                                <input type="number" name="multiplier" class="form-input" step="0.1" min="0.1" max="5" value="1.2" required>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" data-action="save-user">
+                                    Salvar Usuário
+                                </button>
+                                <button type="button" class="btn btn-outline" data-action="cancel-user">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="products-grid">
+                        ${Object.entries(users).map(([username, userData]) => `
+                            <div class="product-card">
+                                <div class="product-name">👤 ${username}</div>
+                                <div class="product-category">
+                                    ${userData.level === 'admin' ? '🔑 Admin VIP' : '👨‍💼 Usuário Básico'}
+                                </div>
+                                <div class="product-price">Multiplicador: ${userData.multiplier}x</div>
+                                <div style="margin-top: 1rem; padding: 0.75rem; background: hsl(var(--muted)); border-radius: 6px; font-size: 0.875rem;">
+                                    <p><strong>Permissões:</strong></p>
+                                    <ul style="margin-left: 1rem; margin-top: 0.25rem;">
+                                        ${userData.level === 'admin' ? `
+                                            <li>✅ Acesso total ao painel administrativo</li>
+                                            <li>✅ Gerenciar produtos e categorias</li>
+                                            <li>✅ Controlar preços e usuários</li>
+                                        ` : `
+                                            <li>👁️ Visualização do catálogo</li>
+                                            <li>💰 Preços com multiplicador ${userData.multiplier}x</li>
+                                        `}
+                                    </ul>
+                                </div>
+                                <div class="product-actions" style="margin-top: 1rem;">
+                                    <button class="btn btn-secondary" data-action="edit-user" data-username="${username}">
+                                        ✏️ Editar
+                                    </button>
+                                    ${username !== 'MoveisBonafe' ? `
+                                        <button class="btn btn-destructive" data-action="delete-user" data-username="${username}">
+                                            🗑️ Excluir
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
                 `;
             }
 
             renderExcelTab() {
+                const products = productManager.getProducts();
                 return `
                     <h2>📊 Importar/Exportar Excel</h2>
-                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
-                        Funcionalidade em desenvolvimento...
-                    </p>
+                    
+                    <div class="products-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="product-card">
+                            <div class="product-name">📥 Importar Produtos</div>
+                            <div class="product-category">Carregar produtos de arquivo Excel</div>
+                            <div style="margin: 1rem 0;">
+                                <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="form-input">
+                                <p style="font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin-top: 0.5rem;">
+                                    Formato esperado: Nome, Preço, Categoria, Descrição
+                                </p>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn btn-primary" data-action="import-excel">
+                                    📥 Importar Excel
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-name">📤 Exportar Produtos</div>
+                            <div class="product-category">${products.length} produtos no catálogo</div>
+                            <div style="margin: 1rem 0;">
+                                <p style="font-size: 0.875rem; color: hsl(var(--muted-foreground));">
+                                    Baixar todos os produtos em formato Excel
+                                </p>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn btn-secondary" data-action="export-excel">
+                                    📤 Exportar Excel
+                                </button>
+                                <button class="btn btn-outline" data-action="export-csv">
+                                    📄 Exportar CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <h3 class="form-title">📋 Modelo Excel</h3>
+                        <p>Para importar produtos, use um arquivo Excel com as seguintes colunas:</p>
+                        <div style="background: hsl(var(--muted)); padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid hsl(var(--border));">
+                                        <th style="text-align: left; padding: 0.5rem;">Nome</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Preço</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Categoria</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Descrição</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Preço Fixo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 0.5rem;">Sofá 3 Lugares</td>
+                                        <td style="padding: 0.5rem;">1299.99</td>
+                                        <td style="padding: 0.5rem;">Móveis</td>
+                                        <td style="padding: 0.5rem;">Sofá confortável</td>
+                                        <td style="padding: 0.5rem;">Não</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-outline" data-action="download-template">
+                                📋 Baixar Modelo
+                            </button>
+                        </div>
+                    </div>
                 `;
             }
 
             renderBackupTab() {
+                const products = productManager.getProducts();
+                const lastBackup = localStorage.getItem('lastBackup') || 'Nunca';
+                const dataSize = JSON.stringify(products).length;
+                
                 return `
                     <h2>☁️ Backup e Sincronização</h2>
-                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
-                        Funcionalidade em desenvolvimento...
-                    </p>
+                    
+                    <div class="products-grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="product-card">
+                            <div class="product-name">💾 Backup Local</div>
+                            <div class="product-category">Salvar dados no computador</div>
+                            <div style="margin: 1rem 0;">
+                                <p><strong>Produtos:</strong> ${products.length}</p>
+                                <p><strong>Tamanho:</strong> ${(dataSize / 1024).toFixed(2)} KB</p>
+                                <p><strong>Último backup:</strong> ${lastBackup}</p>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn btn-primary" data-action="backup-data">
+                                    💾 Fazer Backup
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-name">📥 Restaurar Backup</div>
+                            <div class="product-category">Carregar dados salvos</div>
+                            <div style="margin: 1rem 0;">
+                                <input type="file" id="backupFile" accept=".json" class="form-input">
+                                <p style="font-size: 0.875rem; color: hsl(var(--muted-foreground)); margin-top: 0.5rem;">
+                                    Arquivo JSON de backup anterior
+                                </p>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn btn-secondary" data-action="restore-backup">
+                                    📥 Restaurar Backup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <h3 class="form-title">🔄 Sincronização Entre Dispositivos</h3>
+                        <div style="background: hsl(var(--muted)); padding: 1rem; border-radius: 6px;">
+                            <p><strong>Como sincronizar:</strong></p>
+                            <ol style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                                <li>No dispositivo principal: clique em "Fazer Backup"</li>
+                                <li>Salve o arquivo JSON gerado</li>
+                                <li>No outro dispositivo: clique em "Restaurar Backup"</li>
+                                <li>Selecione o arquivo JSON e confirme a restauração</li>
+                            </ol>
+                        </div>
+                        <div class="product-actions" style="margin-top: 1rem;">
+                            <button class="btn btn-outline" data-action="reset-data">
+                                🗑️ Limpar Todos os Dados
+                            </button>
+                        </div>
+                    </div>
                 `;
             }
 
             renderMonitorTab() {
+                const products = productManager.getProducts();
+                const categories = productManager.getCategories();
+                const users = Object.keys(auth.users);
+                const storageSize = JSON.stringify(products).length;
+                const lastUpdate = localStorage.getItem('lastUpdate') || new Date().toLocaleDateString('pt-BR');
+                
                 return `
-                    <h2>📊 Monitor de Banco de Dados</h2>
-                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
-                        Funcionalidade em desenvolvimento...
-                    </p>
+                    <h2>📊 Monitor de Sistema</h2>
+                    
+                    <div class="products-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                        <div class="product-card">
+                            <div class="product-name">📦 Produtos</div>
+                            <div class="product-price">${products.length}</div>
+                            <div class="product-category">Total de produtos cadastrados</div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-name">📂 Categorias</div>
+                            <div class="product-price">${categories.length}</div>
+                            <div class="product-category">Categorias ativas</div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-name">👥 Usuários</div>
+                            <div class="product-price">${users.length}</div>
+                            <div class="product-category">Usuários cadastrados</div>
+                        </div>
+
+                        <div class="product-card">
+                            <div class="product-name">💾 Armazenamento</div>
+                            <div class="product-price">${(storageSize / 1024).toFixed(2)} KB</div>
+                            <div class="product-category">Espaço utilizado</div>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <h3 class="form-title">🔍 Informações do Sistema</h3>
+                        <div style="background: hsl(var(--muted)); padding: 1rem; border-radius: 6px;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div>
+                                    <p><strong>Ambiente:</strong> GitHub Pages</p>
+                                    <p><strong>Tipo de armazenamento:</strong> localStorage</p>
+                                    <p><strong>Sincronização:</strong> Entre abas do navegador</p>
+                                    <p><strong>Última atualização:</strong> ${lastUpdate}</p>
+                                </div>
+                                <div>
+                                    <p><strong>Status do sistema:</strong> 🟢 Online</p>
+                                    <p><strong>Backup automático:</strong> Manual</p>
+                                    <p><strong>Capacidade máxima:</strong> ~10MB</p>
+                                    <p><strong>Compatibilidade:</strong> Todos os navegadores</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-container">
+                        <h3 class="form-title">📈 Estatísticas por Categoria</h3>
+                        ${categories.length === 0 ? `
+                            <p style="color: hsl(var(--muted-foreground));">Nenhuma categoria encontrada</p>
+                        ` : `
+                            <div style="background: hsl(var(--muted)); padding: 1rem; border-radius: 6px;">
+                                ${categories.map(category => {
+                                    const categoryProducts = products.filter(p => p.category === category);
+                                    const avgPrice = categoryProducts.reduce((sum, p) => sum + p.price, 0) / categoryProducts.length;
+                                    return `
+                                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid hsl(var(--border));">
+                                            <span>📂 ${category}</span>
+                                            <span>${categoryProducts.length} produtos • Média: ${avgPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="form-container">
+                        <h3 class="form-title">🛠️ Ações de Manutenção</h3>
+                        <div class="product-actions">
+                            <button class="btn btn-secondary" data-action="refresh-stats">
+                                🔄 Atualizar Estatísticas
+                            </button>
+                            <button class="btn btn-outline" data-action="check-storage">
+                                🔍 Verificar Armazenamento
+                            </button>
+                            <button class="btn btn-outline" data-action="optimize-storage">
+                                ⚡ Otimizar Dados
+                            </button>
+                        </div>
+                    </div>
                 `;
             }
         }
