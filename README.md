@@ -109,7 +109,7 @@ npm run lint
 ## 🚀 Deploy
 
 O projeto está configurado para deploy fácil em:
-- **Replit**: Deploy automático
+- **Replit**: Deploy automático.
 - **Vercel**: Frontend estático
 - **Railway/Render**: Fullstack com banco
 
