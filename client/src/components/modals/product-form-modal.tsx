@@ -27,6 +27,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
     image: '',
     specifications: [],
     active: true,
+    fixedPrice: false,
   });
 
   const [finalPrice, setFinalPrice] = useState(0);
@@ -43,6 +44,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
         image: product.image,
         specifications: product.specifications || [],
         active: product.active,
+        fixedPrice: product.fixedPrice || false,
       });
     } else {
       setFormData({
@@ -55,6 +57,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
         image: '',
         specifications: [],
         active: true,
+        fixedPrice: false,
       });
     }
   }, [product]);
@@ -187,6 +190,19 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
                 className="bg-slate-50 text-slate-600"
               />
             </div>
+          </div>
+
+          <div className="flex items-center space-x-2 p-4 bg-blue-50 rounded-lg">
+            <input
+              type="checkbox"
+              id="fixedPrice"
+              checked={formData.fixedPrice}
+              onChange={(e) => setFormData(prev => ({ ...prev, fixedPrice: e.target.checked }))}
+              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            />
+            <Label htmlFor="fixedPrice" className="text-sm font-medium text-blue-800">
+              🔒 Preço Fixo - Este produto não será afetado pelo multiplicador de preços dos usuários
+            </Label>
           </div>
 
           {/* Preview das Tabelas de Preço */}

@@ -26,6 +26,7 @@ export const productSchema = z.object({
   image: z.string(),
   specifications: z.array(z.string()).optional(),
   active: z.boolean(),
+  fixedPrice: z.boolean().default(false), // Se true, preço não é alterado pelo multiplicador
   createdAt: z.date(),
 });
 

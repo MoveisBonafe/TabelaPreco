@@ -31,7 +31,7 @@ export function PriceTables({ product }: PriceTablesProps) {
     {
       id: '30_60',
       title: '30/60',
-      subtitle: '2x sem juros',
+      subtitle: '',
       price: product.price30_60,
       icon: Clock,
       bgColor: 'bg-purple-50',
@@ -41,7 +41,7 @@ export function PriceTables({ product }: PriceTablesProps) {
     {
       id: '30_60_90',
       title: '30/60/90',
-      subtitle: '3x sem juros',
+      subtitle: '',
       price: product.price30_60_90,
       icon: Timer,
       bgColor: 'bg-orange-50',
@@ -51,7 +51,7 @@ export function PriceTables({ product }: PriceTablesProps) {
     {
       id: '30_60_90_120',
       title: '30/60/90/120',
-      subtitle: '4x sem juros',
+      subtitle: '',
       price: product.price30_60_90_120,
       icon: Timer,
       bgColor: 'bg-red-50',
