@@ -23,7 +23,8 @@ export const productSchema = z.object({
   price30_60: z.number(), // À vista + 4%
   price30_60_90: z.number(), // À vista + 6%
   price30_60_90_120: z.number(), // À vista + 8%
-  image: z.string(),
+  image: z.string(), // Imagem principal (para compatibilidade)
+  images: z.array(z.string()).default([]), // Array de múltiplas imagens
   specifications: z.array(z.string()).optional(),
   active: z.boolean(),
   fixedPrice: z.boolean().default(false), // Se true, preço não é alterado pelo multiplicador
