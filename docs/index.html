@@ -546,6 +546,9 @@
                     if (target.matches('[data-action="import-excel"]')) {
                         this.handleImportExcel();
                     }
+                    if (target.matches('[data-action="download-template"]')) {
+                        this.handleDownloadTemplate();
+                    }
                     if (target.matches('[data-action="export-excel"]')) {
                         this.handleExportExcel();
                     }
@@ -748,28 +751,65 @@
                         const lines = text.split('\n');
                         const products = [];
 
-                        // Pula o cabeçalho
-                        for (let i = 1; i < lines.length; i++) {
-                            const columns = lines[i].split(',');
-                            if (columns.length >= 2 && columns[0].trim() && columns[1].trim()) {
-                                products.push({
-                                    name: columns[0].trim(),
-                                    price: parseFloat(columns[1].trim()) || 0,
-                                    category: columns[2]?.trim() || 'Importado',
-                                    description: columns[3]?.trim() || '',
-                                    fixedPrice: columns[4]?.trim().toLowerCase() === 'sim'
-                                });
+                        // Pula o cabeçalho se existir
+                        const startIndex = lines[0].toLowerCase().includes('nome') || lines[0].toLowerCase().includes('preço') ? 1 : 0;
+                        
+                        for (let i = startIndex; i < lines.length; i++) {
+                            const line = lines[i].trim();
+                            if (!line) continue; // Pula linhas vazias
+                            
+                            const columns = line.split(',');
+                            const name = columns[0]?.trim();
+                            const priceText = columns[1]?.trim();
+                            
+                            // Valida se nome e preço existem
+                            if (name && priceText) {
+                                const price = parseFloat(priceText.replace('R$', '').replace(',', '.')) || 0;
+                                
+                                if (price > 0) {
+                                    products.push({
+                                        name: name,
+                                        price: price,
+                                        category: 'Importado',
+                                        description: '',
+                                        fixedPrice: false
+                                    });
+                                }
                             }
                         }
 
-                        products.forEach(product => productManager.addProduct(product));
-                        toast.show(`${products.length} produtos importados com sucesso!`);
-                        this.render();
+                        if (products.length > 0) {
+                            products.forEach(product => productManager.addProduct(product));
+                            toast.show(`${products.length} produtos importados com sucesso!`);
+                            this.render();
+                        } else {
+                            toast.show('Nenhum produto válido encontrado. Verifique se o arquivo tem as colunas: Nome, Preço', 'error');
+                        }
                     } catch (error) {
-                        toast.show('Erro ao processar arquivo. Use formato CSV.', 'error');
+                        toast.show('Erro ao processar arquivo. Use formato CSV com Nome,Preço', 'error');
                     }
                 };
                 reader.readAsText(file);
+            }
+
+            handleDownloadTemplate() {
+                // Modelo simplificado com apenas Nome e Preço
+                const templateData = [
+                    { nome: 'Mesa de Jantar', preco: 850 },
+                    { nome: 'Cadeira Estofada', preco: 320 },
+                    { nome: 'Sofá 3 Lugares', preco: 1200 }
+                ];
+                
+                const csvContent = 'Nome,Preço\n' + 
+                    templateData.map(item => `${item.nome},${item.preco}`).join('\n');
+                
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'modelo_produtos.csv';
+                link.click();
+                
+                toast.show('Modelo Excel baixado com sucesso! ✨');
             }
 
             handleExportExcel() {
@@ -1387,12 +1427,20 @@
                             <div style="margin: 1rem 0;">
                                 <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="form-input">
                                 <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
-                                    Formato: Nome, Preço, Categoria, Descrição, Preço Fixo
+                                    <strong>Formato simplificado:</strong> Nome, Preço
+                                </p>
+                                <p style="font-size: 0.875rem; color: #10b981; margin-top: 0.5rem;">
+                                    ✨ Apenas 2 colunas necessárias!
                                 </p>
                             </div>
-                            <button class="btn btn-primary" data-action="import-excel">
-                                📥 Importar Arquivo
-                            </button>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-primary" data-action="import-excel">
+                                    📥 Importar Arquivo
+                                </button>
+                                <button class="btn btn-secondary" data-action="download-template">
+                                    📋 Modelo Excel
+                                </button>
+                            </div>
                         </div>
 
                         <div class="card">
