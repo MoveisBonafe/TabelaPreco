@@ -1055,7 +1055,7 @@
                                 <form id="loginForm">
                                     <div class="form-group">
                                         <label class="form-label">Usuário</label>
-                                        <input type="text" id="username" name="username" class="form-input" required>
+                                        <input type="text" id="username" name="username" class="form-input" autocomplete="username" required>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Senha</label>
@@ -1349,6 +1349,7 @@
             renderCategoriesTab() {
                 const categories = productManager.getCategories();
                 const products = productManager.getProducts();
+                const user = auth.getCurrentUser();
                 
                 return `
                     <div class="page-header">
