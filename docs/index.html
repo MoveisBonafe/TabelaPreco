@@ -792,21 +792,33 @@
                             
                             // Valida se ambas as colunas existem
                             if (nomeColA && precoColB) {
-                                // Limpa e converte o preço
-                                const precoLimpo = precoColB.replace(/[R$\s]/g, '').replace(',', '.');
+                                // Limpa e converte o preço (aceita vírgula e ponto como decimal)
+                                let precoLimpo = precoColB.toString().trim();
+                                
+                                // Remove símbolos de moeda e espaços
+                                precoLimpo = precoLimpo.replace(/[R$\s]/g, '');
+                                
+                                // Substitui vírgula por ponto para conversão decimal
+                                if (precoLimpo.includes(',') && !precoLimpo.includes('.')) {
+                                    precoLimpo = precoLimpo.replace(',', '.');
+                                }
+                                
                                 const precoNumero = parseFloat(precoLimpo);
                                 
                                 if (!isNaN(precoNumero) && precoNumero > 0) {
-                                    products.push({
-                                        name: nomeColA,
+                                    const newProduct = {
+                                        id: Date.now() + Math.random(), // ID único
+                                        name: nomeColA.trim(),
                                         price: precoNumero,
                                         category: 'Importado',
                                         description: '',
                                         fixedPrice: false
-                                    });
+                                    };
+                                    
+                                    products.push(newProduct);
                                     console.log(`✅ Produto adicionado:`, { nome: nomeColA, preco: precoNumero });
                                 } else {
-                                    console.log(`❌ Preço inválido na linha ${i + 1}:`, precoColB);
+                                    console.log(`❌ Preço inválido na linha ${i + 1}:`, precoColB, '→', precoLimpo);
                                 }
                             } else {
                                 console.log(`⚠️ Linha ${i + 1} ignorada - dados incompletos`);
