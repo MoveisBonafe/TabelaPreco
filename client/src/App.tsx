@@ -12,6 +12,10 @@ function App() {
   const { showToast, ToastContainer } = useToast();
 
   useEffect(() => {
+    // Limpa localStorage de dados antigos para garantir uso do banco compartilhado
+    const keysToRemove = ['catalog-products', 'catalog-categories', 'catalog-data'];
+    keysToRemove.forEach(key => localStorage.removeItem(key));
+    
     // Verifica se já está logado ao carregar a página
     if (auth.isAuthenticated()) {
       setCurrentView('admin');

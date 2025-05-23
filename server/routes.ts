@@ -2,7 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { productStorage } from "./product-storage";
-import { insertProductSchema, insertCategorySchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema, products, categories } from "@shared/schema";
+import { db } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes
@@ -171,6 +172,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error exporting data:", error);
       res.status(500).json({ message: "Falha ao exportar dados" });
+    }
+  });
+
+  // Reset routes for system cleanup
+  app.delete("/api/reset/products", async (req, res) => {
+    try {
+      await db.delete(products);
+      res.json({ message: "Todos os produtos foram removidos" });
+    } catch (error) {
+      console.error("Error clearing products:", error);
+      res.status(500).json({ message: "Falha ao limpar produtos" });
+    }
+  });
+
+  app.delete("/api/reset/categories", async (req, res) => {
+    try {
+      await db.delete(categories);
+      res.json({ message: "Todas as categorias foram removidas" });
+    } catch (error) {
+      console.error("Error clearing categories:", error);
+      res.status(500).json({ message: "Falha ao limpar categorias" });
     }
   });
 
