@@ -18,44 +18,69 @@ interface User {
 }
 
 export function UsersTab() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: '1',
-      username: 'MoveisBonafe',
-      password: 'Bonafe1108',
-      priceLevel: 'vip',
-      customMultiplier: 0.97, // -3%
-      permissions: {
-        canEditProducts: true,
-        canViewPrices: true,
-        canEditPrices: true,
+  // Carregar usuários do localStorage
+  const loadUsers = (): User[] => {
+    try {
+      const stored = localStorage.getItem('catalog-users');
+      if (stored) {
+        return JSON.parse(stored);
       }
-    },
-    {
-      id: '2',
-      username: 'Vendedor1',
-      password: 'vend123',
-      priceLevel: 'premium',
-      customMultiplier: 1.0, // preço normal
-      permissions: {
-        canEditProducts: false,
-        canViewPrices: true,
-        canEditPrices: false,
-      }
-    },
-    {
-      id: '3',
-      username: 'Vendedor2',
-      password: 'vend456',
-      priceLevel: 'basic',
-      customMultiplier: 1.05, // +5%
-      permissions: {
-        canEditProducts: false,
-        canViewPrices: true,
-        canEditPrices: false,
-      }
+    } catch (error) {
+      console.error('Erro ao carregar usuários:', error);
     }
-  ]);
+    
+    // Usuários padrão se não houver dados salvos
+    return [
+      {
+        id: '1',
+        username: 'MoveisBonafe',
+        password: 'Bonafe1108',
+        priceLevel: 'vip',
+        customMultiplier: 0.97, // -3%
+        permissions: {
+          canEditProducts: true,
+          canViewPrices: true,
+          canEditPrices: true,
+        }
+      },
+      {
+        id: '2',
+        username: 'Vendedor1',
+        password: 'vend123',
+        priceLevel: 'premium',
+        customMultiplier: 1.0, // preço normal
+        permissions: {
+          canEditProducts: false,
+          canViewPrices: true,
+          canEditPrices: false,
+        }
+      },
+      {
+        id: '3',
+        username: 'Vendedor2',
+        password: 'vend456',
+        priceLevel: 'basic',
+        customMultiplier: 1.05, // +5%
+        permissions: {
+          canEditProducts: false,
+          canViewPrices: true,
+          canEditPrices: false,
+        }
+      }
+    ];
+  };
+
+  const [users, setUsers] = useState<User[]>(loadUsers);
+
+  // Função para salvar usuários no localStorage
+  const saveUsers = (updatedUsers: User[]) => {
+    try {
+      localStorage.setItem('catalog-users', JSON.stringify(updatedUsers));
+      setUsers(updatedUsers);
+    } catch (error) {
+      console.error('Erro ao salvar usuários:', error);
+    }
+  };
 
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -86,7 +111,7 @@ export function UsersTab() {
           canEditPrices: false,
         }
       };
-      setUsers([...users, user]);
+      saveUsers([...users, user]);
       setNewUser({
         username: '',
         password: '',
@@ -108,14 +133,14 @@ export function UsersTab() {
 
   const handleSaveEdit = () => {
     if (editingUser) {
-      setUsers(users.map(u => u.id === editingUser.id ? editingUser : u));
+      saveUsers(users.map(u => u.id === editingUser.id ? editingUser : u));
       setEditingUser(null);
     }
   };
 
   const handleDeleteUser = (userId: string) => {
     if (confirm('Tem certeza que deseja excluir este usuário?')) {
-      setUsers(users.filter(u => u.id !== userId));
+      saveUsers(users.filter(u => u.id !== userId));
     }
   };
 

@@ -116,25 +116,84 @@ export function ExcelImportExport({
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       
-      // Verificar se é arquivo de produtos ou categorias
-      if (workbook.SheetNames.includes('Produtos')) {
-        await importProductsFromExcel(workbook);
-      } else if (workbook.SheetNames.includes('Categorias')) {
-        await importCategoriesFromExcel(workbook);
+      // Usar a primeira planilha disponível
+      const sheetName = workbook.SheetNames[0];
+      const worksheet = workbook.Sheets[sheetName];
+      const rawData = XLSX.utils.sheet_to_json(worksheet);
+
+      if (rawData.length === 0) {
+        setImportResult({
+          success: false,
+          message: 'Arquivo Excel está vazio'
+        });
+        return;
+      }
+
+      const validProducts: InsertProduct[] = [];
+      const errors: string[] = [];
+
+      rawData.forEach((row: any, index) => {
+        try {
+          // Buscar nome do produto em diferentes colunas possíveis
+          const name = row['Nome'] || row['nome'] || row['Name'] || row['NOME'] || row['Produto'] || '';
+          const description = row['Descrição'] || row['descricao'] || row['Description'] || row['DESCRIÇÃO'] || '';
+          const category = row['Categoria'] || row['categoria'] || row['Category'] || row['CATEGORIA'] || 'Geral';
+          const price = parseFloat(row['Preço'] || row['preco'] || row['Price'] || row['PREÇO'] || row['Valor'] || '0');
+
+          if (!name.trim()) {
+            errors.push(`Linha ${index + 2}: Nome do produto é obrigatório`);
+            return;
+          }
+
+          if (price <= 0) {
+            errors.push(`Linha ${index + 2}: Preço deve ser maior que zero`);
+            return;
+          }
+
+          const product: InsertProduct = {
+            name: name.toString().trim(),
+            description: description.toString().trim(),
+            category: category.toString().trim(),
+            priceAVista: price,
+            images: [],
+            specifications: []
+          };
+
+          validProducts.push(product);
+        } catch (error) {
+          errors.push(`Linha ${index + 2}: Erro ao processar dados`);
+        }
+      });
+
+      if (errors.length > 0 && validProducts.length === 0) {
+        setImportResult({
+          success: false,
+          message: `Erros encontrados:\n${errors.slice(0, 3).join('\n')}\n\nVerifique se as colunas têm nomes como: Nome, Preço, Categoria`
+        });
+        return;
+      }
+
+      if (validProducts.length > 0) {
+        onImportProducts(validProducts);
+        setImportResult({
+          success: true,
+          message: `${validProducts.length} produtos importados com sucesso!${errors.length > 0 ? ` (${errors.length} linhas ignoradas)` : ''}`,
+          count: validProducts.length
+        });
       } else {
         setImportResult({
           success: false,
-          message: 'Arquivo Excel deve conter uma planilha chamada "Produtos" ou "Categorias"'
+          message: 'Nenhum produto válido encontrado. Verifique se há colunas: Nome e Preço'
         });
       }
     } catch (error) {
+      console.error('Erro na importação:', error);
       setImportResult({
         success: false,
-        message: 'Erro ao processar arquivo Excel. Verifique o formato.'
+        message: 'Erro ao processar arquivo Excel. Verifique se é um arquivo válido.'
       });
     } finally {
       setIsProcessing(false);
-      // Limpar input
       event.target.value = '';
     }
   };
