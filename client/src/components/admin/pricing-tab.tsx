@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 
 interface PricingTabProps {
   products: Product[];
+  onEditProduct?: (product: Product) => void;
 }
 
-export function PricingTab({ products }: PricingTabProps) {
+export function PricingTab({ products, onEditProduct }: PricingTabProps) {
   return (
     <div>
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 space-y-4 sm:space-y-0">
@@ -94,6 +95,7 @@ export function PricingTab({ products }: PricingTabProps) {
                       <Button
                         variant="ghost"
                         size="sm"
+                        onClick={() => onEditProduct?.(product)}
                         className="text-blue-600 hover:bg-blue-50"
                       >
                         <Edit className="h-4 w-4" />

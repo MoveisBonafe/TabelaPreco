@@ -137,7 +137,10 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
         )}
 
         {activeTab === 'pricing' && (
-          <PricingTab products={products} />
+          <PricingTab 
+            products={products} 
+            onEditProduct={handleViewProduct}
+          />
         )}
 
         {activeTab === 'users' && (
