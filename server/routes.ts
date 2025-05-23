@@ -10,10 +10,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/products", async (req, res) => {
     try {
       const products = await productStorage.getProducts();
-      res.json(products);
+      // Garante que sempre retorna um array
+      res.json(Array.isArray(products) ? products : []);
     } catch (error) {
       console.error("Error fetching products:", error);
-      res.status(500).json({ message: "Failed to fetch products" });
+      // Retorna array vazio em caso de erro
+      res.json([]);
     }
   });
 
@@ -81,10 +83,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/categories", async (req, res) => {
     try {
       const categories = await productStorage.getCategories();
-      res.json(categories);
+      // Garante que sempre retorna um array
+      res.json(Array.isArray(categories) ? categories : []);
     } catch (error) {
       console.error("Error fetching categories:", error);
-      res.status(500).json({ message: "Failed to fetch categories" });
+      // Retorna array vazio em caso de erro
+      res.json([]);
     }
   });
 
