@@ -12,7 +12,8 @@ class StorageAdapter {
   private isUsingBackend: boolean;
 
   constructor() {
-    this.isUsingBackend = isDevelopment;
+    // Por enquanto usa localStorage até conectar Supabase corretamente
+    this.isUsingBackend = false;
   }
 
   private markDataChanged() {
