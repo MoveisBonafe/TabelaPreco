@@ -370,21 +370,41 @@
     <div id="app"></div>
 
     <script>
-        // Sistema de autenticação (mantido igual)
+        // Sistema de autenticação com Supabase
         const auth = {
-            users: {
-                'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
-                'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
-            },
             currentUser: null,
 
-            login(username, password) {
-                if (this.users[username] && this.users[username].password === password) {
-                    this.currentUser = { username, ...this.users[username] };
-                    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-                    return true;
+            async login(username, password) {
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        this.currentUser = userData;
+                        localStorage.setItem('currentUser', JSON.stringify(userData));
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    // Fallback para localStorage em caso de erro de conexão
+                    const users = {
+                        'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
+                        'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
+                    };
+                    
+                    if (users[username] && users[username].password === password) {
+                        this.currentUser = { id: username, ...users[username] };
+                        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
             },
 
             logout() {
@@ -407,48 +427,100 @@
             }
         };
 
-        // Sistema de produtos (mantido igual)
+        // Sistema de produtos com Supabase
         const productManager = {
-            getProducts() {
-                const stored = localStorage.getItem('products');
-                return stored ? JSON.parse(stored) : [];
+            async getProducts() {
+                try {
+                    const response = await fetch('/api/products');
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    throw new Error('Erro ao buscar produtos');
+                } catch (error) {
+                    // Fallback para localStorage
+                    const stored = localStorage.getItem('products');
+                    return stored ? JSON.parse(stored) : [];
+                }
             },
 
-            saveProducts(products) {
+            async saveProducts(products) {
                 localStorage.setItem('products', JSON.stringify(products));
             },
 
-            addProduct(product) {
-                const products = this.getProducts();
-                const newProduct = {
-                    id: Date.now().toString(),
-                    ...product,
-                    createdAt: new Date().toISOString()
-                };
-                products.push(newProduct);
-                this.saveProducts(products);
-                return newProduct;
-            },
-
-            updateProduct(id, updates) {
-                const products = this.getProducts();
-                const index = products.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    products[index] = { ...products[index], ...updates };
-                    this.saveProducts(products);
-                    return products[index];
+            async addProduct(product) {
+                try {
+                    const response = await fetch('/api/products', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(product)
+                    });
+                    
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    throw new Error('Erro ao criar produto');
+                } catch (error) {
+                    // Fallback para localStorage
+                    const products = JSON.parse(localStorage.getItem('products') || '[]');
+                    const newProduct = {
+                        id: Date.now().toString(),
+                        ...product,
+                        createdAt: new Date().toISOString()
+                    };
+                    products.push(newProduct);
+                    localStorage.setItem('products', JSON.stringify(products));
+                    return newProduct;
                 }
-                return null;
             },
 
-            deleteProduct(id) {
-                const products = this.getProducts();
-                const filtered = products.filter(p => p.id !== id);
-                this.saveProducts(filtered);
+            async updateProduct(id, updates) {
+                try {
+                    const response = await fetch(`/api/products/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(updates)
+                    });
+                    
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    throw new Error('Erro ao atualizar produto');
+                } catch (error) {
+                    // Fallback para localStorage
+                    const products = JSON.parse(localStorage.getItem('products') || '[]');
+                    const index = products.findIndex(p => p.id === id);
+                    if (index !== -1) {
+                        products[index] = { ...products[index], ...updates };
+                        localStorage.setItem('products', JSON.stringify(products));
+                        return products[index];
+                    }
+                    return null;
+                }
             },
 
-            getCategories() {
-                const products = this.getProducts();
+            async deleteProduct(id) {
+                try {
+                    const response = await fetch(`/api/products/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Erro ao deletar produto');
+                    }
+                } catch (error) {
+                    // Fallback para localStorage
+                    const products = JSON.parse(localStorage.getItem('products') || '[]');
+                    const filtered = products.filter(p => p.id !== id);
+                    localStorage.setItem('products', JSON.stringify(filtered));
+                }
+            },
+
+            async getCategories() {
+                const products = await this.getProducts();
                 const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
                 return categories.sort();
             }
@@ -975,24 +1047,26 @@
                             <button class="nav-tab ${this.currentTab === 'produtos' ? 'active' : ''}" data-tab="produtos">
                                 📦 Produtos
                             </button>
-                            <button class="nav-tab ${this.currentTab === 'categorias' ? 'active' : ''}" data-tab="categorias">
-                                📂 Categorias
-                            </button>
-                            <button class="nav-tab ${this.currentTab === 'precos' ? 'active' : ''}" data-tab="precos">
-                                💰 Preços
-                            </button>
-                            <button class="nav-tab ${this.currentTab === 'usuarios' ? 'active' : ''}" data-tab="usuarios">
-                                👥 Usuários
-                            </button>
-                            <button class="nav-tab ${this.currentTab === 'excel' ? 'active' : ''}" data-tab="excel">
-                                📊 Excel
-                            </button>
-                            <button class="nav-tab ${this.currentTab === 'backup' ? 'active' : ''}" data-tab="backup">
-                                ☁️ Backup
-                            </button>
-                            <button class="nav-tab ${this.currentTab === 'monitor' ? 'active' : ''}" data-tab="monitor">
-                                📊 Monitor
-                            </button>
+                            ${user.level === 'admin' ? `
+                                <button class="nav-tab ${this.currentTab === 'categorias' ? 'active' : ''}" data-tab="categorias">
+                                    📂 Categorias
+                                </button>
+                                <button class="nav-tab ${this.currentTab === 'precos' ? 'active' : ''}" data-tab="precos">
+                                    💰 Preços
+                                </button>
+                                <button class="nav-tab ${this.currentTab === 'usuarios' ? 'active' : ''}" data-tab="usuarios">
+                                    👥 Usuários
+                                </button>
+                                <button class="nav-tab ${this.currentTab === 'excel' ? 'active' : ''}" data-tab="excel">
+                                    📊 Excel
+                                </button>
+                                <button class="nav-tab ${this.currentTab === 'backup' ? 'active' : ''}" data-tab="backup">
+                                    ☁️ Backup
+                                </button>
+                                <button class="nav-tab ${this.currentTab === 'monitor' ? 'active' : ''}" data-tab="monitor">
+                                    📊 Monitor
+                                </button>
+                            ` : ''}
                         </div>
                     </nav>
 
@@ -1068,14 +1142,15 @@
                 }
             }
 
-            renderProductsTab() {
-                const products = productManager.getProducts();
+            async renderProductsTab() {
+                const products = await productManager.getProducts();
+                const categories = await productManager.getCategories();
                 const user = auth.getCurrentUser();
 
                 return `
                     <div class="page-header">
-                        <h1 class="page-title">Gerenciar Produtos</h1>
-                        <p class="page-description">Adicione, edite e organize seus produtos</p>
+                        <h1 class="page-title">${user.level === 'admin' ? 'Gerenciar' : 'Visualizar'} Produtos</h1>
+                        <p class="page-description">${user.level === 'admin' ? 'Adicione, edite e organize seus produtos' : 'Visualize produtos com preços personalizados'}</p>
                     </div>
 
                     <div class="stats-grid">
@@ -1086,7 +1161,7 @@
                         </div>
                         <div class="stat-card">
                             <div class="stat-icon">📂</div>
-                            <div class="stat-value">${productManager.getCategories().length}</div>
+                            <div class="stat-value">${categories.length}</div>
                             <div class="stat-label">Categorias</div>
                         </div>
                     </div>
@@ -1094,9 +1169,11 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Lista de Produtos</h3>
-                            <button class="btn btn-primary" data-action="add-product">
-                                ➕ Novo Produto
-                            </button>
+                            ${user.level === 'admin' ? `
+                                <button class="btn btn-primary" data-action="add-product">
+                                    ➕ Novo Produto
+                                </button>
+                            ` : ''}
                         </div>
 
                         ${products.length === 0 ? `
@@ -1123,9 +1200,11 @@
                     <div class="card">
                         <div class="card-header">
                             <h4 class="card-title">${product.name}</h4>
-                            <button class="btn btn-danger" data-action="delete-product" data-product-id="${product.id}">
-                                🗑️
-                            </button>
+                            ${user.level === 'admin' ? `
+                                <button class="btn btn-danger" data-action="delete-product" data-product-id="${product.id}">
+                                    🗑️
+                                </button>
+                            ` : ''}
                         </div>
                         <div class="card-subtitle">${product.category || 'Sem categoria'}</div>
                         <div style="font-size: 1.25rem; font-weight: 700; color: #3b82f6; margin: 1rem 0;">
