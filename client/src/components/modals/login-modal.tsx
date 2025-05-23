@@ -28,8 +28,8 @@ export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModal
           <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
             <ShieldX className="text-white text-2xl" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-800">Acesso Administrativo</h2>
-          <p className="text-slate-600 mt-2">Entre com suas credenciais para gerenciar o catálogo</p>
+          <h2 className="text-2xl font-bold text-slate-800">Acesso ao Sistema</h2>
+          <p className="text-slate-600 mt-2">Faça login para acessar o catálogo</p>
         </div>
         
         <form onSubmit={handleAdminLogin} className="space-y-6">
@@ -67,16 +67,7 @@ export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModal
               className="w-full bg-blue-600 text-white py-3 hover:bg-blue-700 font-semibold"
             >
               <LogIn className="mr-2 h-4 w-4" />
-              Entrar como Admin
-            </Button>
-            <Button 
-              type="button"
-              variant="outline"
-              onClick={onPublicView}
-              className="w-full border-slate-300 text-slate-700 py-3 hover:bg-slate-50 font-semibold"
-            >
-              <Eye className="mr-2 h-4 w-4" />
-              Ver Catálogo Público
+              Entrar
             </Button>
           </div>
         </form>

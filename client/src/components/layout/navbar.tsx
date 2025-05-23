@@ -1,22 +1,20 @@
-import { Box, Store, ExternalLink, LogOut, Shield, Grid3X3, List } from 'lucide-react';
+import { Box, Store, LogOut, Grid3X3, List, User } from 'lucide-react';
+import { auth } from '@/lib/auth';
 
 interface NavbarProps {
   isAdmin?: boolean;
   onLogout?: () => void;
-  onShowPublicView?: () => void;
-  onShowAdminLogin?: () => void;
   viewMode?: 'grid' | 'list';
   onToggleViewMode?: () => void;
 }
 
 export function Navbar({ 
   isAdmin, 
-  onLogout, 
-  onShowPublicView, 
-  onShowAdminLogin,
+  onLogout,
   viewMode = 'grid',
   onToggleViewMode 
 }: NavbarProps) {
+  const currentUser = auth.getUser();
   return (
     <nav className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
