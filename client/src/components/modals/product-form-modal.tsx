@@ -235,30 +235,53 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
           )}
           
           <div>
-            <Label className="block text-sm font-medium text-slate-700 mb-2">URL da Imagem</Label>
-            <div className="space-y-2">
-              <Input
-                type="url"
-                value={formData.image}
-                onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                placeholder="https://exemplo.com/imagem.jpg"
-              />
-              <div className="text-center text-sm text-slate-500">ou</div>
-              <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors duration-200">
-                <Upload className="h-8 w-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-slate-600">Clique para fazer upload de uma imagem</p>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                  id="image-upload"
+            <Label className="block text-sm font-medium text-slate-700 mb-2">Imagem do Produto</Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Input
+                  type="url"
+                  value={formData.image}
+                  onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                  placeholder="https://exemplo.com/imagem.jpg"
                 />
-                <label htmlFor="image-upload" className="cursor-pointer">
-                  <Button type="button" variant="outline" className="mt-2">
-                    Selecionar Arquivo
-                  </Button>
-                </label>
+                <div className="text-center text-sm text-slate-500">ou</div>
+                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors duration-200">
+                  <Upload className="h-6 w-6 text-slate-400 mx-auto mb-2" />
+                  <p className="text-slate-600 text-sm">Fazer upload</p>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="image-upload"
+                  />
+                  <label htmlFor="image-upload" className="cursor-pointer">
+                    <Button type="button" variant="outline" size="sm" className="mt-2">
+                      Selecionar Arquivo
+                    </Button>
+                  </label>
+                </div>
+              </div>
+              
+              {/* Preview da Imagem */}
+              <div className="flex items-center justify-center">
+                {formData.image ? (
+                  <div className="w-32 h-32 border-2 border-slate-200 rounded-lg overflow-hidden bg-slate-50">
+                    <img 
+                      src={formData.image} 
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-400 text-sm">Imagem inválida</div>';
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-32 h-32 border-2 border-dashed border-slate-300 rounded-lg flex items-center justify-center">
+                    <span className="text-slate-400 text-sm">Preview</span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

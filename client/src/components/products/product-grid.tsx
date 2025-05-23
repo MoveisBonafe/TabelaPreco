@@ -31,11 +31,14 @@ export function ProductGrid({ products, onViewDetails, onEdit, onDelete, isAdmin
           key={product.id}
           className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-fade-in"
         >
-          <img
-            src={product.image || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300'}
-            alt={product.name}
-            className="w-full h-48 object-cover"
-          />
+          <div className="w-full h-48 bg-slate-100 overflow-hidden">
+            <img
+              src={product.image || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300'}
+              alt={product.name}
+              className="w-full h-full object-cover"
+              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+            />
+          </div>
           <div className={isAdmin ? 'p-6' : 'p-4'}>
             <div className="flex items-start justify-between mb-3">
               <h3 className={`font-semibold text-slate-800 ${isAdmin ? '' : 'text-sm'}`}>
