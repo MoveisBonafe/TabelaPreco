@@ -111,7 +111,6 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
       <Navbar
         isAdmin={true}
         onLogout={onLogout}
-        onShowPublicView={onShowPublicView}
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

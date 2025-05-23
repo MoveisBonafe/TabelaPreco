@@ -35,13 +35,7 @@ export function Navbar({
           <div className="flex items-center space-x-4">
             {isAdmin ? (
               <>
-                <button 
-                  onClick={onShowPublicView}
-                  className="text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  <span className="ml-2 hidden sm:inline">Ver Público</span>
-                </button>
+                {/* Botão Ver Público removido - login obrigatório */}
                 <button 
                   onClick={onLogout}
                   className="text-slate-600 hover:text-red-600 transition-colors duration-200"
@@ -65,13 +59,7 @@ export function Navbar({
                     {viewMode === 'grid' ? 'Grid' : 'Lista'}
                   </span>
                 </button>
-                <button 
-                  onClick={onShowAdminLogin}
-                  className="text-slate-600 hover:text-blue-600 transition-colors duration-200"
-                >
-                  <Shield className="h-4 w-4" />
-                  <span className="ml-2 hidden sm:inline">Admin</span>
-                </button>
+                {/* Botão Admin removido - login obrigatório */}
               </>
             )}
           </div>
