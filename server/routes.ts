@@ -27,6 +27,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.put("/api/products/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const productData = insertProductSchema.partial().parse(req.body);
+      const product = await productStorage.updateProduct(id, productData);
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating product:", error);
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
+  app.delete("/api/products/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const success = await productStorage.deleteProduct(id);
+      if (success) {
+        res.json({ message: "Produto excluído com sucesso" });
+      } else {
+        res.status(404).json({ message: "Produto não encontrado" });
+      }
+    } catch (error) {
+      console.error("Error deleting product:", error);
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
   // Special route for bulk import that avoids duplicates
   app.post("/api/products/bulk-import", async (req, res) => {
     try {

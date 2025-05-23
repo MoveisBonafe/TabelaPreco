@@ -12,9 +12,12 @@ function App() {
   const { showToast, ToastContainer } = useToast();
 
   useEffect(() => {
-    // Sempre exige login - remove qualquer autenticação anterior
-    auth.logout();
-    setCurrentView('login');
+    // Verifica se já está logado ao carregar a página
+    if (auth.isAuthenticated()) {
+      setCurrentView('admin');
+    } else {
+      setCurrentView('login');
+    }
   }, []);
 
   const handleAdminLogin = (username: string, password: string) => {
