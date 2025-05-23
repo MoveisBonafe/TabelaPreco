@@ -7,7 +7,7 @@ import { supabaseLogger, reconnectWithRetry, testSupabaseConnection } from './su
 const supabaseUrl = process.env.SUPABASE_DATABASE_URL || "postgresql://postgres:6OrkEBSgQUUuiKTH@db.oozesebwtrbzeelkcmwp.supabase.co:5432/postgres";
 const localUrl = process.env.DATABASE_URL;
 
-let pool: Pool;
+let pool: Pool | null = null;
 let isSupabaseConnected = false;
 
 async function initializeDatabase() {
