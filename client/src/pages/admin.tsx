@@ -8,6 +8,7 @@ import { PricingTab } from '@/components/admin/pricing-tab';
 import { UsersTab } from '@/components/admin/users-tab';
 import { ExcelImportExport } from '@/components/admin/excel-import-export';
 import { ProductModal } from '@/components/modals/product-modal';
+import { ProductFormModal } from '@/components/modals/product-form-modal';
 import { useProducts } from '@/hooks/use-products';
 import { useCategories } from '@/hooks/use-categories';
 import { useToast } from '@/components/ui/toast';
@@ -25,6 +26,7 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
   const [activeTab, setActiveTab] = useState('products');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [isProductFormModalOpen, setIsProductFormModalOpen] = useState(false);
   
   const currentUser = auth.getUser();
   const canEditProducts = currentUser?.permissions?.canEditProducts ?? false;
@@ -107,6 +109,17 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
     setIsProductModalOpen(true);
   };
 
+  const handleEditProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setIsProductFormModalOpen(true);
+  };
+
+  const handleEditFormSave = (productData: InsertProduct) => {
+    if (selectedProduct) {
+      handleUpdateProduct(selectedProduct.id, productData);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar
@@ -139,7 +152,7 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
         {activeTab === 'pricing' && (
           <PricingTab 
             products={products} 
-            onEditProduct={handleViewProduct}
+            onEditProduct={handleEditProduct}
           />
         )}
 
@@ -162,6 +175,17 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
         product={selectedProduct}
         isVisible={isProductModalOpen}
         onClose={() => setIsProductModalOpen(false)}
+      />
+
+      {/* Product Edit Modal */}
+      <ProductFormModal
+        product={selectedProduct}
+        isVisible={isProductFormModalOpen}
+        onClose={() => {
+          setIsProductFormModalOpen(false);
+          setSelectedProduct(null);
+        }}
+        onSave={handleEditFormSave}
       />
 
       <ToastContainer />
