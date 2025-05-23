@@ -24,6 +24,10 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
   const [activeTab, setActiveTab] = useState('products');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  
+  const currentUser = auth.getUser();
+  const canEditProducts = currentUser?.permissions?.canEditProducts ?? false;
+  const canEditPrices = currentUser?.permissions?.canEditPrices ?? false;
 
   const handleCreateProduct = (productData: InsertProduct) => {
     try {
