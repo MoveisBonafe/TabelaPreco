@@ -2489,6 +2489,57 @@
                     this.render();
                 }
             }
+
+            exportPriceHistory() {
+                const priceHistory = JSON.parse(localStorage.getItem('priceHistory') || '[]');
+                
+                if (priceHistory.length === 0) {
+                    toast.show('Nenhum histórico de preços para exportar', 'error');
+                    return;
+                }
+
+                // Preparar dados para CSV
+                const csvData = [
+                    ['Data/Hora', 'Produto', 'Preço Anterior', 'Preço Novo', 'Variação %', 'Usuário']
+                ];
+
+                priceHistory.forEach(record => {
+                    csvData.push([
+                        new Date(record.timestamp).toLocaleString('pt-BR'),
+                        record.productName,
+                        `R$ ${record.oldPrice.toFixed(2)}`,
+                        `R$ ${record.newPrice.toFixed(2)}`,
+                        `${record.percentChange}%`,
+                        record.username
+                    ]);
+                });
+
+                // Converter para CSV
+                const csvContent = csvData.map(row => 
+                    row.map(field => `"${field}"`).join(',')
+                ).join('\n');
+
+                // Download do arquivo
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `historico_precos_${new Date().toISOString().split('T')[0]}.csv`;
+                link.click();
+
+                toast.show('Histórico de preços exportado com sucesso!');
+            }
+
+            clearPriceHistory() {
+                if (!confirm('Tem certeza que deseja limpar todo o histórico de mudanças de preços? Esta ação não pode ser desfeita.')) {
+                    return;
+                }
+
+                localStorage.removeItem('priceHistory');
+                localStorage.removeItem('priceNotifications');
+                
+                toast.show('Histórico de preços limpo com sucesso!');
+                this.render();
+            }
         }
 
         // Inicializa a aplicação
