@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Category, InsertCategory } from '@shared/schema';
-import { storage } from '@/lib/storage';
 
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadCategories = () => {
+  const loadCategories = async () => {
     try {
-      const data = storage.getCategories();
+      const response = await fetch('/api/categories');
+      const data = await response.json();
       setCategories(data);
     } catch (error) {
       console.error('Failed to load categories:', error);
@@ -21,9 +21,19 @@ export function useCategories() {
     loadCategories();
   }, []);
 
-  const createCategory = (categoryData: InsertCategory) => {
+  const createCategory = async (categoryData: InsertCategory) => {
     try {
-      const newCategory = storage.saveCategory(categoryData);
+      const response = await fetch('/api/categories', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData),
+      });
+      
+      if (!response.ok) throw new Error('Failed to create category');
+      
+      const newCategory = await response.json();
       setCategories(prev => [...prev, newCategory]);
       return newCategory;
     } catch (error) {
@@ -32,27 +42,36 @@ export function useCategories() {
     }
   };
 
-  const updateCategory = (id: string, categoryData: Partial<InsertCategory>) => {
+  const updateCategory = async (id: string, categoryData: Partial<InsertCategory>) => {
     try {
-      const updatedCategory = storage.updateCategory(id, categoryData);
-      if (updatedCategory) {
-        setCategories(prev => prev.map(c => c.id === id ? updatedCategory : c));
-        return updatedCategory;
-      }
-      throw new Error('Category not found');
+      const response = await fetch(`/api/categories/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(categoryData),
+      });
+      
+      if (!response.ok) throw new Error('Failed to update category');
+      
+      const updatedCategory = await response.json();
+      setCategories(prev => prev.map(c => c.id === id ? updatedCategory : c));
+      return updatedCategory;
     } catch (error) {
       console.error('Failed to update category:', error);
       throw error;
     }
   };
 
-  const deleteCategory = (id: string) => {
+  const deleteCategory = async (id: string) => {
     try {
-      const success = storage.deleteCategory(id);
-      if (success) {
-        setCategories(prev => prev.filter(c => c.id !== id));
-      }
-      return success;
+      const response = await fetch(`/api/categories/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) throw new Error('Failed to delete category');
+      
+      setCategories(prev => prev.filter(c => c.id !== id));
     } catch (error) {
       console.error('Failed to delete category:', error);
       throw error;
