@@ -162,6 +162,7 @@ export function ExcelImportExport({
             discount: 0,
             priceAVista: price,
             image: '',
+            images: [],
             active: true,
             specifications: [],
             fixedPrice: false
@@ -244,6 +245,7 @@ export function ExcelImportExport({
           discount: Math.max(0, Math.min(100, discount)), // Entre 0 e 100
           priceAVista: priceAVista,
           image: row['URL da Imagem']?.toString().trim() || '',
+          images: [],
           specifications: row['Especificações'] 
             ? row['Especificações'].toString().split(';').map((s: string) => s.trim()).filter(Boolean)
             : [],

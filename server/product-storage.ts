@@ -1,6 +1,6 @@
 import { products, categories, type Product, type Category, type InsertProduct, type InsertCategory } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export interface IProductStorage {
   // Product operations
@@ -9,6 +9,8 @@ export interface IProductStorage {
   createProduct(product: InsertProduct): Promise<Product>;
   updateProduct(id: number, product: Partial<InsertProduct>): Promise<Product | undefined>;
   deleteProduct(id: number): Promise<boolean>;
+  findProductByName(name: string): Promise<Product | undefined>;
+  createOrUpdateProduct(product: InsertProduct): Promise<Product>;
   
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -44,6 +46,23 @@ export class DatabaseProductStorage implements IProductStorage {
     
     await this.updateCategoryCount();
     return this.mapProductFromDb(result);
+  }
+
+  async findProductByName(name: string): Promise<Product | undefined> {
+    const [result] = await db.select().from(products).where(eq(products.name, name));
+    return result ? this.mapProductFromDb(result) : undefined;
+  }
+
+  async createOrUpdateProduct(productData: InsertProduct): Promise<Product> {
+    const existingProduct = await this.findProductByName(productData.name);
+    
+    if (existingProduct) {
+      // Atualiza produto existente
+      return await this.updateProduct(parseInt(existingProduct.id), productData) || existingProduct;
+    } else {
+      // Cria novo produto
+      return await this.createProduct(productData);
+    }
   }
 
   async updateProduct(id: number, productData: Partial<InsertProduct>): Promise<Product | undefined> {
