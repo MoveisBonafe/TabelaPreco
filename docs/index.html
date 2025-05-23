@@ -5,647 +5,983 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Produtos - Móveis Bonafé</title>
     <meta name="description" content="Catálogo inteligente de produtos com sistema de preços personalizado para diferentes tipos de usuários.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --primary: 220 90% 56%;
+            --primary-foreground: 0 0% 98%;
+            --secondary: 220 14.3% 95.9%;
+            --secondary-foreground: 220.9 39.3% 11%;
+            --muted: 220 14.3% 95.9%;
+            --muted-foreground: 220 8.9% 46.1%;
+            --accent: 220 14.3% 95.9%;
+            --accent-foreground: 220.9 39.3% 11%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 0 0% 98%;
+            --border: 220 13% 91%;
+            --input: 220 13% 91%;
+            --ring: 220 90% 56%;
+            --background: 0 0% 100%;
+            --foreground: 220.9 39.3% 11%;
+            --card: 0 0% 100%;
+            --card-foreground: 220.9 39.3% 11%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 220.9 39.3% 11%;
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: hsl(var(--background));
+            color: hsl(var(--foreground));
+            line-height: 1.5;
+        }
+
+        .app-container {
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background: hsl(var(--card));
+            border-bottom: 1px solid hsl(var(--border));
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: hsl(var(--foreground));
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .btn-primary:hover {
+            background: hsl(var(--primary) / 0.9);
+        }
+
+        .btn-secondary {
+            background: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .btn-secondary:hover {
+            background: hsl(var(--secondary) / 0.8);
+        }
+
+        .btn-destructive {
+            background: hsl(var(--destructive));
+            color: hsl(var(--destructive-foreground));
+        }
+
+        .btn-destructive:hover {
+            background: hsl(var(--destructive) / 0.9);
+        }
+
+        /* Navigation */
+        .nav-tabs {
+            background: hsl(var(--card));
+            border-bottom: 1px solid hsl(var(--border));
+            display: flex;
+            gap: 0;
+        }
+
+        .tab-btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            transition: all 0.2s;
+        }
+
+        .tab-btn:hover {
+            color: hsl(var(--foreground));
+            background: hsl(var(--muted));
+        }
+
+        .tab-btn.active {
+            color: hsl(var(--primary));
+            border-bottom-color: hsl(var(--primary));
+            background: hsl(var(--background));
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            background: hsl(var(--muted) / 0.3);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Login Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            z-index: 1000;
         }
-        
-        .container {
+
+        .modal-content {
+            background: hsl(var(--card));
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
             text-align: center;
-            max-width: 600px;
-            padding: 40px 20px;
         }
-        
-        .logo {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+
+        .form-group {
+            margin-bottom: 1rem;
         }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            margin-bottom: 40px;
-            opacity: 0.9;
+
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: hsl(var(--foreground));
         }
-        
-        .status {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 30px;
-            margin-bottom: 30px;
-            border: 1px solid rgba(255,255,255,0.2);
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid hsl(var(--border));
+            border-radius: 6px;
+            background: hsl(var(--background));
+            font-size: 0.875rem;
+            transition: border-color 0.2s;
         }
-        
-        .loading {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
+
+        .form-input:focus {
+            outline: none;
+            border-color: hsl(var(--ring));
+            box-shadow: 0 0 0 2px hsl(var(--ring) / 0.2);
         }
-        
-        .spinner {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin: 20px auto;
+
+        /* Admin Panel */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+
+        .admin-tabs {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 2rem;
         }
-        
-        .features {
+
+        .admin-tab-btn {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            font-weight: 500;
+            color: hsl(var(--muted-foreground));
+            transition: all 0.2s;
+            border-bottom: 1px solid hsl(var(--border));
+        }
+
+        .admin-tab-btn:last-child {
+            border-bottom: none;
+        }
+
+        .admin-tab-btn:hover {
+            background: hsl(var(--muted));
+            color: hsl(var(--foreground));
+        }
+
+        .admin-tab-btn.active {
+            background: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .admin-content {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 8px;
+            padding: 2rem;
+        }
+
+        /* Products */
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .products-filters {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
+            grid-template-columns: 1fr 200px 200px;
+            gap: 1rem;
+            margin-bottom: 2rem;
         }
-        
-        .feature {
-            background: rgba(255,255,255,0.1);
-            padding: 20px;
-            border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
         }
-        
-        .feature h3 {
-            margin-bottom: 10px;
-            color: #ffd700;
+
+        .product-card {
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: box-shadow 0.2s;
         }
-        
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
+        }
+
+        .product-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-category {
+            color: hsl(var(--muted-foreground));
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: hsl(var(--primary));
+            margin-bottom: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: hsl(var(--muted-foreground));
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: hsl(var(--foreground));
+        }
+
+        /* Mobile responsiveness */
         @media (max-width: 768px) {
-            .logo {
-                font-size: 2rem;
+            .header {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
             }
-            
-            .container {
-                padding: 20px 15px;
-            }
-            
-            .features {
+
+            .products-filters {
                 grid-template-columns: 1fr;
             }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .main-content {
+                padding: 1rem;
+            }
+        }
+
+        /* Compact view */
+        .products-grid.compact {
+            grid-template-columns: 1fr;
+        }
+
+        .product-card.compact {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .product-card.compact .product-info {
+            flex: 1;
+        }
+
+        .product-card.compact .product-actions {
+            flex-shrink: 0;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            background: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: 8px;
+            padding: 1rem;
+            box-shadow: 0 10px 25px rgb(0 0 0 / 0.1);
+            z-index: 2000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.error {
+            border-color: hsl(var(--destructive));
+            color: hsl(var(--destructive));
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Form styles */
+        .form-container {
+            background: hsl(var(--muted) / 0.3);
+            border: 1px solid hsl(var(--border));
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .form-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid hsl(var(--border));
+            color: hsl(var(--foreground));
+        }
+
+        .btn-outline:hover {
+            background: hsl(var(--muted));
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">📱 Catálogo Móveis Bonafé</div>
-        <div class="subtitle">Sistema Inteligente de Produtos</div>
-        
-        <div class="status">
-            <div class="loading">🚀 Carregando aplicação...</div>
-            <div class="spinner"></div>
-            <p>Inicializando sistema de produtos e preços personalizados</p>
-        </div>
-        
-        <div class="features">
-            <div class="feature">
-                <h3>✅ Sistema Híbrido</h3>
-                <p>Funciona online e offline com sincronização automática</p>
-            </div>
-            
-            <div class="feature">
-                <h3>📊 Preços Personalizados</h3>
-                <p>Diferentes tabelas de preço por tipo de usuário</p>
-            </div>
-            
-            <div class="feature">
-                <h3>📱 Mobile First</h3>
-                <p>Otimizado para dispositivos móveis</p>
-            </div>
-            
-            <div class="feature">
-                <h3>☁️ Backup Automático</h3>
-                <p>Dados sincronizados em tempo real</p>
-            </div>
-        </div>
-    </div>
-    
+    <div id="app"></div>
+
     <script>
-        // Carrega a aplicação completa
-        setTimeout(() => {
-            document.querySelector('.loading').innerHTML = '✅ Sistema carregado com sucesso!';
-            document.querySelector('.spinner').style.display = 'none';
-            
-            setTimeout(() => {
-                // Remove a tela de loading e mostra a aplicação
-                document.body.innerHTML = getAppHTML();
-                initializeApp();
-            }, 2000);
-        }, 3000);
-        
-        function getAppHTML() {
-            return `
-                <div id="app">
-                    <div class="login-container" id="loginContainer">
-                        <div class="login-card">
-                            <h1>🔐 Login - Catálogo Bonafé</h1>
+        // Sistema de autenticação
+        const auth = {
+            users: {
+                'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
+                'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
+            },
+            currentUser: null,
+
+            login(username, password) {
+                if (this.users[username] && this.users[username].password === password) {
+                    this.currentUser = { username, ...this.users[username] };
+                    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                    return true;
+                }
+                return false;
+            },
+
+            logout() {
+                this.currentUser = null;
+                localStorage.removeItem('currentUser');
+            },
+
+            isAuthenticated() {
+                if (!this.currentUser) {
+                    const stored = localStorage.getItem('currentUser');
+                    if (stored) {
+                        this.currentUser = JSON.parse(stored);
+                    }
+                }
+                return !!this.currentUser;
+            },
+
+            getCurrentUser() {
+                return this.currentUser;
+            }
+        };
+
+        // Sistema de produtos
+        const productManager = {
+            getProducts() {
+                const stored = localStorage.getItem('products');
+                return stored ? JSON.parse(stored) : [];
+            },
+
+            saveProducts(products) {
+                localStorage.setItem('products', JSON.stringify(products));
+            },
+
+            addProduct(product) {
+                const products = this.getProducts();
+                const newProduct = {
+                    id: Date.now().toString(),
+                    ...product,
+                    createdAt: new Date().toISOString()
+                };
+                products.push(newProduct);
+                this.saveProducts(products);
+                return newProduct;
+            },
+
+            updateProduct(id, updates) {
+                const products = this.getProducts();
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    products[index] = { ...products[index], ...updates };
+                    this.saveProducts(products);
+                    return products[index];
+                }
+                return null;
+            },
+
+            deleteProduct(id) {
+                const products = this.getProducts();
+                const filtered = products.filter(p => p.id !== id);
+                this.saveProducts(filtered);
+            },
+
+            getCategories() {
+                const products = this.getProducts();
+                const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
+                return categories.sort();
+            }
+        };
+
+        // Sistema de toast
+        const toast = {
+            show(message, type = 'success') {
+                const toastEl = document.createElement('div');
+                toastEl.className = `toast ${type}`;
+                toastEl.textContent = message;
+                document.body.appendChild(toastEl);
+
+                setTimeout(() => {
+                    toastEl.remove();
+                }, 3000);
+            }
+        };
+
+        // Aplicação principal
+        class App {
+            constructor() {
+                this.currentView = 'login';
+                this.currentAdminTab = 'produtos';
+                this.isCompactView = false;
+                this.init();
+            }
+
+            init() {
+                this.render();
+                this.setupEventListeners();
+
+                // Verifica se já está logado
+                if (auth.isAuthenticated()) {
+                    this.currentView = 'admin';
+                    this.render();
+                }
+            }
+
+            setupEventListeners() {
+                document.addEventListener('click', (e) => {
+                    const target = e.target;
+
+                    // Login
+                    if (target.matches('[data-action="login"]')) {
+                        e.preventDefault();
+                        this.handleLogin();
+                    }
+
+                    // Logout
+                    if (target.matches('[data-action="logout"]')) {
+                        this.handleLogout();
+                    }
+
+                    // Navegação
+                    if (target.matches('[data-tab]')) {
+                        this.currentAdminTab = target.dataset.tab;
+                        this.render();
+                    }
+
+                    // Adicionar produto
+                    if (target.matches('[data-action="add-product"]')) {
+                        this.showAddProductForm();
+                    }
+
+                    // Salvar produto
+                    if (target.matches('[data-action="save-product"]')) {
+                        e.preventDefault();
+                        this.handleSaveProduct();
+                    }
+
+                    // Cancelar
+                    if (target.matches('[data-action="cancel"]')) {
+                        this.hideAddProductForm();
+                    }
+
+                    // Toggle view
+                    if (target.matches('[data-action="toggle-view"]')) {
+                        this.isCompactView = !this.isCompactView;
+                        this.render();
+                    }
+
+                    // Deletar produto
+                    if (target.matches('[data-action="delete-product"]')) {
+                        const id = target.dataset.productId;
+                        if (confirm('Tem certeza que deseja excluir este produto?')) {
+                            productManager.deleteProduct(id);
+                            toast.show('Produto excluído com sucesso!');
+                            this.render();
+                        }
+                    }
+                });
+
+                // Form submit
+                document.addEventListener('submit', (e) => {
+                    if (e.target.matches('#loginForm')) {
+                        e.preventDefault();
+                        this.handleLogin();
+                    }
+                    if (e.target.matches('#productForm')) {
+                        e.preventDefault();
+                        this.handleSaveProduct();
+                    }
+                });
+            }
+
+            handleLogin() {
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+
+                if (auth.login(username, password)) {
+                    this.currentView = 'admin';
+                    toast.show('Login realizado com sucesso!');
+                    this.render();
+                } else {
+                    toast.show('Credenciais inválidas', 'error');
+                }
+            }
+
+            handleLogout() {
+                auth.logout();
+                this.currentView = 'login';
+                toast.show('Logout realizado com sucesso!');
+                this.render();
+            }
+
+            handleSaveProduct() {
+                const form = document.getElementById('productForm');
+                const formData = new FormData(form);
+
+                const product = {
+                    name: formData.get('name'),
+                    price: parseFloat(formData.get('price')),
+                    category: formData.get('category'),
+                    description: formData.get('description'),
+                    fixedPrice: formData.get('fixedPrice') === 'on'
+                };
+
+                if (!product.name || !product.price) {
+                    toast.show('Nome e preço são obrigatórios', 'error');
+                    return;
+                }
+
+                productManager.addProduct(product);
+                toast.show('Produto adicionado com sucesso!');
+                this.hideAddProductForm();
+                this.render();
+            }
+
+            showAddProductForm() {
+                const form = document.getElementById('addProductForm');
+                if (form) {
+                    form.style.display = 'block';
+                }
+            }
+
+            hideAddProductForm() {
+                const form = document.getElementById('addProductForm');
+                if (form) {
+                    form.style.display = 'none';
+                    document.getElementById('productForm').reset();
+                }
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                
+                if (this.currentView === 'login') {
+                    app.innerHTML = this.renderLogin();
+                } else if (this.currentView === 'admin') {
+                    app.innerHTML = this.renderAdmin();
+                }
+            }
+
+            renderLogin() {
+                return `
+                    <div class="modal-overlay">
+                        <div class="modal-content">
+                            <h2 class="modal-title">🔐 Login - Catálogo Bonafé</h2>
                             <form id="loginForm">
-                                <input type="text" id="username" placeholder="Usuário" required>
-                                <input type="password" id="password" placeholder="Senha" required>
-                                <button type="submit">Entrar</button>
+                                <div class="form-group">
+                                    <label class="form-label">Usuário</label>
+                                    <input type="text" id="username" name="username" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Senha</label>
+                                    <input type="password" id="password" name="password" class="form-input" required>
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;" data-action="login">
+                                    Entrar
+                                </button>
                             </form>
-                            <div class="login-info">
-                                <p>Entre com suas credenciais para acessar o catálogo</p>
-                            </div>
+                            <p style="text-align: center; margin-top: 1rem; color: hsl(var(--muted-foreground)); font-size: 0.875rem;">
+                                Entre com suas credenciais para acessar o catálogo
+                            </p>
                         </div>
                     </div>
-                    
-                    <div class="app-container" id="appContainer" style="display: none;">
+                `;
+            }
+
+            renderAdmin() {
+                const user = auth.getCurrentUser();
+                return `
+                    <div class="app-container">
                         <header class="header">
-                            <h1>📱 Catálogo Móveis Bonafé</h1>
+                            <h1>📱 Admin Panel</h1>
                             <div class="user-info">
-                                <span id="userDisplay"></span>
-                                <button onclick="logout()" class="logout-btn">Sair</button>
+                                <span>${user.username} (${user.level === 'admin' ? 'Admin VIP' : 'Básico'})</span>
+                                <button class="btn btn-destructive" data-action="logout">Sair</button>
                             </div>
                         </header>
-                        
-                        <nav class="nav-tabs">
-                            <button class="tab-btn active" onclick="showTab('catalog')">📦 Catálogo</button>
-                            <button class="tab-btn" onclick="showTab('admin')" id="adminTab" style="display: none;">⚙️ Admin</button>
-                        </nav>
-                        
+
+                        <div class="admin-tabs">
+                            <button class="admin-tab-btn ${this.currentAdminTab === 'produtos' ? 'active' : ''}" data-tab="produtos">
+                                📦 Produtos
+                            </button>
+                            <button class="admin-tab-btn ${this.currentAdminTab === 'categorias' ? 'active' : ''}" data-tab="categorias">
+                                📂 Categorias
+                            </button>
+                            <button class="admin-tab-btn ${this.currentAdminTab === 'precos' ? 'active' : ''}" data-tab="precos">
+                                💰 Preços
+                            </button>
+                            <button class="admin-tab-btn ${this.currentAdminTab === 'usuarios' ? 'active' : ''}" data-tab="usuarios">
+                                👥 Usuários
+                            </button>
+                            <button class="admin-tab-btn ${this.currentAdminTab === 'excel' ? 'active' : ''}" data-tab="excel">
+                                📊 Excel
+                            </button>
+                            <button class="admin-tab-btn ${this.currentAdminTab === 'backup' ? 'active' : ''}" data-tab="backup">
+                                ☁️ Backup
+                            </button>
+                            <button class="admin-tab-btn ${this.currentAdminTab === 'monitor' ? 'active' : ''}" data-tab="monitor">
+                                📊 Monitor DB
+                            </button>
+                        </div>
+
                         <main class="main-content">
-                            <div id="catalogTab" class="tab-content active">
-                                <div class="catalog-header">
-                                    <h2>Produtos Disponíveis</h2>
-                                    <div class="view-toggle">
-                                        <button onclick="toggleView()" id="viewToggle">📱 Compacto</button>
-                                    </div>
-                                </div>
-                                <div id="productList" class="product-grid">
-                                    <div class="empty-state">
-                                        <h3>📦 Nenhum produto encontrado</h3>
-                                        <p>Use o painel administrativo para adicionar produtos ao catálogo.</p>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div id="adminTab" class="tab-content">
-                                <div class="admin-section">
-                                    <h2>🛠️ Painel Administrativo</h2>
-                                    <div class="admin-actions">
-                                        <button onclick="showAddProduct()" class="btn-primary">➕ Adicionar Produto</button>
-                                        <button onclick="importExcel()" class="btn-secondary">📊 Importar Excel</button>
-                                        <button onclick="exportExcel()" class="btn-secondary">💾 Exportar Excel</button>
-                                    </div>
-                                    
-                                    <div id="addProductForm" class="form-container" style="display: none;">
-                                        <h3>Novo Produto</h3>
-                                        <form id="productForm">
-                                            <input type="text" id="productName" placeholder="Nome do produto" required>
-                                            <input type="number" id="productPrice" placeholder="Preço" step="0.01" required>
-                                            <input type="text" id="productCategory" placeholder="Categoria">
-                                            <textarea id="productDescription" placeholder="Descrição"></textarea>
-                                            <label>
-                                                <input type="checkbox" id="fixedPrice"> 🔒 Preço Fixo (não aplica multiplicador)
-                                            </label>
-                                            <button type="submit">Salvar Produto</button>
-                                            <button type="button" onclick="hideAddProduct()">Cancelar</button>
-                                        </form>
-                                    </div>
-                                </div>
+                            <div class="admin-content">
+                                ${this.renderAdminContent()}
                             </div>
                         </main>
                     </div>
-                </div>
-                
-                <style>
-                    * {
-                        margin: 0;
-                        padding: 0;
-                        box-sizing: border-box;
-                    }
-                    
-                    body {
-                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        min-height: 100vh;
-                    }
-                    
-                    .login-container {
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        min-height: 100vh;
-                        padding: 20px;
-                    }
-                    
-                    .login-card {
-                        background: rgba(255,255,255,0.1);
-                        backdrop-filter: blur(10px);
-                        border-radius: 15px;
-                        padding: 40px;
-                        border: 1px solid rgba(255,255,255,0.2);
-                        color: white;
-                        text-align: center;
-                        max-width: 400px;
-                        width: 100%;
-                    }
-                    
-                    .login-card h1 {
-                        margin-bottom: 30px;
-                        font-size: 1.8rem;
-                    }
-                    
-                    .login-card input {
-                        width: 100%;
-                        padding: 12px;
-                        margin-bottom: 15px;
-                        border: none;
-                        border-radius: 8px;
-                        background: rgba(255,255,255,0.9);
-                        font-size: 16px;
-                    }
-                    
-                    .login-card button {
-                        width: 100%;
-                        padding: 12px;
-                        background: #4CAF50;
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        font-size: 16px;
-                        cursor: pointer;
-                        transition: background 0.3s;
-                    }
-                    
-                    .login-card button:hover {
-                        background: #45a049;
-                    }
-                    
-                    .login-info {
-                        margin-top: 20px;
-                        font-size: 0.9rem;
-                        opacity: 0.8;
-                    }
-                    
-                    .app-container {
-                        min-height: 100vh;
-                        background: #f5f5f5;
-                    }
-                    
-                    .header {
-                        background: white;
-                        padding: 15px 20px;
-                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                    }
-                    
-                    .header h1 {
-                        color: #333;
-                        font-size: 1.5rem;
-                    }
-                    
-                    .user-info {
-                        display: flex;
-                        align-items: center;
-                        gap: 15px;
-                    }
-                    
-                    .logout-btn {
-                        padding: 8px 16px;
-                        background: #ff4757;
-                        color: white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    }
-                    
-                    .nav-tabs {
-                        background: white;
-                        display: flex;
-                        border-bottom: 1px solid #ddd;
-                    }
-                    
-                    .tab-btn {
-                        padding: 15px 25px;
-                        border: none;
-                        background: transparent;
-                        cursor: pointer;
-                        border-bottom: 3px solid transparent;
-                        transition: all 0.3s;
-                    }
-                    
-                    .tab-btn.active {
-                        border-bottom-color: #667eea;
-                        color: #667eea;
-                        font-weight: bold;
-                    }
-                    
-                    .main-content {
-                        padding: 20px;
-                    }
-                    
-                    .tab-content {
-                        display: none;
-                    }
-                    
-                    .tab-content.active {
-                        display: block;
-                    }
-                    
-                    .catalog-header {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        margin-bottom: 20px;
-                    }
-                    
-                    .view-toggle button {
-                        padding: 8px 16px;
-                        background: #667eea;
-                        color: white;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    }
-                    
-                    .product-grid {
-                        display: grid;
-                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-                        gap: 20px;
-                    }
-                    
-                    .product-grid.compact {
-                        grid-template-columns: 1fr;
-                    }
-                    
-                    .product-card {
-                        background: white;
-                        border-radius: 10px;
-                        padding: 20px;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                        transition: transform 0.3s;
-                    }
-                    
-                    .product-card:hover {
-                        transform: translateY(-2px);
-                    }
-                    
-                    .product-card.compact {
-                        padding: 15px;
-                        display: flex;
-                        align-items: center;
-                        gap: 15px;
-                    }
-                    
-                    .empty-state {
-                        text-align: center;
-                        padding: 60px 20px;
-                        color: #666;
-                    }
-                    
-                    .admin-section {
-                        background: white;
-                        border-radius: 10px;
-                        padding: 30px;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-                    }
-                    
-                    .admin-actions {
-                        display: flex;
-                        gap: 15px;
-                        margin-bottom: 30px;
-                        flex-wrap: wrap;
-                    }
-                    
-                    .btn-primary {
-                        padding: 12px 24px;
-                        background: #4CAF50;
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        cursor: pointer;
-                        font-weight: bold;
-                    }
-                    
-                    .btn-secondary {
-                        padding: 12px 24px;
-                        background: #2196F3;
-                        color: white;
-                        border: none;
-                        border-radius: 8px;
-                        cursor: pointer;
-                    }
-                    
-                    .form-container {
-                        background: #f9f9f9;
-                        padding: 20px;
-                        border-radius: 8px;
-                        margin-top: 20px;
-                    }
-                    
-                    .form-container input,
-                    .form-container textarea {
-                        width: 100%;
-                        padding: 10px;
-                        margin-bottom: 15px;
-                        border: 1px solid #ddd;
-                        border-radius: 5px;
-                        font-size: 14px;
-                    }
-                    
-                    .form-container button {
-                        padding: 10px 20px;
-                        margin-right: 10px;
-                        border: none;
-                        border-radius: 5px;
-                        cursor: pointer;
-                    }
-                    
-                    @media (max-width: 768px) {
-                        .header {
-                            flex-direction: column;
-                            gap: 10px;
-                            text-align: center;
-                        }
-                        
-                        .catalog-header {
-                            flex-direction: column;
-                            gap: 15px;
-                        }
-                        
-                        .admin-actions {
-                            flex-direction: column;
-                        }
-                        
-                        .product-grid {
-                            grid-template-columns: 1fr;
-                        }
-                    }
-                </style>
-            `;
-        }
-        
-        function initializeApp() {
-            // Sistema de usuários
-            const users = {
-                'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
-                'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
-            };
-            
-            // Produtos em localStorage
-            let products = JSON.parse(localStorage.getItem('products') || '[]');
-            let currentUser = null;
-            let isCompactView = false;
-            
-            // Login
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                if (users[username] && users[username].password === password) {
-                    currentUser = { username, ...users[username] };
-                    document.getElementById('loginContainer').style.display = 'none';
-                    document.getElementById('appContainer').style.display = 'block';
-                    document.getElementById('userDisplay').textContent = username + ' (' + (users[username].level === 'admin' ? 'Admin VIP' : 'Básico') + ')';
-                    
-                    if (users[username].level === 'admin') {
-                        document.getElementById('adminTab').style.display = 'block';
-                    }
-                    
-                    renderProducts();
-                } else {
-                    alert('Usuário ou senha incorretos!');
+                `;
+            }
+
+            renderAdminContent() {
+                switch (this.currentAdminTab) {
+                    case 'produtos':
+                        return this.renderProductsTab();
+                    case 'categorias':
+                        return this.renderCategoriesTab();
+                    case 'precos':
+                        return this.renderPricesTab();
+                    case 'usuarios':
+                        return this.renderUsersTab();
+                    case 'excel':
+                        return this.renderExcelTab();
+                    case 'backup':
+                        return this.renderBackupTab();
+                    case 'monitor':
+                        return this.renderMonitorTab();
+                    default:
+                        return this.renderProductsTab();
                 }
-            });
-            
-            // Logout
-            window.logout = function() {
-                currentUser = null;
-                document.getElementById('loginContainer').style.display = 'flex';
-                document.getElementById('appContainer').style.display = 'none';
-                document.getElementById('username').value = '';
-                document.getElementById('password').value = '';
-            };
-            
-            // Navegação entre abas
-            window.showTab = function(tabName) {
-                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-                
-                document.getElementById(tabName + 'Tab').classList.add('active');
-                event.target.classList.add('active');
-            };
-            
-            // Toggle view
-            window.toggleView = function() {
-                isCompactView = !isCompactView;
-                const grid = document.getElementById('productList');
-                const toggle = document.getElementById('viewToggle');
-                
-                if (isCompactView) {
-                    grid.classList.add('compact');
-                    toggle.textContent = '📋 Grade';
-                } else {
-                    grid.classList.remove('compact');
-                    toggle.textContent = '📱 Compacto';
-                }
-                
-                renderProducts();
-            };
-            
-            // Renderizar produtos
-            function renderProducts() {
-                const container = document.getElementById('productList');
-                
-                if (products.length === 0) {
-                    container.innerHTML = `
+            }
+
+            renderProductsTab() {
+                const products = productManager.getProducts();
+                const user = auth.getCurrentUser();
+
+                return `
+                    <div class="products-header">
+                        <h2>Gerenciar Produtos</h2>
+                        <div style="display: flex; gap: 1rem;">
+                            <button class="btn btn-secondary" data-action="toggle-view">
+                                ${this.isCompactView ? '📋 Grade' : '📱 Compacto'}
+                            </button>
+                            <button class="btn btn-primary" data-action="add-product">
+                                ➕ Novo Produto
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="products-filters">
+                        <input type="text" placeholder="Buscar produtos..." class="form-input">
+                        <select class="form-input">
+                            <option>Todas as categorias</option>
+                            ${productManager.getCategories().map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+                        </select>
+                        <select class="form-input">
+                            <option>Ordenar por nome</option>
+                            <option>Ordenar por preço</option>
+                            <option>Ordenar por categoria</option>
+                        </select>
+                    </div>
+
+                    <div id="addProductForm" class="form-container" style="display: none;">
+                        <h3 class="form-title">Novo Produto</h3>
+                        <form id="productForm">
+                            <div class="form-group">
+                                <label class="form-label">Nome do Produto</label>
+                                <input type="text" name="name" class="form-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Preço</label>
+                                <input type="number" name="price" class="form-input" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Categoria</label>
+                                <input type="text" name="category" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Descrição</label>
+                                <textarea name="description" class="form-input" rows="3"></textarea>
+                            </div>
+                            <div class="checkbox-group">
+                                <input type="checkbox" name="fixedPrice" id="fixedPrice">
+                                <label for="fixedPrice">🔒 Preço Fixo (não aplica multiplicador)</label>
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary" data-action="save-product">
+                                    Salvar Produto
+                                </button>
+                                <button type="button" class="btn btn-outline" data-action="cancel">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    ${products.length === 0 ? `
                         <div class="empty-state">
-                            <h3>📦 Nenhum produto encontrado</h3>
-                            <p>Use o painel administrativo para adicionar produtos ao catálogo.</p>
+                            <div class="empty-state-icon">📦</div>
+                            <h3 class="empty-state-title">Nenhum produto encontrado</h3>
+                            <p>Tente ajustar os filtros de busca ou adicione novos produtos.</p>
+                        </div>
+                    ` : `
+                        <div class="products-grid ${this.isCompactView ? 'compact' : ''}">
+                            ${products.map(product => this.renderProductCard(product, user)).join('')}
+                        </div>
+                    `}
+                `;
+            }
+
+            renderProductCard(product, user) {
+                const finalPrice = product.fixedPrice ? product.price : product.price * user.multiplier;
+                const priceDisplay = finalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                const fixedIndicator = product.fixedPrice ? ' 🔒 Preço Fixo' : '';
+
+                if (this.isCompactView) {
+                    return `
+                        <div class="product-card compact">
+                            <div class="product-info">
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-category">${product.category || 'Sem categoria'}</div>
+                                <div class="product-price">${priceDisplay}${fixedIndicator}</div>
+                            </div>
+                            <div class="product-actions">
+                                <button class="btn btn-destructive" data-action="delete-product" data-product-id="${product.id}">
+                                    🗑️
+                                </button>
+                            </div>
                         </div>
                     `;
-                    return;
+                } else {
+                    return `
+                        <div class="product-card">
+                            <div class="product-name">${product.name}</div>
+                            <div class="product-category">${product.category || 'Sem categoria'}</div>
+                            <div class="product-price">${priceDisplay}${fixedIndicator}</div>
+                            ${product.description ? `<p style="color: hsl(var(--muted-foreground)); margin-bottom: 1rem;">${product.description}</p>` : ''}
+                            <div class="product-actions">
+                                <button class="btn btn-destructive" data-action="delete-product" data-product-id="${product.id}">
+                                    🗑️ Excluir
+                                </button>
+                            </div>
+                        </div>
+                    `;
                 }
-                
-                container.innerHTML = products.map(product => {
-                    const finalPrice = product.fixedPrice ? product.price : product.price * currentUser.multiplier;
-                    const priceDisplay = finalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                    const fixedIndicator = product.fixedPrice ? ' 🔒 Preço Fixo' : '';
-                    
-                    if (isCompactView) {
-                        return `
-                            <div class="product-card compact">
-                                <div>
-                                    <h3>${product.name}</h3>
-                                    <p class="price">${priceDisplay}${fixedIndicator}</p>
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        return `
-                            <div class="product-card">
-                                <h3>${product.name}</h3>
-                                <p class="category">${product.category || 'Sem categoria'}</p>
-                                <p class="description">${product.description || ''}</p>
-                                <div class="price">${priceDisplay}${fixedIndicator}</div>
-                            </div>
-                        `;
-                    }
-                }).join('');
             }
-            
-            // Admin functions
-            window.showAddProduct = function() {
-                document.getElementById('addProductForm').style.display = 'block';
-            };
-            
-            window.hideAddProduct = function() {
-                document.getElementById('addProductForm').style.display = 'none';
-                document.getElementById('productForm').reset();
-            };
-            
-            // Adicionar produto
-            document.getElementById('productForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const product = {
-                    id: Date.now(),
-                    name: document.getElementById('productName').value,
-                    price: parseFloat(document.getElementById('productPrice').value),
-                    category: document.getElementById('productCategory').value,
-                    description: document.getElementById('productDescription').value,
-                    fixedPrice: document.getElementById('fixedPrice').checked
-                };
-                
-                products.push(product);
-                localStorage.setItem('products', JSON.stringify(products));
-                renderProducts();
-                hideAddProduct();
-                alert('✅ Produto adicionado com sucesso!');
-            });
-            
-            // Excel functions
-            window.importExcel = function() {
-                alert('📊 Funcionalidade de importação Excel em desenvolvimento!');
-            };
-            
-            window.exportExcel = function() {
-                alert('💾 Funcionalidade de exportação Excel em desenvolvimento!');
-            };
+
+            renderCategoriesTab() {
+                return `
+                    <h2>📂 Gerenciar Categorias</h2>
+                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
+                        Funcionalidade em desenvolvimento...
+                    </p>
+                `;
+            }
+
+            renderPricesTab() {
+                return `
+                    <h2>💰 Gerenciar Preços</h2>
+                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
+                        Funcionalidade em desenvolvimento...
+                    </p>
+                `;
+            }
+
+            renderUsersTab() {
+                return `
+                    <h2>👥 Gerenciar Usuários</h2>
+                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
+                        Funcionalidade em desenvolvimento...
+                    </p>
+                `;
+            }
+
+            renderExcelTab() {
+                return `
+                    <h2>📊 Importar/Exportar Excel</h2>
+                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
+                        Funcionalidade em desenvolvimento...
+                    </p>
+                `;
+            }
+
+            renderBackupTab() {
+                return `
+                    <h2>☁️ Backup e Sincronização</h2>
+                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
+                        Funcionalidade em desenvolvimento...
+                    </p>
+                `;
+            }
+
+            renderMonitorTab() {
+                return `
+                    <h2>📊 Monitor de Banco de Dados</h2>
+                    <p style="color: hsl(var(--muted-foreground)); margin-top: 1rem;">
+                        Funcionalidade em desenvolvimento...
+                    </p>
+                `;
+            }
         }
+
+        // Inicializa a aplicação
+        window.addEventListener('DOMContentLoaded', () => {
+            new App();
+        });
     </script>
 </body>
 </html>
