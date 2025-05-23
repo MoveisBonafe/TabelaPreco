@@ -793,15 +793,17 @@
             }
 
             handleDownloadTemplate() {
-                // Modelo simplificado com apenas Nome e Preço
+                // Modelo simplificado: Coluna A = Nome, Coluna B = Preço
                 const templateData = [
-                    { nome: 'Mesa de Jantar', preco: 850 },
-                    { nome: 'Cadeira Estofada', preco: 320 },
-                    { nome: 'Sofá 3 Lugares', preco: 1200 }
+                    'Nome,Preço',  // Cabeçalho nas colunas A e B
+                    'Mesa de Jantar,850',
+                    'Cadeira Estofada,320', 
+                    'Sofá 3 Lugares,1200',
+                    'Guarda-roupa,1800',
+                    'Cama Box Casal,950'
                 ];
                 
-                const csvContent = 'Nome,Preço\n' + 
-                    templateData.map(item => `${item.nome},${item.preco}`).join('\n');
+                const csvContent = templateData.join('\n');
                 
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
@@ -809,7 +811,7 @@
                 link.download = 'modelo_produtos.csv';
                 link.click();
                 
-                toast.show('Modelo Excel baixado com sucesso! ✨');
+                toast.show('Modelo Excel baixado! Coluna A=Nome, Coluna B=Preço ✨');
             }
 
             handleExportExcel() {
@@ -1427,10 +1429,12 @@
                             <div style="margin: 1rem 0;">
                                 <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="form-input">
                                 <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
-                                    <strong>Formato simplificado:</strong> Nome, Preço
+                                    <strong>Layout do Excel:</strong><br>
+                                    • Coluna A: Nome do produto<br>
+                                    • Coluna B: Preço (apenas números)
                                 </p>
                                 <p style="font-size: 0.875rem; color: #10b981; margin-top: 0.5rem;">
-                                    ✨ Apenas 2 colunas necessárias!
+                                    ✨ Super simples - apenas 2 colunas!
                                 </p>
                             </div>
                             <div style="display: flex; gap: 0.5rem;">
