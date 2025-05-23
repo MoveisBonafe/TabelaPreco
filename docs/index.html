@@ -517,6 +517,60 @@
                         const id = target.dataset.productId;
                         this.deleteProduct(id);
                     }
+
+                    // Preços
+                    if (target.matches('[data-action="update-multiplier"]')) {
+                        this.handleUpdateMultiplier(target);
+                    }
+
+                    // Usuários
+                    if (target.matches('[data-action="add-user"]')) {
+                        this.showUserModal();
+                    }
+                    if (target.matches('[data-action="save-user"]')) {
+                        e.preventDefault();
+                        this.handleSaveUser();
+                    }
+                    if (target.matches('[data-action="delete-user"]')) {
+                        const username = target.dataset.username;
+                        this.deleteUser(username);
+                    }
+
+                    // Excel
+                    if (target.matches('[data-action="import-excel"]')) {
+                        this.handleImportExcel();
+                    }
+                    if (target.matches('[data-action="export-excel"]')) {
+                        this.handleExportExcel();
+                    }
+                    if (target.matches('[data-action="export-csv"]')) {
+                        this.handleExportCSV();
+                    }
+                    if (target.matches('[data-action="download-template"]')) {
+                        this.downloadExcelTemplate();
+                    }
+
+                    // Backup
+                    if (target.matches('[data-action="backup-data"]')) {
+                        this.handleBackupData();
+                    }
+                    if (target.matches('[data-action="restore-backup"]')) {
+                        this.handleRestoreBackup();
+                    }
+                    if (target.matches('[data-action="reset-data"]')) {
+                        this.handleResetData();
+                    }
+
+                    // Monitor
+                    if (target.matches('[data-action="refresh-stats"]')) {
+                        this.refreshStats();
+                    }
+                    if (target.matches('[data-action="check-storage"]')) {
+                        this.checkStorage();
+                    }
+                    if (target.matches('[data-action="optimize-storage"]')) {
+                        this.optimizeStorage();
+                    }
                 });
 
                 document.addEventListener('submit', (e) => {
@@ -595,6 +649,268 @@
                     toast.show('Produto excluído com sucesso!');
                     this.render();
                 }
+            }
+
+            // Funcionalidades de Preços
+            handleUpdateMultiplier(input) {
+                const username = input.dataset.username;
+                const newMultiplier = parseFloat(input.value);
+                
+                if (newMultiplier < 0.1 || newMultiplier > 5) {
+                    toast.show('Multiplicador deve estar entre 0.1 e 5.0', 'error');
+                    input.value = auth.users[username].multiplier;
+                    return;
+                }
+
+                auth.users[username].multiplier = newMultiplier;
+                localStorage.setItem('users', JSON.stringify(auth.users));
+                toast.show(`Multiplicador de ${username} atualizado para ${newMultiplier}x`);
+            }
+
+            // Funcionalidades de Usuários
+            showUserModal() {
+                const modal = document.getElementById('userModal');
+                if (modal) {
+                    modal.style.display = 'flex';
+                }
+            }
+
+            hideUserModal() {
+                const modal = document.getElementById('userModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    document.getElementById('userForm').reset();
+                }
+            }
+
+            handleSaveUser() {
+                const form = document.getElementById('userForm');
+                const formData = new FormData(form);
+
+                const userData = {
+                    username: formData.get('username'),
+                    password: formData.get('password'),
+                    level: formData.get('level'),
+                    multiplier: parseFloat(formData.get('multiplier'))
+                };
+
+                if (!userData.username || !userData.password) {
+                    toast.show('Nome de usuário e senha são obrigatórios', 'error');
+                    return;
+                }
+
+                if (auth.users[userData.username]) {
+                    toast.show('Usuário já existe', 'error');
+                    return;
+                }
+
+                auth.users[userData.username] = {
+                    password: userData.password,
+                    level: userData.level,
+                    multiplier: userData.multiplier
+                };
+
+                localStorage.setItem('users', JSON.stringify(auth.users));
+                toast.show('Usuário criado com sucesso!');
+                this.hideUserModal();
+                this.render();
+            }
+
+            deleteUser(username) {
+                if (confirm(`Tem certeza que deseja excluir o usuário ${username}?`)) {
+                    delete auth.users[username];
+                    localStorage.setItem('users', JSON.stringify(auth.users));
+                    toast.show('Usuário excluído com sucesso!');
+                    this.render();
+                }
+            }
+
+            // Funcionalidades Excel
+            handleImportExcel() {
+                const fileInput = document.getElementById('excelFile');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    toast.show('Selecione um arquivo Excel primeiro', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        const products = [];
+
+                        // Pula o cabeçalho
+                        for (let i = 1; i < lines.length; i++) {
+                            const columns = lines[i].split(',');
+                            if (columns.length >= 2 && columns[0].trim() && columns[1].trim()) {
+                                products.push({
+                                    name: columns[0].trim(),
+                                    price: parseFloat(columns[1].trim()) || 0,
+                                    category: columns[2]?.trim() || 'Importado',
+                                    description: columns[3]?.trim() || '',
+                                    fixedPrice: columns[4]?.trim().toLowerCase() === 'sim'
+                                });
+                            }
+                        }
+
+                        products.forEach(product => productManager.addProduct(product));
+                        toast.show(`${products.length} produtos importados com sucesso!`);
+                        this.render();
+                    } catch (error) {
+                        toast.show('Erro ao processar arquivo. Use formato CSV.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            handleExportExcel() {
+                const products = productManager.getProducts();
+                this.downloadData(products, 'produtos.csv', 'csv');
+                toast.show('Arquivo CSV exportado com sucesso!');
+            }
+
+            handleExportCSV() {
+                const products = productManager.getProducts();
+                this.downloadData(products, 'produtos.csv', 'csv');
+                toast.show('Arquivo CSV exportado com sucesso!');
+            }
+
+            downloadExcelTemplate() {
+                const template = [
+                    ['Nome', 'Preço', 'Categoria', 'Descrição', 'Preço Fixo'],
+                    ['Sofá 3 Lugares', '1299.99', 'Móveis', 'Sofá confortável', 'Não'],
+                    ['Mesa de Jantar', '899.99', 'Móveis', 'Mesa para 6 pessoas', 'Sim']
+                ];
+                
+                this.downloadData(template, 'modelo_produtos.csv', 'csv');
+                toast.show('Modelo CSV baixado com sucesso!');
+            }
+
+            // Funcionalidades de Backup
+            handleBackupData() {
+                const data = {
+                    products: productManager.getProducts(),
+                    users: auth.users,
+                    timestamp: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                localStorage.setItem('lastBackup', new Date().toLocaleDateString('pt-BR'));
+                this.downloadData(data, 'backup_catalogo.json', 'json');
+                toast.show('Backup criado com sucesso!');
+                this.render();
+            }
+
+            handleRestoreBackup() {
+                const fileInput = document.getElementById('backupFile');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    toast.show('Selecione um arquivo de backup primeiro', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const backup = JSON.parse(e.target.result);
+                        
+                        if (backup.products) {
+                            productManager.saveProducts(backup.products);
+                        }
+                        if (backup.users) {
+                            Object.assign(auth.users, backup.users);
+                            localStorage.setItem('users', JSON.stringify(auth.users));
+                        }
+
+                        toast.show('Backup restaurado com sucesso!');
+                        this.render();
+                    } catch (error) {
+                        toast.show('Arquivo de backup inválido', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            handleResetData() {
+                if (confirm('ATENÇÃO: Isso irá apagar todos os dados! Tem certeza?')) {
+                    localStorage.clear();
+                    auth.users = {
+                        'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
+                        'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
+                    };
+                    toast.show('Todos os dados foram limpos!');
+                    this.render();
+                }
+            }
+
+            // Funcionalidades de Monitor
+            refreshStats() {
+                localStorage.setItem('lastUpdate', new Date().toLocaleDateString('pt-BR'));
+                toast.show('Estatísticas atualizadas!');
+                this.render();
+            }
+
+            checkStorage() {
+                const products = productManager.getProducts();
+                const size = JSON.stringify(products).length;
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                const percentage = (size / maxSize * 100).toFixed(2);
+                
+                toast.show(`Armazenamento: ${(size/1024).toFixed(2)}KB (${percentage}% usado)`);
+            }
+
+            optimizeStorage() {
+                const products = productManager.getProducts();
+                // Remove produtos duplicados
+                const unique = products.filter((product, index, self) => 
+                    index === self.findIndex(p => p.name === product.name)
+                );
+                
+                productManager.saveProducts(unique);
+                toast.show(`Otimização concluída! ${products.length - unique.length} duplicatas removidas`);
+                this.render();
+            }
+
+            // Utilitário para download
+            downloadData(data, filename, type) {
+                let content;
+                let mimeType;
+
+                if (type === 'csv') {
+                    if (Array.isArray(data) && Array.isArray(data[0])) {
+                        // Template format
+                        content = data.map(row => row.join(',')).join('\n');
+                    } else {
+                        // Products format
+                        const headers = ['Nome', 'Preço', 'Categoria', 'Descrição', 'Preço Fixo'];
+                        const rows = data.map(p => [
+                            p.name,
+                            p.price,
+                            p.category || '',
+                            p.description || '',
+                            p.fixedPrice ? 'Sim' : 'Não'
+                        ]);
+                        content = [headers, ...rows].map(row => row.join(',')).join('\n');
+                    }
+                    mimeType = 'text/csv';
+                } else {
+                    content = JSON.stringify(data, null, 2);
+                    mimeType = 'application/json';
+                }
+
+                const blob = new Blob([content], { type: mimeType });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
             }
 
             render() {
@@ -685,6 +1001,49 @@
                     </main>
 
                     ${this.renderProductModal()}
+                `;
+            }
+
+            renderUserModal() {
+                return `
+                    <div id="userModal" class="modal-overlay" style="display: none;">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h3 class="modal-title">Novo Usuário</h3>
+                            </div>
+                            <div class="modal-body">
+                                <form id="userForm">
+                                    <div class="form-group">
+                                        <label class="form-label">Nome de Usuário</label>
+                                        <input type="text" name="username" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Senha</label>
+                                        <input type="password" name="password" class="form-input" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Nível de Acesso</label>
+                                        <select name="level" class="form-input" required>
+                                            <option value="basic">Usuário Básico</option>
+                                            <option value="admin">Admin VIP</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Multiplicador de Preço</label>
+                                        <input type="number" name="multiplier" class="form-input" step="0.1" min="0.1" max="5" value="1.2" required>
+                                    </div>
+                                    <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                                        <button type="submit" class="btn btn-primary" data-action="save-user">
+                                            Salvar Usuário
+                                        </button>
+                                        <button type="button" class="btn btn-secondary" onclick="app.hideUserModal()">
+                                            Cancelar
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 `;
             }
 
@@ -824,73 +1183,425 @@
             }
 
             renderCategoriesTab() {
+                const categories = productManager.getCategories();
+                const products = productManager.getProducts();
+                
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Categorias</h1>
                         <p class="page-description">Gerencie as categorias dos seus produtos</p>
                     </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📂</div>
+                            <div class="stat-value">${categories.length}</div>
+                            <div class="stat-label">Total de Categorias</div>
+                        </div>
+                    </div>
+
                     <div class="card">
-                        <p style="color: #64748b;">Funcionalidade em desenvolvimento...</p>
+                        <div class="card-header">
+                            <h3 class="card-title">Lista de Categorias</h3>
+                        </div>
+
+                        ${categories.length === 0 ? `
+                            <div class="empty-state">
+                                <div class="empty-icon">📂</div>
+                                <h3 class="empty-title">Nenhuma categoria encontrada</h3>
+                                <p>As categorias são criadas automaticamente quando você adiciona produtos</p>
+                            </div>
+                        ` : `
+                            <div class="grid grid-cols-2">
+                                ${categories.map(category => {
+                                    const categoryProducts = products.filter(p => p.category === category);
+                                    return `
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4 class="card-title">📂 ${category}</h4>
+                                            </div>
+                                            <div class="card-subtitle">${categoryProducts.length} produtos</div>
+                                            <p style="color: #64748b; font-size: 0.875rem;">
+                                                Produtos: ${categoryProducts.map(p => p.name).join(', ')}
+                                            </p>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
                     </div>
                 `;
             }
 
             renderPricesTab() {
+                const users = auth.users;
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Preços</h1>
                         <p class="page-description">Configure multiplicadores e preços personalizados</p>
                     </div>
+
                     <div class="card">
-                        <p style="color: #64748b;">Funcionalidade em desenvolvimento...</p>
+                        <div class="card-header">
+                            <h3 class="card-title">Multiplicadores por Usuário</h3>
+                        </div>
+                        
+                        <div class="grid grid-cols-2">
+                            ${Object.entries(users).map(([username, userData]) => `
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">👤 ${username}</h4>
+                                    </div>
+                                    <div class="card-subtitle">
+                                        ${userData.level === 'admin' ? '🔑 Admin VIP' : '👨‍💼 Usuário Básico'}
+                                    </div>
+                                    <div style="font-size: 1.25rem; font-weight: 700; color: #3b82f6; margin: 1rem 0;">
+                                        Multiplicador: ${userData.multiplier}x
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="form-label">Ajustar Multiplicador</label>
+                                        <input type="number" 
+                                               value="${userData.multiplier}" 
+                                               step="0.1" 
+                                               min="0.1" 
+                                               max="5"
+                                               class="form-input"
+                                               data-action="update-multiplier"
+                                               data-username="${username}">
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">ℹ️ Como Funciona</h3>
+                        </div>
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; color: #64748b;">
+                            <ul style="margin-left: 1.5rem;">
+                                <li>Produtos com <strong>preço fixo 🔒</strong> não sofrem alteração</li>
+                                <li>Produtos normais têm o preço multiplicado pelo valor do usuário</li>
+                                <li>Admin VIP geralmente tem multiplicador 1.0 (preço original)</li>
+                                <li>Usuários básicos podem ter multiplicadores maiores</li>
+                            </ul>
+                        </div>
                     </div>
                 `;
             }
 
             renderUsersTab() {
+                const users = auth.users;
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Usuários</h1>
                         <p class="page-description">Gerencie usuários e permissões</p>
                     </div>
-                    <div class="card">
-                        <p style="color: #64748b;">Funcionalidade em desenvolvimento...</p>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value">${Object.keys(users).length}</div>
+                            <div class="stat-label">Usuários Ativos</div>
+                        </div>
                     </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Lista de Usuários</h3>
+                            <button class="btn btn-primary" data-action="add-user">
+                                ➕ Novo Usuário
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-2">
+                            ${Object.entries(users).map(([username, userData]) => `
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card-title">👤 ${username}</h4>
+                                        ${username !== 'MoveisBonafe' ? `
+                                            <button class="btn btn-danger" data-action="delete-user" data-username="${username}">
+                                                🗑️
+                                            </button>
+                                        ` : ''}
+                                    </div>
+                                    <div class="card-subtitle">
+                                        ${userData.level === 'admin' ? '🔑 Admin VIP' : '👨‍💼 Usuário Básico'}
+                                    </div>
+                                    <div style="margin: 1rem 0;">
+                                        <p><strong>Multiplicador:</strong> ${userData.multiplier}x</p>
+                                        <p><strong>Permissões:</strong></p>
+                                        <ul style="margin-left: 1rem; font-size: 0.875rem; color: #64748b;">
+                                            ${userData.level === 'admin' ? `
+                                                <li>✅ Acesso total ao painel</li>
+                                                <li>✅ Gerenciar produtos</li>
+                                                <li>✅ Controlar preços</li>
+                                            ` : `
+                                                <li>👁️ Visualizar catálogo</li>
+                                                <li>💰 Preços personalizados</li>
+                                            `}
+                                        </ul>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    ${this.renderUserModal()}
                 `;
             }
 
             renderExcelTab() {
+                const products = productManager.getProducts();
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Excel</h1>
                         <p class="page-description">Importar e exportar dados em Excel</p>
                     </div>
+
+                    <div class="grid grid-cols-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📥 Importar Produtos</h3>
+                            </div>
+                            <p class="card-subtitle">Carregar produtos de arquivo Excel/CSV</p>
+                            <div style="margin: 1rem 0;">
+                                <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="form-input">
+                                <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
+                                    Formato: Nome, Preço, Categoria, Descrição, Preço Fixo
+                                </p>
+                            </div>
+                            <button class="btn btn-primary" data-action="import-excel">
+                                📥 Importar Arquivo
+                            </button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📤 Exportar Produtos</h3>
+                            </div>
+                            <p class="card-subtitle">${products.length} produtos no catálogo</p>
+                            <div style="margin: 1rem 0;">
+                                <p style="color: #64748b; font-size: 0.875rem;">
+                                    Baixar todos os produtos em formato Excel ou CSV
+                                </p>
+                            </div>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary" data-action="export-excel">
+                                    📤 Excel
+                                </button>
+                                <button class="btn btn-secondary" data-action="export-csv">
+                                    📄 CSV
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="card">
-                        <p style="color: #64748b;">Funcionalidade em desenvolvimento...</p>
+                        <div class="card-header">
+                            <h3 class="card-title">📋 Modelo de Importação</h3>
+                        </div>
+                        <p style="margin-bottom: 1rem;">Use um arquivo Excel/CSV com estas colunas:</p>
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; font-size: 0.875rem;">
+                                <thead>
+                                    <tr style="border-bottom: 1px solid #e2e8f0;">
+                                        <th style="text-align: left; padding: 0.5rem;">Nome</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Preço</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Categoria</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Descrição</th>
+                                        <th style="text-align: left; padding: 0.5rem;">Preço Fixo</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td style="padding: 0.5rem;">Sofá 3 Lugares</td>
+                                        <td style="padding: 0.5rem;">1299.99</td>
+                                        <td style="padding: 0.5rem;">Móveis</td>
+                                        <td style="padding: 0.5rem;">Sofá confortável</td>
+                                        <td style="padding: 0.5rem;">Não</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div style="margin-top: 1rem;">
+                            <button class="btn btn-secondary" data-action="download-template">
+                                📋 Baixar Modelo
+                            </button>
+                        </div>
                     </div>
                 `;
             }
 
             renderBackupTab() {
+                const products = productManager.getProducts();
+                const lastBackup = localStorage.getItem('lastBackup') || 'Nunca';
+                const dataSize = JSON.stringify(products).length;
+                
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Backup</h1>
                         <p class="page-description">Faça backup e sincronização dos seus dados</p>
                     </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📦</div>
+                            <div class="stat-value">${products.length}</div>
+                            <div class="stat-label">Produtos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-value">${(dataSize / 1024).toFixed(2)} KB</div>
+                            <div class="stat-label">Tamanho dos Dados</div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">💾 Fazer Backup</h3>
+                            </div>
+                            <p class="card-subtitle">Salvar dados no computador</p>
+                            <div style="margin: 1rem 0;">
+                                <p><strong>Último backup:</strong> ${lastBackup}</p>
+                                <p style="color: #64748b; font-size: 0.875rem;">
+                                    Inclui produtos, categorias e configurações
+                                </p>
+                            </div>
+                            <button class="btn btn-primary" data-action="backup-data">
+                                💾 Criar Backup
+                            </button>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📥 Restaurar Backup</h3>
+                            </div>
+                            <p class="card-subtitle">Carregar dados salvos</p>
+                            <div style="margin: 1rem 0;">
+                                <input type="file" id="backupFile" accept=".json" class="form-input">
+                                <p style="color: #64748b; font-size: 0.875rem; margin-top: 0.5rem;">
+                                    Arquivo JSON de backup anterior
+                                </p>
+                            </div>
+                            <button class="btn btn-secondary" data-action="restore-backup">
+                                📥 Restaurar Dados
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="card">
-                        <p style="color: #64748b;">Funcionalidade em desenvolvimento...</p>
+                        <div class="card-header">
+                            <h3 class="card-title">🔄 Sincronização Entre Dispositivos</h3>
+                        </div>
+                        <div style="background: #f8fafc; padding: 1rem; border-radius: 6px; margin-bottom: 1rem;">
+                            <p><strong>Como sincronizar dados:</strong></p>
+                            <ol style="margin-left: 1.5rem; margin-top: 0.5rem; color: #64748b;">
+                                <li>No dispositivo principal: clique em "Criar Backup"</li>
+                                <li>Salve o arquivo JSON gerado</li>
+                                <li>No outro dispositivo: clique em "Restaurar Dados"</li>
+                                <li>Selecione o arquivo JSON e confirme a restauração</li>
+                            </ol>
+                        </div>
+                        <button class="btn btn-danger" data-action="reset-data">
+                            🗑️ Limpar Todos os Dados
+                        </button>
                     </div>
                 `;
             }
 
             renderMonitorTab() {
+                const products = productManager.getProducts();
+                const categories = productManager.getCategories();
+                const users = Object.keys(auth.users);
+                const storageSize = JSON.stringify(products).length;
+                const lastUpdate = localStorage.getItem('lastUpdate') || new Date().toLocaleDateString('pt-BR');
+                
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Monitor</h1>
                         <p class="page-description">Monitore o sistema e estatísticas</p>
                     </div>
+
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">📦</div>
+                            <div class="stat-value">${products.length}</div>
+                            <div class="stat-label">Produtos</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📂</div>
+                            <div class="stat-value">${categories.length}</div>
+                            <div class="stat-label">Categorias</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <div class="stat-value">${users.length}</div>
+                            <div class="stat-label">Usuários</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💾</div>
+                            <div class="stat-value">${(storageSize / 1024).toFixed(2)} KB</div>
+                            <div class="stat-label">Armazenamento</div>
+                        </div>
+                    </div>
+
                     <div class="card">
-                        <p style="color: #64748b;">Funcionalidade em desenvolvimento...</p>
+                        <div class="card-header">
+                            <h3 class="card-title">🔍 Informações do Sistema</h3>
+                        </div>
+                        <div class="grid grid-cols-2">
+                            <div>
+                                <p><strong>Ambiente:</strong> GitHub Pages</p>
+                                <p><strong>Armazenamento:</strong> localStorage</p>
+                                <p><strong>Sincronização:</strong> Entre abas</p>
+                                <p><strong>Última atualização:</strong> ${lastUpdate}</p>
+                            </div>
+                            <div>
+                                <p><strong>Status:</strong> 🟢 Online</p>
+                                <p><strong>Backup:</strong> Manual</p>
+                                <p><strong>Capacidade:</strong> ~10MB</p>
+                                <p><strong>Compatibilidade:</strong> Todos os navegadores</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${categories.length > 0 ? `
+                        <div class="card">
+                            <div class="card-header">
+                                <h3 class="card-title">📈 Estatísticas por Categoria</h3>
+                            </div>
+                            <div style="background: #f8fafc; padding: 1rem; border-radius: 6px;">
+                                ${categories.map(category => {
+                                    const categoryProducts = products.filter(p => p.category === category);
+                                    const avgPrice = categoryProducts.reduce((sum, p) => sum + p.price, 0) / categoryProducts.length;
+                                    return `
+                                        <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #e2e8f0;">
+                                            <span>📂 ${category}</span>
+                                            <span>${categoryProducts.length} produtos • Média: ${avgPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">🛠️ Ações de Manutenção</h3>
+                        </div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-secondary" data-action="refresh-stats">
+                                🔄 Atualizar Estatísticas
+                            </button>
+                            <button class="btn btn-secondary" data-action="check-storage">
+                                🔍 Verificar Armazenamento
+                            </button>
+                            <button class="btn btn-secondary" data-action="optimize-storage">
+                                ⚡ Otimizar Dados
+                            </button>
+                        </div>
                     </div>
                 `;
             }
