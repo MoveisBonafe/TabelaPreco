@@ -1787,6 +1787,239 @@
                     </div>
                 `;
             }
+            // === FUNÇÕES DO MONITOR SUPABASE ===
+
+            async refreshConnectionStatus() {
+                const statusElement = document.getElementById('connection-status');
+                if (!statusElement) return;
+
+                statusElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Verificando status...</div>';
+
+                try {
+                    const response = await fetch('/api/supabase/status');
+                    const data = await response.json();
+
+                    const statusColor = data.isConnected ? '#10b981' : '#ef4444';
+                    const statusIcon = data.isConnected ? '🟢' : '🔴';
+                    const statusText = data.isConnected ? 'CONECTADO' : 'DESCONECTADO';
+
+                    statusElement.innerHTML = `
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">${statusIcon}</div>
+                                <div style="font-weight: bold; color: ${statusColor};">${statusText}</div>
+                            </div>
+                            <div>
+                                <div><strong>Tentativas:</strong> ${data.totalAttempts}</div>
+                                <div><strong>Taxa de Sucesso:</strong> ${data.successRate}%</div>
+                                <div><strong>Tempo Médio:</strong> ${data.averageResponseTime}ms</div>
+                                <div><strong>Última Conexão:</strong> ${data.lastConnection ? new Date(data.lastConnection).toLocaleString('pt-BR') : 'Nunca'}</div>
+                                <div><strong>Uptime:</strong> ${Math.floor(data.uptime / 60)}min</div>
+                            </div>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Erro ao carregar status:', error);
+                    statusElement.innerHTML = `
+                        <div style="color: #ef4444; text-align: center;">
+                            ❌ Erro ao carregar status da conexão
+                        </div>
+                    `;
+                }
+            }
+
+            async refreshErrorLogs() {
+                const logsElement = document.getElementById('error-logs');
+                if (!logsElement) return;
+
+                logsElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Carregando logs...</div>';
+
+                try {
+                    const response = await fetch('/api/supabase/logs');
+                    const data = await response.json();
+
+                    if (data.recentErrors && data.recentErrors.length > 0) {
+                        const errorsHtml = data.recentErrors.map(error => `
+                            <div style="border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; background: #fef2f2;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                    <strong style="color: #dc2626;">${error.error}</strong>
+                                    <span style="font-size: 0.875rem; color: #64748b;">${new Date(error.timestamp).toLocaleString('pt-BR')}</span>
+                                </div>
+                                ${error.code ? `<div><strong>Código:</strong> ${error.code}</div>` : ''}
+                            </div>
+                        `).join('');
+
+                        logsElement.innerHTML = `
+                            <div style="margin-bottom: 1rem;">
+                                <strong>Total de Erros:</strong> ${data.statistics.failedConnections} | 
+                                <strong>Último Erro:</strong> ${data.statistics.lastFailedConnection ? new Date(data.statistics.lastFailedConnection).toLocaleString('pt-BR') : 'Nenhum'}
+                            </div>
+                            ${errorsHtml}
+                        `;
+                    } else {
+                        logsElement.innerHTML = `
+                            <div style="text-align: center; color: #10b981;">
+                                ✅ Nenhum erro registrado
+                            </div>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Erro ao carregar logs:', error);
+                    logsElement.innerHTML = `
+                        <div style="color: #ef4444; text-align: center;">
+                            ❌ Erro ao carregar logs de erro
+                        </div>
+                    `;
+                }
+            }
+
+            async clearSupabaseLogs() {
+                if (!confirm('Tem certeza que deseja limpar todos os logs do Supabase?')) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch('/api/supabase/clear-logs', {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+
+                    toast.show(data.message);
+                    this.refreshErrorLogs();
+                    this.refreshConnectionStatus();
+                } catch (error) {
+                    console.error('Erro ao limpar logs:', error);
+                    toast.show('Erro ao limpar logs', 'error');
+                }
+            }
+
+            async generateHealthReport() {
+                const reportElement = document.getElementById('health-report');
+                if (!reportElement) return;
+
+                reportElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Gerando relatório...</div>';
+
+                try {
+                    const response = await fetch('/api/supabase/health-report');
+                    const data = await response.json();
+                    const report = data.report;
+
+                    const statusColor = {
+                        'HEALTHY': '#10b981',
+                        'WARNING': '#f59e0b',
+                        'CRITICAL': '#ef4444'
+                    }[report.health.status] || '#64748b';
+
+                    const statusIcon = {
+                        'HEALTHY': '✅',
+                        'WARNING': '⚠️',
+                        'CRITICAL': '🚨'
+                    }[report.health.status] || '❓';
+
+                    reportElement.innerHTML = `
+                        <div style="margin-bottom: 2rem;">
+                            <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+                                <span style="font-size: 1.5rem;">${statusIcon}</span>
+                                Status: <span style="color: ${statusColor};">${report.health.status}</span>
+                            </h4>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                                <div>
+                                    <strong>Taxa de Sucesso:</strong> ${report.health.successRate}<br>
+                                    <strong>Tentativas Totais:</strong> ${report.health.totalAttempts}<br>
+                                    <strong>Tempo Médio:</strong> ${report.health.averageResponseTime}
+                                </div>
+                                <div>
+                                    <strong>Última Conexão:</strong> ${report.health.lastConnection !== 'Never' ? new Date(report.health.lastConnection).toLocaleString('pt-BR') : 'Nunca'}<br>
+                                    <strong>Total de Erros:</strong> ${report.errors.totalErrors}<br>
+                                    <strong>Último Erro:</strong> ${report.errors.lastError !== 'None' ? new Date(report.errors.lastError).toLocaleString('pt-BR') : 'Nenhum'}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 1rem;">
+                            <h5>📊 Tipos de Erro</h5>
+                            ${Object.keys(report.errors.errorTypes).length > 0 ? 
+                                Object.entries(report.errors.errorTypes).map(([type, count]) => 
+                                    `<div><strong>${type}:</strong> ${count} ocorrências</div>`
+                                ).join('') : 
+                                '<div style="color: #10b981;">Nenhum erro registrado</div>'
+                            }
+                        </div>
+
+                        <div>
+                            <h5>💡 Recomendações</h5>
+                            ${report.recommendations.map(rec => `<div style="margin-bottom: 0.5rem;">${rec}</div>`).join('')}
+                        </div>
+
+                        <div style="margin-top: 1rem; font-size: 0.875rem; color: #64748b;">
+                            <strong>Relatório gerado em:</strong> ${new Date(data.generatedAt).toLocaleString('pt-BR')}
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Erro ao gerar relatório:', error);
+                    reportElement.innerHTML = `
+                        <div style="color: #ef4444; text-align: center;">
+                            ❌ Erro ao gerar relatório de saúde
+                        </div>
+                    `;
+                }
+            }
+
+            async testSupabaseConnection() {
+                const connectionString = document.getElementById('test-connection-string').value;
+                const resultElement = document.getElementById('connection-test-result');
+                
+                if (!connectionString) {
+                    toast.show('Digite a string de conexão do Supabase', 'error');
+                    return;
+                }
+
+                if (resultElement) {
+                    resultElement.innerHTML = '<div style="padding: 1rem; color: #64748b;">🔄 Testando conexão...</div>';
+                }
+
+                try {
+                    const response = await fetch('/api/supabase/test', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ connectionString })
+                    });
+                    
+                    const data = await response.json();
+
+                    if (resultElement) {
+                        const color = data.success ? '#10b981' : '#ef4444';
+                        const icon = data.success ? '✅' : '❌';
+                        
+                        resultElement.innerHTML = `
+                            <div style="padding: 1rem; border-top: 1px solid #e5e7eb; background: ${data.success ? '#f0fdf4' : '#fef2f2'};">
+                                <div style="display: flex; align-items: center; gap: 0.5rem; color: ${color};">
+                                    <span>${icon}</span>
+                                    <strong>${data.message}</strong>
+                                </div>
+                                <div style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
+                                    Testado em: ${new Date(data.timestamp).toLocaleString('pt-BR')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    toast.show(data.message, data.success ? 'success' : 'error');
+                } catch (error) {
+                    console.error('Erro ao testar conexão:', error);
+                    if (resultElement) {
+                        resultElement.innerHTML = `
+                            <div style="padding: 1rem; border-top: 1px solid #e5e7eb; background: #fef2f2; color: #ef4444;">
+                                ❌ Erro ao testar conexão
+                            </div>
+                        `;
+                    }
+                    toast.show('Erro ao testar conexão', 'error');
+                }
+            }
         }
 
         // Inicializa a aplicação
