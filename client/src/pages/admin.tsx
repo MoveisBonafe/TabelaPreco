@@ -5,6 +5,7 @@ import { AdminTabs } from '@/components/admin/admin-tabs';
 import { ProductsTab } from '@/components/admin/products-tab';
 import { CategoriesTab } from '@/components/admin/categories-tab';
 import { PricingTab } from '@/components/admin/pricing-tab';
+import { UsersTab } from '@/components/admin/users-tab';
 import { ExcelImportExport } from '@/components/admin/excel-import-export';
 import { ProductModal } from '@/components/modals/product-modal';
 import { useProducts } from '@/hooks/use-products';
@@ -137,6 +138,10 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
 
         {activeTab === 'pricing' && (
           <PricingTab products={products} />
+        )}
+
+        {activeTab === 'users' && (
+          <UsersTab />
         )}
 
         {activeTab === 'excel' && (
