@@ -18,13 +18,18 @@ export const productSchema = z.object({
   basePrice: z.number(),
   discount: z.number(),
   finalPrice: z.number(),
+  priceAVista: z.number(), // Preço à vista (base para cálculos)
+  price30: z.number(), // À vista + 2%
+  price30_60: z.number(), // À vista + 4%
+  price30_60_90: z.number(), // À vista + 6%
+  price30_60_90_120: z.number(), // À vista + 8%
   image: z.string(),
   specifications: z.array(z.string()).optional(),
   active: z.boolean(),
   createdAt: z.date(),
 });
 
-export const insertProductSchema = productSchema.omit({ id: true, createdAt: true, finalPrice: true });
+export const insertProductSchema = productSchema.omit({ id: true, createdAt: true, finalPrice: true, price30: true, price30_60: true, price30_60_90: true, price30_60_90_120: true });
 export const insertCategorySchema = categorySchema.omit({ id: true, productCount: true });
 
 export type Product = z.infer<typeof productSchema>;

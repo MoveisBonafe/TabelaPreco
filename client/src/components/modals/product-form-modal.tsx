@@ -23,6 +23,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
     category: '',
     basePrice: 0,
     discount: 0,
+    priceAVista: 0,
     image: '',
     specifications: [],
     active: true,
@@ -38,6 +39,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
         category: product.category,
         basePrice: product.basePrice,
         discount: product.discount,
+        priceAVista: product.priceAVista,
         image: product.image,
         specifications: product.specifications || [],
         active: product.active,
@@ -49,6 +51,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
         category: '',
         basePrice: 0,
         discount: 0,
+        priceAVista: 0,
         image: '',
         specifications: [],
         active: true,
@@ -135,7 +138,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
             />
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label className="block text-sm font-medium text-slate-700 mb-2">Preço Base (R$)</Label>
               <Input
@@ -159,6 +162,20 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
                 placeholder="0"
               />
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <Label className="block text-sm font-medium text-slate-700 mb-2">Preço À Vista (R$)</Label>
+              <Input
+                type="number"
+                step="0.01"
+                value={formData.priceAVista}
+                onChange={(e) => setFormData(prev => ({ ...prev, priceAVista: parseFloat(e.target.value) || 0 }))}
+                required
+                placeholder="0,00"
+              />
+            </div>
             
             <div>
               <Label className="block text-sm font-medium text-slate-700 mb-2">Preço Final (R$)</Label>
@@ -171,6 +188,35 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
               />
             </div>
           </div>
+
+          {/* Preview das Tabelas de Preço */}
+          {formData.priceAVista > 0 && (
+            <div className="bg-slate-50 rounded-lg p-4">
+              <h4 className="font-medium text-slate-800 mb-3">Preview das Tabelas de Preços</h4>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 text-sm">
+                <div className="bg-emerald-100 text-emerald-800 p-2 rounded text-center">
+                  <div className="font-medium">À Vista</div>
+                  <div>R$ {formData.priceAVista.toFixed(2).replace('.', ',')}</div>
+                </div>
+                <div className="bg-blue-100 text-blue-800 p-2 rounded text-center">
+                  <div className="font-medium">30 dias</div>
+                  <div>R$ {(formData.priceAVista * 1.02).toFixed(2).replace('.', ',')}</div>
+                </div>
+                <div className="bg-purple-100 text-purple-800 p-2 rounded text-center">
+                  <div className="font-medium">30/60</div>
+                  <div>R$ {(formData.priceAVista * 1.04).toFixed(2).replace('.', ',')}</div>
+                </div>
+                <div className="bg-orange-100 text-orange-800 p-2 rounded text-center">
+                  <div className="font-medium">30/60/90</div>
+                  <div>R$ {(formData.priceAVista * 1.06).toFixed(2).replace('.', ',')}</div>
+                </div>
+                <div className="bg-red-100 text-red-800 p-2 rounded text-center">
+                  <div className="font-medium">30/60/90/120</div>
+                  <div>R$ {(formData.priceAVista * 1.08).toFixed(2).replace('.', ',')}</div>
+                </div>
+              </div>
+            </div>
+          )}
           
           <div>
             <Label className="block text-sm font-medium text-slate-700 mb-2">URL da Imagem</Label>

@@ -35,10 +35,21 @@ export class LocalStorage {
     const id = Date.now().toString();
     const finalPrice = productData.basePrice * (1 - (productData.discount || 0) / 100);
     
+    // Calcular automaticamente as tabelas de preço baseadas no preço à vista
+    const priceAVista = productData.priceAVista;
+    const price30 = priceAVista * 1.02; // À vista + 2%
+    const price30_60 = priceAVista * 1.04; // À vista + 4%
+    const price30_60_90 = priceAVista * 1.06; // À vista + 6%
+    const price30_60_90_120 = priceAVista * 1.08; // À vista + 8%
+    
     const product: Product = {
       ...productData,
       id,
       finalPrice,
+      price30,
+      price30_60,
+      price30_60_90,
+      price30_60_90_120,
       createdAt: new Date(),
     };
 
@@ -54,8 +65,19 @@ export class LocalStorage {
     if (index === -1) return null;
 
     const updatedProduct = { ...products[index], ...productData };
+    
+    // Recalcular preço final se necessário
     if (productData.basePrice !== undefined || productData.discount !== undefined) {
       updatedProduct.finalPrice = updatedProduct.basePrice * (1 - (updatedProduct.discount || 0) / 100);
+    }
+    
+    // Recalcular tabelas de preço se o preço à vista foi alterado
+    if (productData.priceAVista !== undefined) {
+      const priceAVista = productData.priceAVista;
+      updatedProduct.price30 = priceAVista * 1.02; // À vista + 2%
+      updatedProduct.price30_60 = priceAVista * 1.04; // À vista + 4%
+      updatedProduct.price30_60_90 = priceAVista * 1.06; // À vista + 6%
+      updatedProduct.price30_60_90_120 = priceAVista * 1.08; // À vista + 8%
     }
 
     products[index] = updatedProduct;

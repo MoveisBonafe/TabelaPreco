@@ -1,6 +1,7 @@
 import { X } from 'lucide-react';
 import { Product } from '@shared/schema';
 import { Button } from '@/components/ui/button';
+import { PriceTables } from '@/components/products/price-tables';
 
 interface ProductModalProps {
   product: Product | null;
