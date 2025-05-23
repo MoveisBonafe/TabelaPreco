@@ -5,7 +5,7 @@ import { Admin } from '@/pages/admin';
 import { LoginModal } from '@/components/modals/login-modal';
 import { useToast } from '@/components/ui/toast';
 import { auth } from '@/lib/auth';
-import Navbar from './components/Navbar'; // Assuming Navbar exists
+import { Navbar } from './components/layout/navbar';
 import { Toaster } from 'react-hot-toast'; // Assuming Toaster exists and is needed
 
 import { useState, useEffect } from 'react';
