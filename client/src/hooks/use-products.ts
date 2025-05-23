@@ -55,10 +55,23 @@ export function useProducts() {
 
   const deleteProduct = async (id: string) => {
     try {
-      await storageAdapter.deleteProduct(id);
+      // Remove da interface imediatamente
       setProducts(prev => prev.filter(p => p.id !== id));
+      
+      // Remove do backend/localStorage
+      const success = await storageAdapter.deleteProduct(id);
+      
+      if (!success) {
+        // Se falhou, restaura o produto na interface
+        await loadProducts();
+        throw new Error('Falha ao excluir produto');
+      }
+      
+      console.log('✅ Produto excluído com sucesso');
     } catch (error) {
       console.error('Failed to delete product:', error);
+      // Recarrega para sincronizar estado
+      await loadProducts();
       throw error;
     }
   };

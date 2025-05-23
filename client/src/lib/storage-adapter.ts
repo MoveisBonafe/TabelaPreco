@@ -95,13 +95,17 @@ class StorageAdapter {
 
   async deleteProduct(id: string): Promise<boolean> {
     if (this.isUsingBackend) {
+      console.log(`🗑️ Excluindo produto ${id} do banco...`);
       const response = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      console.log(`✅ Produto ${id} excluído:`, response.ok);
       return response.ok;
     } else {
+      console.log(`🗑️ Excluindo produto ${id} do localStorage...`);
       const products = await this.getProducts();
       const filtered = products.filter(p => p.id !== id);
       localStorage.setItem(PRODUCTS_KEY, JSON.stringify(filtered));
       this.markDataChanged();
+      console.log(`✅ Produto ${id} excluído do localStorage`);
       return true;
     }
   }
