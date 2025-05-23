@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import NotFound from './pages/not-found';
 import { Catalog } from '@/pages/catalog';
 import { Admin } from '@/pages/admin';
 import { LoginModal } from '@/components/modals/login-modal';
 import { useToast } from '@/components/ui/toast';
 import { auth } from '@/lib/auth';
+import Navbar from './components/Navbar'; // Assuming Navbar exists
+import { Toaster } from 'react-hot-toast'; // Assuming Toaster exists and is needed
+
+import { useState, useEffect } from 'react';
 
 type View = 'login' | 'catalog' | 'admin';
 
@@ -52,28 +57,41 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
-      {currentView === 'login' && (
-        <LoginModal
-          onAdminLogin={handleAdminLogin}
-          onPublicView={handleShowCatalog}
-          isVisible={true}
-        />
-      )}
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
+      <Navbar />
+      <main className="container mx-auto px-4 py-8">
+        <Routes>
+          <Route path="/" element={<Navigate to="/catalog" replace />} />
+          <Route path="/catalog" element={<Catalog />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
+      <Toaster />
+        <div className="min-h-screen">
+        {/* Keeping the original logic and rendering it conditionally inside the router based application. */}
+          {currentView === 'login' && (
+            <LoginModal
+              onAdminLogin={handleAdminLogin}
+              onPublicView={handleShowCatalog}
+              isVisible={true}
+            />
+          )}
 
-      {currentView === 'catalog' && (
-        <Catalog onShowAdminLogin={handleShowLogin} />
-      )}
+          {currentView === 'catalog' && (
+            <Catalog onShowAdminLogin={handleShowLogin} />
+          )}
 
-      {currentView === 'admin' && (
-        <Admin 
-          onLogout={handleLogout}
-          onShowPublicView={handleShowCatalog}
-        />
-      )}
+          {currentView === 'admin' && (
+            <Admin 
+              onLogout={handleLogout}
+              onShowPublicView={handleShowCatalog}
+            />
+          )}
 
-      <ToastContainer />
-    </div>
+          <ToastContainer />
+        </div>
+    </BrowserRouter>
   );
 }
 

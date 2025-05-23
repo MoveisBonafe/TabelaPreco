@@ -34,7 +34,7 @@ export class LocalStorage {
     const products = this.getProducts();
     const id = Date.now().toString();
     const finalPrice = productData.basePrice * (1 - (productData.discount || 0) / 100);
-    
+
     // Calcular automaticamente as tabelas de preço baseadas no preço à vista
     const priceAVista = productData.priceAVista;
     // Se preço fixo, todas as tabelas têm o mesmo valor
@@ -42,7 +42,7 @@ export class LocalStorage {
     const price30_60 = productData.fixedPrice ? priceAVista : priceAVista * 1.04;
     const price30_60_90 = productData.fixedPrice ? priceAVista : priceAVista * 1.06;
     const price30_60_90_120 = productData.fixedPrice ? priceAVista : priceAVista * 1.08;
-    
+
     const product: Product = {
       ...productData,
       id,
@@ -62,21 +62,21 @@ export class LocalStorage {
   updateProduct(id: string, productData: Partial<InsertProduct>): Product | null {
     const products = this.getProducts();
     const index = products.findIndex(p => p.id === id);
-    
+
     if (index === -1) return null;
 
     const updatedProduct = { ...products[index], ...productData };
-    
+
     // Recalcular preço final se necessário
     if (productData.basePrice !== undefined || productData.discount !== undefined) {
       updatedProduct.finalPrice = updatedProduct.basePrice * (1 - (updatedProduct.discount || 0) / 100);
     }
-    
+
     // Recalcular tabelas de preço se o preço à vista foi alterado ou fixedPrice mudou
     if (productData.priceAVista !== undefined || productData.fixedPrice !== undefined) {
       const priceAVista = updatedProduct.priceAVista;
       const isFixedPrice = updatedProduct.fixedPrice;
-      
+
       // Se preço fixo, todas as tabelas têm o mesmo valor
       updatedProduct.price30 = isFixedPrice ? priceAVista : priceAVista * 1.02;
       updatedProduct.price30_60 = isFixedPrice ? priceAVista : priceAVista * 1.04;
@@ -92,9 +92,9 @@ export class LocalStorage {
   deleteProduct(id: string): boolean {
     const products = this.getProducts();
     const filteredProducts = products.filter(p => p.id !== id);
-    
+
     if (filteredProducts.length === products.length) return false;
-    
+
     this.saveToStorage(STORAGE_KEYS.PRODUCTS, filteredProducts);
     return true;
   }
@@ -107,7 +107,7 @@ export class LocalStorage {
   saveCategory(categoryData: InsertCategory): Category {
     const categories = this.getCategories();
     const id = Date.now().toString();
-    
+
     const category: Category = {
       ...categoryData,
       id,
@@ -122,7 +122,7 @@ export class LocalStorage {
   updateCategory(id: string, categoryData: Partial<InsertCategory>): Category | null {
     const categories = this.getCategories();
     const index = categories.findIndex(c => c.id === id);
-    
+
     if (index === -1) return null;
 
     categories[index] = { ...categories[index], ...categoryData };
@@ -133,9 +133,9 @@ export class LocalStorage {
   deleteCategory(id: string): boolean {
     const categories = this.getCategories();
     const filteredCategories = categories.filter(c => c.id !== id);
-    
+
     if (filteredCategories.length === categories.length) return false;
-    
+
     this.saveToStorage(STORAGE_KEYS.CATEGORIES, filteredCategories);
     return true;
   }
@@ -175,7 +175,7 @@ export class LocalStorage {
   updateCategoryProductCounts(): void {
     const products = this.getProducts();
     const categories = this.getCategories();
-    
+
     const updatedCategories = categories.map(category => ({
       ...category,
       productCount: products.filter(p => p.category === category.name && p.active).length,
@@ -186,3 +186,19 @@ export class LocalStorage {
 }
 
 export const storage = new LocalStorage();
+
+export function loadFromLocalStorage() {
+  try {
+    const data = localStorage.getItem('catalog-products');
+    if (!data) {
+      console.log('No products found in localStorage');
+      return [];
+    }
+    const products = JSON.parse(data);
+    console.log(`Loaded ${products.length} products from localStorage`);
+    return products;
+  } catch (error) {
+    console.error('Error loading from localStorage:', error);
+    return [];
+  }
+}
