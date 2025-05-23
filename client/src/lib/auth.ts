@@ -5,6 +5,12 @@ export interface AuthState {
   user?: {
     username: string;
     role: 'admin';
+    permissions: {
+      canEditProducts: boolean;
+      canViewPrices: boolean;
+      canEditPrices: boolean;
+      priceLevel: 'basic' | 'premium' | 'vip'; // Controla quais preços o usuário vê
+    };
   };
 }
 
@@ -27,13 +33,45 @@ export class AuthManager {
   }
 
   login(username: string, password: string): boolean {
-    // Simple admin login - in production this would validate against a real backend
-    if (username === 'MoveisBonafe' && password === 'Bonafe1108') {
+    // Sistema de usuários com diferentes permissões
+    const users = {
+      'MoveisBonafe': {
+        password: 'Bonafe1108',
+        permissions: {
+          canEditProducts: true,
+          canViewPrices: true,
+          canEditPrices: true,
+          priceLevel: 'vip' as const
+        }
+      },
+      'Vendedor1': {
+        password: 'vend123',
+        permissions: {
+          canEditProducts: false,
+          canViewPrices: true,
+          canEditPrices: false,
+          priceLevel: 'premium' as const
+        }
+      },
+      'Vendedor2': {
+        password: 'vend456',
+        permissions: {
+          canEditProducts: false,
+          canViewPrices: true,
+          canEditPrices: false,
+          priceLevel: 'basic' as const
+        }
+      }
+    };
+
+    const user = users[username as keyof typeof users];
+    if (user && user.password === password) {
       const authState: AuthState = {
         isAuthenticated: true,
         user: {
           username: username,
           role: 'admin',
+          permissions: user.permissions,
         },
       };
       this.saveAuthState(authState);

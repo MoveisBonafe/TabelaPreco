@@ -10,6 +10,7 @@ import { ProductModal } from '@/components/modals/product-modal';
 import { useProducts } from '@/hooks/use-products';
 import { useCategories } from '@/hooks/use-categories';
 import { useToast } from '@/components/ui/toast';
+import { auth } from '@/lib/auth';
 
 interface AdminProps {
   onLogout: () => void;

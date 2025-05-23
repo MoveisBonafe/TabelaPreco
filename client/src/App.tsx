@@ -16,7 +16,7 @@ function App() {
     if (auth.isAuthenticated()) {
       setCurrentView('admin');
     } else {
-      setCurrentView('catalog');
+      setCurrentView('login'); // Sempre mostra login primeiro
     }
   }, []);
 

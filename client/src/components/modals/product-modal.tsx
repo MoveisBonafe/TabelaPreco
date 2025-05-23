@@ -1,7 +1,8 @@
 import { X } from 'lucide-react';
 import { Product } from '@shared/schema';
 import { Button } from '@/components/ui/button';
-import { PriceTables } from '@/components/products/price-tables';
+import { PriceDisplay } from '@/components/products/price-display';
+import { auth } from '@/lib/auth';
 
 interface ProductModalProps {
   product: Product | null;
@@ -41,7 +42,7 @@ export function ProductModal({ product, isVisible, onClose }: ProductModalProps)
             
             {/* Tabelas de Preços */}
             <div className="border-t border-slate-200 pt-6">
-              <PriceTables product={product} />
+              <PriceDisplay product={product} userAuth={auth.getUser()} />
             </div>
             
             {product.specifications && product.specifications.length > 0 && (
