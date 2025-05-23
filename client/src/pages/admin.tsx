@@ -1,0 +1,130 @@
+import { useState } from 'react';
+import { Product, InsertProduct, InsertCategory } from '@shared/schema';
+import { Navbar } from '@/components/layout/navbar';
+import { AdminTabs } from '@/components/admin/admin-tabs';
+import { ProductsTab } from '@/components/admin/products-tab';
+import { CategoriesTab } from '@/components/admin/categories-tab';
+import { PricingTab } from '@/components/admin/pricing-tab';
+import { ProductModal } from '@/components/modals/product-modal';
+import { useProducts } from '@/hooks/use-products';
+import { useCategories } from '@/hooks/use-categories';
+import { useToast } from '@/components/ui/toast';
+
+interface AdminProps {
+  onLogout: () => void;
+  onShowPublicView: () => void;
+}
+
+export function Admin({ onLogout, onShowPublicView }: AdminProps) {
+  const { products, createProduct, updateProduct, deleteProduct } = useProducts();
+  const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
+  const { showToast, ToastContainer } = useToast();
+  const [activeTab, setActiveTab] = useState('products');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+
+  const handleCreateProduct = (productData: InsertProduct) => {
+    try {
+      createProduct(productData);
+      showToast('Produto criado com sucesso!');
+    } catch (error) {
+      showToast('Erro ao criar produto', 'error');
+    }
+  };
+
+  const handleUpdateProduct = (id: string, productData: Partial<InsertProduct>) => {
+    try {
+      updateProduct(id, productData);
+      showToast('Produto atualizado com sucesso!');
+    } catch (error) {
+      showToast('Erro ao atualizar produto', 'error');
+    }
+  };
+
+  const handleDeleteProduct = (id: string) => {
+    try {
+      deleteProduct(id);
+      showToast('Produto excluído com sucesso!');
+    } catch (error) {
+      showToast('Erro ao excluir produto', 'error');
+    }
+  };
+
+  const handleCreateCategory = (categoryData: InsertCategory) => {
+    try {
+      createCategory(categoryData);
+      showToast('Categoria criada com sucesso!');
+    } catch (error) {
+      showToast('Erro ao criar categoria', 'error');
+    }
+  };
+
+  const handleUpdateCategory = (id: string, categoryData: Partial<InsertCategory>) => {
+    try {
+      updateCategory(id, categoryData);
+      showToast('Categoria atualizada com sucesso!');
+    } catch (error) {
+      showToast('Erro ao atualizar categoria', 'error');
+    }
+  };
+
+  const handleDeleteCategory = (id: string) => {
+    try {
+      deleteCategory(id);
+      showToast('Categoria excluída com sucesso!');
+    } catch (error) {
+      showToast('Erro ao excluir categoria', 'error');
+    }
+  };
+
+  const handleViewProduct = (product: Product) => {
+    setSelectedProduct(product);
+    setIsProductModalOpen(true);
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <Navbar
+        isAdmin={true}
+        onLogout={onLogout}
+        onShowPublicView={onShowPublicView}
+      />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <AdminTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+        {activeTab === 'products' && (
+          <ProductsTab
+            products={products}
+            onCreateProduct={handleCreateProduct}
+            onUpdateProduct={handleUpdateProduct}
+            onDeleteProduct={handleDeleteProduct}
+            onViewProduct={handleViewProduct}
+          />
+        )}
+
+        {activeTab === 'categories' && (
+          <CategoriesTab
+            categories={categories}
+            onCreateCategory={handleCreateCategory}
+            onUpdateCategory={handleUpdateCategory}
+            onDeleteCategory={handleDeleteCategory}
+          />
+        )}
+
+        {activeTab === 'pricing' && (
+          <PricingTab products={products} />
+        )}
+      </div>
+
+      {/* Product Detail Modal */}
+      <ProductModal
+        product={selectedProduct}
+        isVisible={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+      />
+
+      <ToastContainer />
+    </div>
+  );
+}
