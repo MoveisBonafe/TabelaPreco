@@ -102,15 +102,27 @@ export function CategoriesTab({
             </div>
             <h3 className="font-semibold text-slate-800 mb-2">{category.name}</h3>
             <p className="text-slate-600 text-sm mb-4">{category.description}</p>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">{category.productCount} produtos</span>
-              <span className={`px-2 py-1 rounded-full text-xs ${
-                category.active 
-                  ? 'bg-emerald-100 text-emerald-800' 
-                  : 'bg-red-100 text-red-800'
-              }`}>
-                {category.active ? 'Ativa' : 'Inativa'}
-              </span>
+            <div className="mt-4 space-y-2">
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-slate-500">{category.productCount} produtos</span>
+                <span className={`px-2 py-1 rounded-full text-xs ${
+                  category.active 
+                    ? 'bg-emerald-100 text-emerald-800' 
+                    : 'bg-red-100 text-red-800'
+                }`}>
+                  {category.active ? 'Ativa' : 'Inativa'}
+                </span>
+              </div>
+              <div className="border-t pt-2">
+                <div className="text-sm font-medium text-slate-700 mb-1">Produtos nesta categoria:</div>
+                <div className="max-h-32 overflow-y-auto">
+                  {products.filter(p => p.category === category.name).map(product => (
+                    <div key={product.id} className="text-sm text-slate-600 py-1 px-2 hover:bg-slate-50 rounded">
+                      {product.name}
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         ))}

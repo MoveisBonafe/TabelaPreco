@@ -56,7 +56,7 @@ export function ProductsTab({
     });
 
   const handleEdit = (product: Product) => {
-    setEditingProduct(product);
+    setEditingProduct({...product});
     setIsFormModalOpen(true);
   };
 
