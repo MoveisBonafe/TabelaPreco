@@ -136,16 +136,20 @@ export function ExcelImportExport({
         try {
           // Buscar apenas nome e preço - campos obrigatórios
           const name = row['Nome'] || row['nome'] || row['Name'] || row['NOME'] || row['Produto'] || '';
-          const price = parseFloat(row['Preço'] || row['preco'] || row['Price'] || row['PREÇO'] || row['Valor'] || '0');
+          const priceValue = row['Preço'] || row['preco'] || row['Price'] || row['PREÇO'] || row['Valor'];
+          const price = parseFloat(String(priceValue).replace(',', '.')) || 0;
+
+          // Debug: log da linha para identificar problemas
+          console.log(`Linha ${index + 2}:`, { name, priceValue, price, row });
 
           // Validações simples - apenas nome e preço
-          if (!name.trim()) {
-            errors.push(`Linha ${index + 2}: Nome é obrigatório`);
+          if (!name || !String(name).trim()) {
+            errors.push(`Linha ${index + 2}: Nome é obrigatório (encontrado: "${name}")`);
             return;
           }
 
-          if (price <= 0) {
-            errors.push(`Linha ${index + 2}: Preço deve ser maior que zero`);
+          if (!priceValue || price <= 0 || isNaN(price)) {
+            errors.push(`Linha ${index + 2}: Preço inválido (encontrado: "${priceValue}")`);
             return;
           }
 
@@ -336,20 +340,21 @@ export function ExcelImportExport({
     let sheetName = '';
 
     if (type === 'products') {
-      templateData = [{
-        'Nome': 'Exemplo Produto',
-        'Descrição': 'Descrição do produto exemplo',
-        'Categoria': 'Eletrônicos',
-        'Preço Base': 100.00,
-        'Desconto (%)': 10,
-        'Preço Final': 90.00,
-        'Preço À Vista': 85.00,
-        'URL da Imagem': 'https://exemplo.com/imagem.jpg',
-        'Especificações': 'Especificação 1; Especificação 2',
-        'Ativo': 'Sim',
-        'Data de Criação': new Date().toLocaleDateString('pt-BR')
-      }];
-      sheetName = 'Produtos';
+      templateData = [
+        {
+          'Nome': 'Mesa de Jantar',
+          'Preço': 850.00
+        },
+        {
+          'Nome': 'Cadeira Estofada',
+          'Preço': 320.00
+        },
+        {
+          'Nome': 'Sofá 3 Lugares',
+          'Preço': 1200.00
+        }
+      ];
+      sheetName = 'Modelo_Produtos';
     } else {
       templateData = [{
         'Nome': 'Exemplo Categoria',
@@ -451,22 +456,26 @@ export function ExcelImportExport({
               )}
             </div>
             
-            <div className="text-sm text-slate-600">
-              <p className="font-medium mb-2">Modelos disponíveis:</p>
-              <div className="flex gap-2">
+            <div className="text-sm text-slate-600 space-y-3">
+              <div>
+                <p className="font-medium mb-2">📋 Como criar sua planilha:</p>
+                <ul className="text-xs space-y-1 text-slate-600">
+                  <li>• Coluna A: <strong>Nome</strong> (nome do produto)</li>
+                  <li>• Coluna B: <strong>Preço</strong> (valor numérico)</li>
+                  <li>• Use ponto ou vírgula para decimais (ex: 150.50 ou 150,50)</li>
+                  <li>• Não use símbolos de moeda (R$, $)</li>
+                </ul>
+              </div>
+              
+              <div>
+                <p className="font-medium mb-2">📥 Baixar modelo pronto:</p>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => downloadTemplate('products')}
+                  className="w-full"
                 >
-                  Modelo Produtos
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => downloadTemplate('categories')}
-                >
-                  Modelo Categorias
+                  📄 Baixar Modelo Excel
                 </Button>
               </div>
             </div>
