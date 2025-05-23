@@ -28,11 +28,11 @@ export class AuthManager {
 
   login(username: string, password: string): boolean {
     // Simple admin login - in production this would validate against a real backend
-    if (username === 'admin' || password === 'admin') {
+    if (username === 'MoveisBonafe' && password === 'Bonafe1108') {
       const authState: AuthState = {
         isAuthenticated: true,
         user: {
-          username: username || 'admin',
+          username: username,
           role: 'admin',
         },
       };
