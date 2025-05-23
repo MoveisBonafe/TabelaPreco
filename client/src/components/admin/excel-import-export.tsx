@@ -275,13 +275,38 @@ export function ExcelImportExport({
       return;
     }
 
-    // Importar produtos
-    onImportProducts(validProducts);
-    setImportResult({
-      success: true,
-      message: `${validProducts.length} produtos importados com sucesso!`,
-      count: validProducts.length
-    });
+    // Importar produtos usando a nova rota que evita duplicação
+    try {
+      const response = await fetch('/api/products/bulk-import', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ products: validProducts }),
+      });
+
+      const result = await response.json();
+      
+      if (response.ok) {
+        setImportResult({
+          success: true,
+          message: result.message,
+          count: result.products.length
+        });
+        // Atualizar a lista de produtos no frontend
+        onImportProducts(result.products);
+      } else {
+        setImportResult({
+          success: false,
+          message: result.message || 'Erro na importação'
+        });
+      }
+    } catch (error) {
+      setImportResult({
+        success: false,
+        message: 'Erro de conexão durante a importação'
+      });
+    }
   };
 
   // Importar categorias do Excel
