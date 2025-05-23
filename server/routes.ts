@@ -2,6 +2,8 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertProductSchema, insertCategorySchema, insertUserSchema } from "@shared/schema";
+import { supabaseLogger, testSupabaseConnection } from "./supabase-logger";
+import { getConnectionStatus } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth routes
@@ -89,6 +91,82 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error creating category:", error);
       res.status(500).json({ message: "Failed to create category" });
+    }
+  });
+
+  // Rotas de monitoramento do Supabase
+  app.get("/api/supabase/status", async (req, res) => {
+    try {
+      const status = getConnectionStatus();
+      res.json({
+        ...status,
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+      });
+    } catch (error) {
+      console.error("Error getting Supabase status:", error);
+      res.status(500).json({ message: "Falha ao obter status do Supabase" });
+    }
+  });
+
+  app.get("/api/supabase/logs", async (req, res) => {
+    try {
+      const stats = supabaseLogger.getConnectionStats();
+      const recentErrors = supabaseLogger.getRecentErrors(10);
+      
+      res.json({
+        statistics: stats,
+        recentErrors,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error getting Supabase logs:", error);
+      res.status(500).json({ message: "Falha ao obter logs do Supabase" });
+    }
+  });
+
+  app.post("/api/supabase/test", async (req, res) => {
+    try {
+      const { connectionString } = req.body;
+      
+      if (!connectionString) {
+        return res.status(400).json({ message: "String de conexão é obrigatória" });
+      }
+
+      console.log('🧪 Testando conexão manual com Supabase...');
+      const success = await testSupabaseConnection(connectionString);
+      
+      res.json({
+        success,
+        message: success ? "Conexão bem-sucedida!" : "Falha na conexão",
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error testing Supabase connection:", error);
+      res.status(500).json({ message: "Erro ao testar conexão" });
+    }
+  });
+
+  app.get("/api/supabase/health-report", async (req, res) => {
+    try {
+      const report = supabaseLogger.generateHealthReport();
+      res.json({
+        report,
+        generatedAt: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error generating health report:", error);
+      res.status(500).json({ message: "Falha ao gerar relatório de saúde" });
+    }
+  });
+
+  app.delete("/api/supabase/clear-logs", async (req, res) => {
+    try {
+      supabaseLogger.clearOldLogs();
+      res.json({ message: "Logs limpos com sucesso!" });
+    } catch (error) {
+      console.error("Error clearing logs:", error);
+      res.status(500).json({ message: "Falha ao limpar logs" });
     }
   });
 

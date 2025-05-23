@@ -1,180 +1,254 @@
-// Sistema de log detalhado para conexões Supabase
-import { Pool } from 'pg';
+import { Pool } from '@neondatabase/serverless';
 
-interface ConnectionAttempt {
+interface ConnectionError {
   timestamp: Date;
-  success: boolean;
-  error?: string;
-  duration: number;
+  error: string;
+  details: any;
   connectionString?: string;
-  retryCount: number;
+  retryAttempt?: number;
+}
+
+interface ConnectionStats {
+  totalAttempts: number;
+  successfulConnections: number;
+  failedConnections: number;
+  lastSuccessfulConnection?: Date;
+  lastFailedConnection?: Date;
+  averageResponseTime: number;
+  errorTypes: { [key: string]: number };
 }
 
 class SupabaseLogger {
-  private attempts: ConnectionAttempt[] = [];
-  private maxAttempts = 100; // Mantém os últimos 100 logs
+  private connectionErrors: ConnectionError[] = [];
+  private connectionStats: ConnectionStats = {
+    totalAttempts: 0,
+    successfulConnections: 0,
+    failedConnections: 0,
+    averageResponseTime: 0,
+    errorTypes: {}
+  };
+  private responseTimes: number[] = [];
 
-  logConnectionAttempt(attempt: ConnectionAttempt) {
-    this.attempts.push(attempt);
-    
-    // Mantém apenas os logs mais recentes
-    if (this.attempts.length > this.maxAttempts) {
-      this.attempts = this.attempts.slice(-this.maxAttempts);
-    }
-
-    // Log detalhado no console
-    const status = attempt.success ? '✅ SUCESSO' : '❌ FALHA';
-    const duration = `${attempt.duration}ms`;
-    const host = this.extractHost(attempt.connectionString);
-    
-    console.log(`🔗 [SUPABASE] ${status} - ${host} (${duration})`);
-    
-    if (!attempt.success && attempt.error) {
-      console.error(`   Erro: ${attempt.error}`);
-      console.error(`   Tentativa: ${attempt.retryCount}`);
-    }
-  }
-
-  private extractHost(connectionString?: string): string {
-    if (!connectionString) return 'host desconhecido';
-    try {
-      const match = connectionString.match(/@([^:]+)/);
-      return match ? match[1] : 'host não identificado';
-    } catch {
-      return 'host inválido';
-    }
-  }
-
-  getConnectionStats() {
-    const total = this.attempts.length;
-    const successful = this.attempts.filter(a => a.success).length;
-    const failed = total - successful;
-    const successRate = total > 0 ? (successful / total * 100).toFixed(1) : '0';
-    
-    const lastAttempt = this.attempts[this.attempts.length - 1];
-    const avgDuration = this.attempts.length > 0 
-      ? Math.round(this.attempts.reduce((sum, a) => sum + a.duration, 0) / this.attempts.length)
-      : 0;
-
-    return {
-      total,
-      successful,
-      failed,
-      successRate: `${successRate}%`,
-      lastAttempt: lastAttempt?.timestamp,
-      lastSuccess: this.attempts.findLast(a => a.success)?.timestamp,
-      avgDuration: `${avgDuration}ms`,
-      recentErrors: this.getRecentErrors()
+  // Log de erro de conexão
+  logConnectionError(error: any, connectionString?: string, retryAttempt?: number) {
+    const connectionError: ConnectionError = {
+      timestamp: new Date(),
+      error: error.message || String(error),
+      details: {
+        name: error.name,
+        code: error.code,
+        severity: error.severity,
+        detail: error.detail,
+        hint: error.hint,
+        position: error.position,
+        internalPosition: error.internalPosition,
+        internalQuery: error.internalQuery,
+        where: error.where,
+        schema: error.schema,
+        table: error.table,
+        column: error.column,
+        dataType: error.dataType,
+        constraint: error.constraint,
+        file: error.file,
+        line: error.line,
+        routine: error.routine
+      },
+      connectionString: connectionString ? this.sanitizeConnectionString(connectionString) : undefined,
+      retryAttempt
     };
+
+    this.connectionErrors.push(connectionError);
+    
+    // Manter apenas os últimos 100 erros
+    if (this.connectionErrors.length > 100) {
+      this.connectionErrors = this.connectionErrors.slice(-100);
+    }
+
+    // Atualizar estatísticas
+    this.updateErrorStats(error);
+    
+    console.error('🔴 [Supabase] Erro de conexão:', {
+      timestamp: connectionError.timestamp.toISOString(),
+      error: connectionError.error,
+      code: error.code,
+      retryAttempt: retryAttempt || 'N/A'
+    });
   }
 
-  getRecentErrors(limit = 5) {
-    return this.attempts
-      .filter(a => !a.success)
-      .slice(-limit)
-      .map(a => ({
-        timestamp: a.timestamp,
-        error: a.error,
-        retryCount: a.retryCount
-      }));
+  // Log de conexão bem-sucedida
+  logSuccessfulConnection(responseTime: number) {
+    this.connectionStats.totalAttempts++;
+    this.connectionStats.successfulConnections++;
+    this.connectionStats.lastSuccessfulConnection = new Date();
+    
+    this.responseTimes.push(responseTime);
+    
+    // Manter apenas os últimos 50 tempos de resposta
+    if (this.responseTimes.length > 50) {
+      this.responseTimes = this.responseTimes.slice(-50);
+    }
+    
+    // Calcular tempo médio de resposta
+    this.connectionStats.averageResponseTime = 
+      this.responseTimes.reduce((sum, time) => sum + time, 0) / this.responseTimes.length;
+    
+    console.log('🟢 [Supabase] Conexão bem-sucedida:', {
+      responseTime: `${responseTime}ms`,
+      averageResponseTime: `${Math.round(this.connectionStats.averageResponseTime)}ms`
+    });
   }
 
+  // Log de tentativa de conexão
+  logConnectionAttempt() {
+    this.connectionStats.totalAttempts++;
+    console.log('🔄 [Supabase] Tentativa de conexão...', {
+      attempt: this.connectionStats.totalAttempts,
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // Atualizar estatísticas de erro
+  private updateErrorStats(error: any) {
+    this.connectionStats.failedConnections++;
+    this.connectionStats.lastFailedConnection = new Date();
+    
+    const errorType = error.code || error.name || 'UNKNOWN_ERROR';
+    this.connectionStats.errorTypes[errorType] = (this.connectionStats.errorTypes[errorType] || 0) + 1;
+  }
+
+  // Sanitizar string de conexão para logs
+  private sanitizeConnectionString(connectionString: string): string {
+    return connectionString.replace(/:[^:@]+@/, ':***@');
+  }
+
+  // Obter erros recentes
+  getRecentErrors(limit: number = 10): ConnectionError[] {
+    return this.connectionErrors.slice(-limit);
+  }
+
+  // Obter estatísticas de conexão
+  getConnectionStats(): ConnectionStats {
+    return { ...this.connectionStats };
+  }
+
+  // Gerar relatório de saúde
   generateHealthReport() {
     const stats = this.getConnectionStats();
+    const recentErrors = this.getRecentErrors(5);
     
-    console.log('\n📊 === RELATÓRIO DE SAÚDE SUPABASE ===');
-    console.log(`📈 Taxa de sucesso: ${stats.successRate}`);
-    console.log(`🔢 Total de tentativas: ${stats.total}`);
-    console.log(`✅ Sucessos: ${stats.successful}`);
-    console.log(`❌ Falhas: ${stats.failed}`);
-    console.log(`⏱️  Duração média: ${stats.avgDuration}`);
-    console.log(`🕐 Última tentativa: ${stats.lastAttempt?.toLocaleString()}`);
-    console.log(`🎯 Último sucesso: ${stats.lastSuccess?.toLocaleString() || 'Nunca'}`);
+    const successRate = stats.totalAttempts > 0 
+      ? ((stats.successfulConnections / stats.totalAttempts) * 100).toFixed(2)
+      : '0';
     
-    if (stats.recentErrors.length > 0) {
-      console.log('\n🚨 Erros recentes:');
-      stats.recentErrors.forEach((error, index) => {
-        console.log(`   ${index + 1}. ${error.timestamp.toLocaleTimeString()}: ${error.error}`);
-      });
+    const report = {
+      health: {
+        status: stats.failedConnections === 0 ? 'HEALTHY' : 
+                stats.successfulConnections > stats.failedConnections ? 'WARNING' : 'CRITICAL',
+        successRate: `${successRate}%`,
+        totalAttempts: stats.totalAttempts,
+        lastConnection: stats.lastSuccessfulConnection?.toISOString() || 'Never',
+        averageResponseTime: `${Math.round(stats.averageResponseTime)}ms`
+      },
+      errors: {
+        totalErrors: stats.failedConnections,
+        lastError: stats.lastFailedConnection?.toISOString() || 'None',
+        errorTypes: stats.errorTypes,
+        recentErrors: recentErrors.map(err => ({
+          timestamp: err.timestamp.toISOString(),
+          error: err.error,
+          code: err.details.code
+        }))
+      },
+      recommendations: this.generateRecommendations(stats)
+    };
+
+    return report;
+  }
+
+  // Gerar recomendações baseadas nos erros
+  private generateRecommendations(stats: ConnectionStats): string[] {
+    const recommendations: string[] = [];
+    
+    if (stats.failedConnections > stats.successfulConnections) {
+      recommendations.push('🔧 Alta taxa de falhas - verifique a string de conexão do Supabase');
     }
     
-    console.log('=====================================\n');
+    if (stats.averageResponseTime > 5000) {
+      recommendations.push('⚡ Tempo de resposta alto - considere otimizar queries ou verificar rede');
+    }
     
-    return stats;
+    if (stats.errorTypes['ENOTFOUND']) {
+      recommendations.push('🌐 Erros de DNS - verifique a URL do Supabase');
+    }
+    
+    if (stats.errorTypes['ECONNREFUSED'] || stats.errorTypes['ETIMEDOUT']) {
+      recommendations.push('🔒 Problemas de conectividade - verifique firewall e proxy');
+    }
+    
+    if (stats.errorTypes['INVALID_AUTHORIZATION_SPECIFICATION']) {
+      recommendations.push('🔑 Problemas de autenticação - verifique credenciais do Supabase');
+    }
+    
+    if (recommendations.length === 0) {
+      recommendations.push('✅ Sistema funcionando corretamente');
+    }
+    
+    return recommendations;
+  }
+
+  // Limpar logs antigos
+  clearOldLogs() {
+    this.connectionErrors = [];
+    this.connectionStats = {
+      totalAttempts: 0,
+      successfulConnections: 0,
+      failedConnections: 0,
+      averageResponseTime: 0,
+      errorTypes: {}
+    };
+    this.responseTimes = [];
+    
+    console.log('🧹 [Supabase] Logs limpos');
   }
 }
 
+// Instância singleton
 export const supabaseLogger = new SupabaseLogger();
 
-// Função para testar conexão com logs detalhados
-export async function testSupabaseConnection(connectionString: string, retryCount = 0): Promise<boolean> {
+// Função para testar conexão com Supabase
+export async function testSupabaseConnection(connectionString: string): Promise<boolean> {
   const startTime = Date.now();
+  supabaseLogger.logConnectionAttempt();
   
   try {
-    const pool = new Pool({ 
-      connectionString,
-      ssl: { rejectUnauthorized: false },
-      connectionTimeoutMillis: 5000, // 5 segundos timeout
-      idleTimeoutMillis: 10000, // 10 segundos idle
-    });
-
-    // Testa a conexão
+    const pool = new Pool({ connectionString });
     const client = await pool.connect();
+    
+    // Teste simples de query
     await client.query('SELECT 1');
     client.release();
-    await pool.end();
-
-    const duration = Date.now() - startTime;
     
-    supabaseLogger.logConnectionAttempt({
-      timestamp: new Date(),
-      success: true,
-      duration,
-      connectionString,
-      retryCount
-    });
-
+    const responseTime = Date.now() - startTime;
+    supabaseLogger.logSuccessfulConnection(responseTime);
+    
     return true;
   } catch (error) {
-    const duration = Date.now() - startTime;
-    const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
-    
-    supabaseLogger.logConnectionAttempt({
-      timestamp: new Date(),
-      success: false,
-      error: errorMessage,
-      duration,
-      connectionString,
-      retryCount
-    });
-
+    supabaseLogger.logConnectionError(error, connectionString);
     return false;
   }
 }
 
-// Função para reconectar com retry automático
-export async function reconnectWithRetry(connectionString: string, maxRetries = 3): Promise<Pool | null> {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    console.log(`🔄 Tentativa ${attempt}/${maxRetries} de conexão com Supabase...`);
-    
-    const success = await testSupabaseConnection(connectionString, attempt);
-    
-    if (success) {
-      console.log('🎉 Conexão com Supabase estabelecida com sucesso!');
-      return new Pool({ 
-        connectionString,
-        ssl: { rejectUnauthorized: false }
-      });
-    }
-    
-    if (attempt < maxRetries) {
-      const delay = attempt * 2000; // Delay crescente: 2s, 4s, 6s
-      console.log(`⏳ Aguardando ${delay/1000}s antes da próxima tentativa...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
+// Função para monitorar conexão em intervalo
+export function startConnectionMonitoring(connectionString: string, intervalMs: number = 60000) {
+  console.log('🔍 [Supabase] Iniciando monitoramento de conexão...');
   
-  console.log('💥 Falha ao conectar com Supabase após todas as tentativas');
-  supabaseLogger.generateHealthReport();
-  return null;
+  const monitor = setInterval(async () => {
+    await testSupabaseConnection(connectionString);
+  }, intervalMs);
+  
+  // Cleanup function
+  return () => {
+    clearInterval(monitor);
+    console.log('🛑 [Supabase] Monitoramento de conexão parado');
+  };
 }

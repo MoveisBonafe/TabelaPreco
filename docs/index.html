@@ -580,6 +580,23 @@
                     if (target.matches('[data-action="optimize-storage"]')) {
                         this.optimizeStorage();
                     }
+                    
+                    // Ações do Monitor Supabase
+                    if (target.matches('[data-action="refresh-connection-status"]')) {
+                        this.refreshConnectionStatus();
+                    }
+                    if (target.matches('[data-action="refresh-error-logs"]')) {
+                        this.refreshErrorLogs();
+                    }
+                    if (target.matches('[data-action="clear-supabase-logs"]')) {
+                        this.clearSupabaseLogs();
+                    }
+                    if (target.matches('[data-action="generate-health-report"]')) {
+                        this.generateHealthReport();
+                    }
+                    if (target.matches('[data-action="test-supabase-connection"]')) {
+                        this.testSupabaseConnection();
+                    }
                 });
 
                 document.addEventListener('submit', (e) => {
@@ -1607,6 +1624,83 @@
                 const lastUpdate = localStorage.getItem('lastUpdate') || new Date().toLocaleDateString('pt-BR');
                 
                 return `
+                    <div class="page-header">
+                        <h1 class="page-title">Monitor Supabase</h1>
+                        <p class="page-description">Logs detalhados de conexão e diagnóstico em tempo real</p>
+                    </div>
+
+                    <!-- Status da Conexão em Tempo Real -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">🔗 Status da Conexão</h3>
+                            <button class="btn btn-secondary" data-action="refresh-connection-status">
+                                🔄 Atualizar
+                            </button>
+                        </div>
+                        <div id="connection-status" style="padding: 1rem;">
+                            <div style="text-align: center; color: #64748b;">
+                                Carregando status da conexão...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Logs de Erros Recentes -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">📋 Logs de Erros Recentes</h3>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary" data-action="refresh-error-logs">
+                                    🔄 Atualizar Logs
+                                </button>
+                                <button class="btn btn-danger" data-action="clear-supabase-logs">
+                                    🗑️ Limpar Logs
+                                </button>
+                            </div>
+                        </div>
+                        <div id="error-logs" style="padding: 1rem;">
+                            <div style="text-align: center; color: #64748b;">
+                                Carregando logs de erro...
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Relatório de Saúde -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">🏥 Relatório de Saúde do Sistema</h3>
+                            <button class="btn btn-primary" data-action="generate-health-report">
+                                📊 Gerar Relatório
+                            </button>
+                        </div>
+                        <div id="health-report" style="padding: 1rem;">
+                            <div style="text-align: center; color: #64748b;">
+                                Clique em "Gerar Relatório" para ver diagnóstico completo
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Teste Manual de Conexão -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">🧪 Teste Manual de Conexão</h3>
+                        </div>
+                        <div style="padding: 1rem;">
+                            <div class="form-group">
+                                <label class="form-label">String de Conexão do Supabase</label>
+                                <input type="password" id="test-connection-string" class="form-input" 
+                                       placeholder="postgresql://user:password@host:port/database">
+                                <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
+                                    Cole aqui sua string de conexão do Supabase para teste
+                                </p>
+                            </div>
+                            <button class="btn btn-primary" data-action="test-supabase-connection">
+                                🔌 Testar Conexão
+                            </button>
+                        </div>
+                        <div id="connection-test-result"></div>
+                    </div>
+
+                    <!-- Sistema Local (GitHub Pages) -->
                     <div class="page-header">
                         <h1 class="page-title">Monitor</h1>
                         <p class="page-description">Monitore o sistema e estatísticas</p>
