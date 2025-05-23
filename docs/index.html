@@ -751,30 +751,47 @@
                         const lines = text.split('\n');
                         const products = [];
 
-                        // Pula o cabeçalho se existir
-                        const startIndex = lines[0].toLowerCase().includes('nome') || lines[0].toLowerCase().includes('preço') ? 1 : 0;
+                        // Detecta automaticamente se tem cabeçalho
+                        let startIndex = 0;
+                        if (lines.length > 0) {
+                            const firstLine = lines[0].toLowerCase();
+                            if (firstLine.includes('nome') || firstLine.includes('name') || firstLine.includes('preço') || firstLine.includes('price')) {
+                                startIndex = 1; // Pula cabeçalho
+                            }
+                        }
+                        
+                        console.log(`🔍 Processando arquivo CSV/Excel:`, { totalLinhas: lines.length, inicioEm: startIndex });
                         
                         for (let i = startIndex; i < lines.length; i++) {
                             const line = lines[i].trim();
                             if (!line) continue; // Pula linhas vazias
                             
                             const columns = line.split(',');
-                            const name = columns[0]?.trim();
-                            const priceText = columns[1]?.trim();
+                            const nomeColA = columns[0]?.trim(); // Coluna A = Nome
+                            const precoColB = columns[1]?.trim(); // Coluna B = Preço
                             
-                            // Valida se nome e preço existem
-                            if (name && priceText) {
-                                const price = parseFloat(priceText.replace('R$', '').replace(',', '.')) || 0;
+                            console.log(`📝 Linha ${i + 1}:`, { nomeColA, precoColB });
+                            
+                            // Valida se ambas as colunas existem
+                            if (nomeColA && precoColB) {
+                                // Limpa e converte o preço
+                                const precoLimpo = precoColB.replace(/[R$\s]/g, '').replace(',', '.');
+                                const precoNumero = parseFloat(precoLimpo);
                                 
-                                if (price > 0) {
+                                if (!isNaN(precoNumero) && precoNumero > 0) {
                                     products.push({
-                                        name: name,
-                                        price: price,
+                                        name: nomeColA,
+                                        price: precoNumero,
                                         category: 'Importado',
                                         description: '',
                                         fixedPrice: false
                                     });
+                                    console.log(`✅ Produto adicionado:`, { nome: nomeColA, preco: precoNumero });
+                                } else {
+                                    console.log(`❌ Preço inválido na linha ${i + 1}:`, precoColB);
                                 }
+                            } else {
+                                console.log(`⚠️ Linha ${i + 1} ignorada - dados incompletos`);
                             }
                         }
 
