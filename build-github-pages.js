@@ -19,6 +19,7 @@ try {
   execSync('npx vite build --outDir docs --base ./', { stdio: 'inherit' });
 
   // 3. Cria arquivo .nojekyll para GitHub Pages
+  fs.mkdirSync('docs', { recursive: true });
   fs.writeFileSync('docs/.nojekyll', '');
   console.log('✅ Arquivo .nojekyll criado');
 
