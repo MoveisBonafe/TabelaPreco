@@ -289,8 +289,7 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
                       alt="Preview"
                       className="w-full h-full object-cover"
                       onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.parentElement!.innerHTML = '<div class="w-full h-full flex items-center justify-center text-slate-400 text-sm">Imagem inválida</div>';
+                        setFormData(prev => ({ ...prev, image: '' }));
                       }}
                     />
                   </div>
