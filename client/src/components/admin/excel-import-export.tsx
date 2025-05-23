@@ -155,7 +155,7 @@ export function ExcelImportExport({
             description: description.toString().trim(),
             category: category.toString().trim(),
             priceAVista: price,
-            images: [],
+            image: '',
             specifications: []
           };
 
@@ -440,19 +440,12 @@ export function ExcelImportExport({
                 type="file"
                 accept=".xlsx,.xls"
                 onChange={handleFileImport}
-                className="hidden"
-                id="excel-upload"
+                className="mb-4 text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer"
                 disabled={isProcessing}
               />
-              <label htmlFor="excel-upload" className="cursor-pointer">
-                <Button 
-                  type="button" 
-                  className="bg-emerald-600 hover:bg-emerald-700"
-                  disabled={isProcessing}
-                >
-                  {isProcessing ? 'Processando...' : 'Selecionar Arquivo'}
-                </Button>
-              </label>
+              {isProcessing && (
+                <p className="text-emerald-600 font-medium">Processando arquivo...</p>
+              )}
             </div>
             
             <div className="text-sm text-slate-600">
