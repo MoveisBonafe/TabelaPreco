@@ -1121,10 +1121,10 @@
                 `;
             }
 
-            renderTabContent() {
+            async renderTabContent() {
                 switch (this.currentTab) {
                     case 'produtos':
-                        return this.renderProductsTab();
+                        return await this.renderProductsTab();
                     case 'categorias':
                         return this.renderCategoriesTab();
                     case 'precos':
@@ -1138,7 +1138,7 @@
                     case 'monitor':
                         return this.renderMonitorTab();
                     default:
-                        return this.renderProductsTab();
+                        return await this.renderProductsTab();
                 }
             }
 

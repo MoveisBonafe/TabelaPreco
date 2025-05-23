@@ -1,21 +1,37 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { productStorage } from "./product-storage";
-import { insertProductSchema, insertCategorySchema, products, categories } from "@shared/schema";
-import { db, getConnectionStatus } from "./db";
-import { supabaseLogger } from "./supabase-logger";
+import { insertProductSchema, insertCategorySchema, insertUserSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      const user = await storage.getUserByCredentials(username, password);
+      
+      if (user) {
+        res.json({
+          id: user.id,
+          level: user.level,
+          multiplier: parseFloat(user.multiplier || "1.0")
+        });
+      } else {
+        res.status(401).json({ message: "Credenciais inválidas" });
+      }
+    } catch (error) {
+      console.error("Error during login:", error);
+      res.status(500).json({ message: "Erro interno do servidor" });
+    }
+  });
+
   // Product routes
   app.get("/api/products", async (req, res) => {
     try {
-      const products = await productStorage.getProducts();
-      // Garante que sempre retorna um array
+      const products = await storage.getProducts();
       res.json(Array.isArray(products) ? products : []);
     } catch (error) {
       console.error("Error fetching products:", error);
-      // Retorna array vazio em caso de erro
       res.json([]);
     }
   });
