@@ -39,19 +39,9 @@ export function ProductModal({ product, isVisible, onClose }: ProductModalProps)
             
             <p className="text-slate-600">{product.description}</p>
             
-            <div className="grid grid-cols-2 gap-4 py-4">
-              <div className="bg-slate-50 rounded-lg p-4">
-                <span className="text-slate-500 text-sm">Preço Original</span>
-                <p className="text-lg font-semibold text-slate-400 line-through">
-                  R$ {product.basePrice.toFixed(2).replace('.', ',')}
-                </p>
-              </div>
-              <div className="bg-emerald-50 rounded-lg p-4">
-                <span className="text-emerald-600 text-sm">Preço com Desconto</span>
-                <p className="text-2xl font-bold text-emerald-600">
-                  R$ {product.finalPrice.toFixed(2).replace('.', ',')}
-                </p>
-              </div>
+            {/* Tabelas de Preços */}
+            <div className="border-t border-slate-200 pt-6">
+              <PriceTables product={product} />
             </div>
             
             {product.specifications && product.specifications.length > 0 && (

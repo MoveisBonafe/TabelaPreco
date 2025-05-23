@@ -38,6 +38,11 @@ export function ExcelImportExport({
       'Preço Base': product.basePrice,
       'Desconto (%)': product.discount,
       'Preço Final': product.finalPrice,
+      'Preço À Vista': product.priceAVista,
+      'Preço 30 dias': product.price30,
+      'Preço 30/60': product.price30_60,
+      'Preço 30/60/90': product.price30_60_90,
+      'Preço 30/60/90/120': product.price30_60_90_120,
       'URL da Imagem': product.image,
       Especificações: product.specifications?.join('; ') || '',
       Ativo: product.active ? 'Sim' : 'Não',
@@ -152,9 +157,15 @@ export function ExcelImportExport({
 
         const basePrice = parseFloat(row['Preço Base']) || 0;
         const discount = parseFloat(row['Desconto (%)']) || 0;
+        const priceAVista = parseFloat(row['Preço À Vista']) || 0;
 
         if (basePrice <= 0) {
           errors.push(`Linha ${index + 2}: Preço Base deve ser maior que zero`);
+          return;
+        }
+
+        if (priceAVista <= 0) {
+          errors.push(`Linha ${index + 2}: Preço À Vista deve ser maior que zero`);
           return;
         }
 
@@ -164,6 +175,7 @@ export function ExcelImportExport({
           category: row['Categoria'].toString().trim(),
           basePrice: basePrice,
           discount: Math.max(0, Math.min(100, discount)), // Entre 0 e 100
+          priceAVista: priceAVista,
           image: row['URL da Imagem']?.toString().trim() || '',
           specifications: row['Especificações'] 
             ? row['Especificações'].toString().split(';').map((s: string) => s.trim()).filter(Boolean)
@@ -269,6 +281,7 @@ export function ExcelImportExport({
         'Preço Base': 100.00,
         'Desconto (%)': 10,
         'Preço Final': 90.00,
+        'Preço À Vista': 85.00,
         'URL da Imagem': 'https://exemplo.com/imagem.jpg',
         'Especificações': 'Especificação 1; Especificação 2',
         'Ativo': 'Sim',
@@ -418,7 +431,9 @@ export function ExcelImportExport({
               <ul className="space-y-1">
                 <li>• Nome e Categoria são obrigatórios</li>
                 <li>• Preço Base deve ser maior que zero</li>
+                <li>• Preço À Vista é obrigatório e deve ser maior que zero</li>
                 <li>• Desconto deve estar entre 0 e 100%</li>
+                <li>• Outras tabelas de preço são calculadas automaticamente</li>
                 <li>• Especificações devem ser separadas por ponto e vírgula</li>
                 <li>• Ativo: "Sim" ou "Não"</li>
               </ul>
