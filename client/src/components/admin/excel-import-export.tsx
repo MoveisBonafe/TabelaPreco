@@ -134,14 +134,13 @@ export function ExcelImportExport({
 
       rawData.forEach((row: any, index) => {
         try {
-          // Buscar nome do produto em diferentes colunas possíveis
+          // Buscar apenas nome e preço - campos obrigatórios
           const name = row['Nome'] || row['nome'] || row['Name'] || row['NOME'] || row['Produto'] || '';
-          const description = row['Descrição'] || row['descricao'] || row['Description'] || row['DESCRIÇÃO'] || '';
-          const category = row['Categoria'] || row['categoria'] || row['Category'] || row['CATEGORIA'] || 'Geral';
           const price = parseFloat(row['Preço'] || row['preco'] || row['Price'] || row['PREÇO'] || row['Valor'] || '0');
 
+          // Validações simples - apenas nome e preço
           if (!name.trim()) {
-            errors.push(`Linha ${index + 2}: Nome do produto é obrigatório`);
+            errors.push(`Linha ${index + 2}: Nome é obrigatório`);
             return;
           }
 
@@ -150,12 +149,16 @@ export function ExcelImportExport({
             return;
           }
 
+          // Criar produto com dados mínimos necessários
           const product: InsertProduct = {
             name: name.toString().trim(),
-            description: description.toString().trim(),
-            category: category.toString().trim(),
+            description: '',
+            category: 'Geral',
+            basePrice: price,
+            discount: 0,
             priceAVista: price,
             image: '',
+            active: true,
             specifications: []
           };
 
@@ -168,7 +171,7 @@ export function ExcelImportExport({
       if (errors.length > 0 && validProducts.length === 0) {
         setImportResult({
           success: false,
-          message: `Erros encontrados:\n${errors.slice(0, 3).join('\n')}\n\nVerifique se as colunas têm nomes como: Nome, Preço, Categoria`
+          message: `Erros encontrados:\n${errors.slice(0, 3).join('\n')}\n\nApenas 2 colunas são obrigatórias: Nome e Preço`
         });
         return;
       }
@@ -183,7 +186,7 @@ export function ExcelImportExport({
       } else {
         setImportResult({
           success: false,
-          message: 'Nenhum produto válido encontrado. Verifique se há colunas: Nome e Preço'
+          message: 'Nenhum produto válido encontrado. Certifique-se de que a planilha tem colunas: Nome e Preço'
         });
       }
     } catch (error) {
@@ -434,7 +437,7 @@ export function ExcelImportExport({
             <div className="border-2 border-dashed border-slate-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors duration-200">
               <Upload className="h-8 w-8 text-slate-400 mx-auto mb-2" />
               <p className="text-slate-600 mb-4">
-                Clique para selecionar arquivo Excel (.xlsx)
+                Selecione arquivo Excel com apenas 2 colunas: Nome e Preço
               </p>
               <input
                 type="file"
