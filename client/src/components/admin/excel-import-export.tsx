@@ -163,7 +163,8 @@ export function ExcelImportExport({
             priceAVista: price,
             image: '',
             active: true,
-            specifications: []
+            specifications: [],
+            fixedPrice: false
           };
 
           validProducts.push(product);
@@ -246,7 +247,8 @@ export function ExcelImportExport({
           specifications: row['Especificações'] 
             ? row['Especificações'].toString().split(';').map((s: string) => s.trim()).filter(Boolean)
             : [],
-          active: row['Ativo']?.toString().toLowerCase() === 'sim'
+          active: row['Ativo']?.toString().toLowerCase() === 'sim',
+          fixedPrice: false
         };
 
         validProducts.push(product);
