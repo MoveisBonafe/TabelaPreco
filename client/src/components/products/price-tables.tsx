@@ -82,16 +82,6 @@ export function PriceTables({ product }: PriceTablesProps) {
               <div className="font-bold text-lg">
                 R$ {option.price.toFixed(2).replace('.', ',')}
               </div>
-              {option.id !== 'avista' && (
-                <div className="text-xs mt-1 opacity-75">
-                  {option.id === '30_60_90_120' ? '4x de ' : 
-                   option.id === '30_60_90' ? '3x de ' :
-                   option.id === '30_60' ? '2x de ' : ''}
-                  {option.id !== '30' && (
-                    <>R$ {(option.price / (option.id === '30_60_90_120' ? 4 : option.id === '30_60_90' ? 3 : 2)).toFixed(2).replace('.', ',')}</>
-                  )}
-                </div>
-              )}
             </div>
           );
         })}
@@ -112,9 +102,7 @@ export function PriceTables({ product }: PriceTablesProps) {
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Valor Total
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
-                  Parcelas
-                </th>
+
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
                   Economia vs Parcelado
                 </th>
@@ -131,9 +119,7 @@ export function PriceTables({ product }: PriceTablesProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-emerald-600 font-bold">
                   R$ {product.priceAVista.toFixed(2).replace('.', ',')}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                  Pagamento único
-                </td>
+
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className="bg-emerald-100 text-emerald-800 px-2 py-1 rounded-full text-xs font-medium">
                     Melhor preço
@@ -151,9 +137,6 @@ export function PriceTables({ product }: PriceTablesProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-blue-600 font-bold">
                   R$ {product.price30.toFixed(2).replace('.', ',')}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                  1x em 30 dias
-                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-red-600">
                   +R$ {(product.price30 - product.priceAVista).toFixed(2).replace('.', ',')}
                 </td>
@@ -168,9 +151,6 @@ export function PriceTables({ product }: PriceTablesProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-purple-600 font-bold">
                   R$ {product.price30_60.toFixed(2).replace('.', ',')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                  2x de R$ {(product.price30_60 / 2).toFixed(2).replace('.', ',')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-red-600">
                   +R$ {(product.price30_60 - product.priceAVista).toFixed(2).replace('.', ',')}
@@ -187,9 +167,6 @@ export function PriceTables({ product }: PriceTablesProps) {
                 <td className="px-6 py-4 whitespace-nowrap text-orange-600 font-bold">
                   R$ {product.price30_60_90.toFixed(2).replace('.', ',')}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                  3x de R$ {(product.price30_60_90 / 3).toFixed(2).replace('.', ',')}
-                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-red-600">
                   +R$ {(product.price30_60_90 - product.priceAVista).toFixed(2).replace('.', ',')}
                 </td>
@@ -204,9 +181,6 @@ export function PriceTables({ product }: PriceTablesProps) {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-red-600 font-bold">
                   R$ {product.price30_60_90_120.toFixed(2).replace('.', ',')}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-slate-600">
-                  4x de R$ {(product.price30_60_90_120 / 4).toFixed(2).replace('.', ',')}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-red-600">
                   +R$ {(product.price30_60_90_120 - product.priceAVista).toFixed(2).replace('.', ',')}

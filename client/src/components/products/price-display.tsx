@@ -34,17 +34,21 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
       }
     }
 
+    // Se produto tem preço fixo, não aplica multiplicador
+    const finalMultiplier = product.fixedPrice ? 1.0 : multiplier;
+    
     // Todos os usuários veem todas as tabelas, apenas com multiplicador diferente
     return {
-      avista: product.priceAVista * multiplier,
-      price30: product.price30 * multiplier,
-      price30_60: product.price30_60 * multiplier,
-      price30_60_90: product.price30_60_90 * multiplier,
-      price30_60_90_120: product.price30_60_90_120 * multiplier,
+      avista: product.priceAVista * finalMultiplier,
+      price30: product.price30 * finalMultiplier,
+      price30_60: product.price30_60 * finalMultiplier,
+      price30_60_90: product.price30_60_90 * finalMultiplier,
+      price30_60_90_120: product.price30_60_90_120 * finalMultiplier,
       showOthers: true,
       maxInstallments: 4,
-      multiplier: multiplier,
-      isVip: userAuth.permissions.priceLevel === 'vip'
+      multiplier: finalMultiplier,
+      isVip: userAuth.permissions.priceLevel === 'vip',
+      isFixedPrice: product.fixedPrice
     };
   };
 
@@ -54,17 +58,24 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-slate-800">Preços para {userAuth.username}</h3>
-        {prices.multiplier !== 1.0 && (
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            prices.multiplier < 1 ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 
-            'bg-gradient-to-r from-blue-400 to-blue-600 text-white'
-          }`}>
-            {prices.multiplier < 1 ? 
-              `Desconto ${((1 - prices.multiplier) * 100).toFixed(1)}%` : 
-              `+${((prices.multiplier - 1) * 100).toFixed(1)}%`
-            }
-          </span>
-        )}
+        <div className="flex gap-2">
+          {prices.isFixedPrice && (
+            <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700 border">
+              🔒 Preço Fixo
+            </span>
+          )}
+          {prices.multiplier !== 1.0 && !prices.isFixedPrice && (
+            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+              prices.multiplier < 1 ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 
+              'bg-gradient-to-r from-blue-400 to-blue-600 text-white'
+            }`}>
+              {prices.multiplier < 1 ? 
+                `Desconto ${((1 - prices.multiplier) * 100).toFixed(1)}%` : 
+                `+${((prices.multiplier - 1) * 100).toFixed(1)}%`
+              }
+            </span>
+          )}
+        </div>
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -94,9 +105,6 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
               <div className="font-bold text-lg">
                 R$ {prices.price30_60!.toFixed(2).replace('.', ',')}
               </div>
-              <div className="text-xs mt-1 opacity-75">
-                2x de R$ {(prices.price30_60! / 2).toFixed(2).replace('.', ',')}
-              </div>
             </div>
 
             {(prices.maxInstallments || 0) >= 3 && prices.price30_60_90 && (
@@ -104,9 +112,6 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
                 <div className="font-bold text-sm mb-1">30/60/90</div>
                 <div className="font-bold text-lg">
                   R$ {prices.price30_60_90.toFixed(2).replace('.', ',')}
-                </div>
-                <div className="text-xs mt-1 opacity-75">
-                  3x de R$ {(prices.price30_60_90 / 3).toFixed(2).replace('.', ',')}
                 </div>
               </div>
             )}
@@ -116,9 +121,6 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
                 <div className="font-bold text-sm mb-1">30/60/90/120</div>
                 <div className="font-bold text-lg">
                   R$ {prices.price30_60_90_120.toFixed(2).replace('.', ',')}
-                </div>
-                <div className="text-xs mt-1 opacity-75">
-                  4x de R$ {(prices.price30_60_90_120 / 4).toFixed(2).replace('.', ',')}
                 </div>
               </div>
             )}
