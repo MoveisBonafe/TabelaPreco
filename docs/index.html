@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Produtos - Móveis Bonafé</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛋️</text></svg>">
     <meta name="description" content="Catálogo inteligente de produtos com sistema de preços personalizado para diferentes tipos de usuários.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -1020,7 +1021,7 @@
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Senha</label>
-                                        <input type="password" id="password" name="password" class="form-input" required>
+                                        <input type="password" id="password" name="password" class="form-input" autocomplete="current-password" required>
                                     </div>
                                     <button type="submit" class="btn btn-primary" style="width: 100%;" data-action="login">
                                         Entrar
@@ -1686,9 +1687,9 @@
                         </div>
                         <div style="padding: 1rem;">
                             <div class="form-group">
-                                <label class="form-label">String de Conexão do Supabase</label>
+                                <label class="form-label" for="test-connection-string">String de Conexão do Supabase</label>
                                 <input type="password" id="test-connection-string" class="form-input" 
-                                       placeholder="postgresql://user:password@host:port/database">
+                                       autocomplete="off" placeholder="postgresql://user:password@host:port/database">
                                 <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
                                     Cole aqui sua string de conexão do Supabase para teste
                                 </p>
@@ -1796,6 +1797,33 @@
                 statusElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Verificando status...</div>';
 
                 try {
+                    // Verifica se estamos no GitHub Pages ou servidor local
+                    const isGitHubPages = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+                    
+                    if (isGitHubPages) {
+                        // Modo GitHub Pages - simula status baseado no localStorage
+                        const products = productManager.getProducts();
+                        const hasData = products.length > 0;
+                        const lastUpdate = localStorage.getItem('lastUpdate');
+                        
+                        statusElement.innerHTML = `
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                                <div style="text-align: center;">
+                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
+                                    <div style="font-weight: bold; color: #3b82f6;">GITHUB PAGES</div>
+                                </div>
+                                <div>
+                                    <div><strong>Modo:</strong> Offline (localStorage)</div>
+                                    <div><strong>Produtos:</strong> ${products.length}</div>
+                                    <div><strong>Status:</strong> ${hasData ? 'Com dados' : 'Vazio'}</div>
+                                    <div><strong>Última Atualização:</strong> ${lastUpdate || 'Nunca'}</div>
+                                    <div><strong>Armazenamento:</strong> ${(JSON.stringify(products).length / 1024).toFixed(1)}KB</div>
+                                </div>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
                     const response = await fetch('/api/supabase/status');
                     const data = await response.json();
 
@@ -1835,6 +1863,41 @@
                 logsElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Carregando logs...</div>';
 
                 try {
+                    // Verifica se estamos no GitHub Pages
+                    const isGitHubPages = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
+                    
+                    if (isGitHubPages) {
+                        // Modo GitHub Pages - mostra logs do localStorage
+                        const errorLogs = JSON.parse(localStorage.getItem('errorLogs') || '[]');
+                        
+                        if (errorLogs.length > 0) {
+                            const errorsHtml = errorLogs.slice(-5).map(error => `
+                                <div style="border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; background: #fef2f2;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                                        <strong style="color: #dc2626;">${error.message}</strong>
+                                        <span style="font-size: 0.875rem; color: #64748b;">${new Date(error.timestamp).toLocaleString('pt-BR')}</span>
+                                    </div>
+                                    <div><strong>Tipo:</strong> ${error.type}</div>
+                                </div>
+                            `).join('');
+
+                            logsElement.innerHTML = `
+                                <div style="margin-bottom: 1rem;">
+                                    <strong>Total de Logs:</strong> ${errorLogs.length} | 
+                                    <strong>Modo:</strong> GitHub Pages (localStorage)
+                                </div>
+                                ${errorsHtml}
+                            `;
+                        } else {
+                            logsElement.innerHTML = `
+                                <div style="text-align: center; color: #10b981;">
+                                    ✅ Nenhum erro registrado no localStorage
+                                </div>
+                            `;
+                        }
+                        return;
+                    }
+                    
                     const response = await fetch('/api/supabase/logs');
                     const data = await response.json();
 
