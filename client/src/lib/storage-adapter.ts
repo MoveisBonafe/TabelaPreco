@@ -25,12 +25,17 @@ class StorageAdapter {
   // PRODUCTS
   async getProducts(): Promise<Product[]> {
     if (this.isUsingBackend) {
+      console.log('🔗 Carregando produtos do banco compartilhado...');
       const response = await fetch('/api/products');
-      return response.json();
+      const products = await response.json();
+      console.log(`✅ ${products.length} produtos carregados do Supabase`);
+      return products;
     } else {
-      // GitHub Pages: usa localStorage
+      console.log('📱 Carregando produtos do localStorage (GitHub Pages)...');
       const stored = localStorage.getItem(PRODUCTS_KEY);
-      return stored ? JSON.parse(stored) : [];
+      const products = stored ? JSON.parse(stored) : [];
+      console.log(`✅ ${products.length} produtos carregados do localStorage`);
+      return products;
     }
   }
 
