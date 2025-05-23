@@ -611,6 +611,22 @@
                         const productId = target.getAttribute('data-product-id');
                         this.deleteProduct(productId);
                     }
+                    if (target.matches('[data-action="edit-price"]')) {
+                        const productId = target.getAttribute('data-product-id');
+                        this.editPrice(productId);
+                    }
+                    if (target.matches('[data-action="edit-category"]')) {
+                        const categoryName = target.getAttribute('data-category');
+                        this.editCategory(categoryName);
+                    }
+                    if (target.matches('[data-action="delete-category"]')) {
+                        const categoryName = target.getAttribute('data-category');
+                        this.deleteCategory(categoryName);
+                    }
+                    if (target.matches('[data-action="edit-user"]')) {
+                        const username = target.getAttribute('data-username');
+                        this.editUser(username);
+                    }
                 });
 
                 document.addEventListener('submit', (e) => {
@@ -1359,10 +1375,20 @@
                                         <div class="card">
                                             <div class="card-header">
                                                 <h4 class="card-title">📂 ${category}</h4>
+                                                ${user.level === 'admin' ? `
+                                                    <div style="display: flex; gap: 0.25rem;">
+                                                        <button class="btn-icon" data-action="edit-category" data-category="${category}" title="Editar categoria">
+                                                            ✏️
+                                                        </button>
+                                                        <button class="btn-icon btn-danger" data-action="delete-category" data-category="${category}" title="Excluir categoria">
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                ` : ''}
                                             </div>
                                             <div class="card-subtitle">${categoryProducts.length} produtos</div>
                                             <p style="color: #64748b; font-size: 0.875rem;">
-                                                Produtos: ${categoryProducts.map(p => p.name).join(', ')}
+                                                Produtos: ${categoryProducts.length > 0 ? categoryProducts.map(p => p.name).slice(0, 3).join(', ') + (categoryProducts.length > 3 ? '...' : '') : 'Nenhum produto'}
                                             </p>
                                         </div>
                                     `;
@@ -2140,14 +2166,26 @@
                 const container = document.getElementById('products-container');
                 const icon = document.getElementById('view-mode-icon');
                 
-                if (container.classList.contains('products-list-view')) {
-                    container.classList.remove('products-list-view');
-                    container.classList.add('products-grid-view');
-                    icon.textContent = '📋';
-                } else {
-                    container.classList.remove('products-grid-view');
-                    container.classList.add('products-list-view');
-                    icon.textContent = '⊞';
+                if (container && icon) {
+                    if (container.classList.contains('products-list-view')) {
+                        container.classList.remove('products-list-view');
+                        container.classList.add('products-grid-view');
+                        icon.textContent = '📋';
+                        
+                        // Aplicar estilos de grade
+                        container.style.display = 'grid';
+                        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
+                        container.style.gap = '1rem';
+                    } else {
+                        container.classList.remove('products-grid-view');
+                        container.classList.add('products-list-view');
+                        icon.textContent = '⊞';
+                        
+                        // Aplicar estilos de lista
+                        container.style.display = 'block';
+                        container.style.gridTemplateColumns = '';
+                        container.style.gap = '';
+                    }
                 }
             }
 
@@ -2160,15 +2198,24 @@
                     return;
                 }
 
-                // Preencher modal de edição
-                document.getElementById('productName').value = product.name;
-                document.getElementById('productPrice').value = product.price;
-                document.getElementById('productCategory').value = product.category;
-                document.getElementById('productDescription').value = product.description || '';
-                document.querySelector('input[name="fixedPrice"]').checked = product.fixedPrice;
-
                 // Marcar como edição
                 this.editingProductId = productId;
+                
+                // Preencher modal de edição
+                setTimeout(() => {
+                    const nameField = document.getElementById('productName');
+                    const priceField = document.getElementById('productPrice');
+                    const categoryField = document.getElementById('productCategory');
+                    const descField = document.getElementById('productDescription');
+                    const fixedField = document.querySelector('input[name="fixedPrice"]');
+                    
+                    if (nameField) nameField.value = product.name;
+                    if (priceField) priceField.value = product.price;
+                    if (categoryField) categoryField.value = product.category;
+                    if (descField) descField.value = product.description || '';
+                    if (fixedField) fixedField.checked = product.fixedPrice;
+                }, 100);
+                
                 this.showProductModal();
             }
 
@@ -2180,6 +2227,68 @@
                 productManager.deleteProduct(productId);
                 toast.show('Produto excluído com sucesso!');
                 this.render();
+            }
+
+            editPrice(productId) {
+                const products = productManager.getProducts();
+                const product = products.find(p => p.id == productId);
+                
+                if (!product) {
+                    toast.show('Produto não encontrado', 'error');
+                    return;
+                }
+
+                const newPrice = prompt(`Novo preço para ${product.name}:`, product.price);
+                if (newPrice && !isNaN(newPrice) && parseFloat(newPrice) > 0) {
+                    product.price = parseFloat(newPrice);
+                    productManager.updateProduct(product.id, product);
+                    toast.show('Preço atualizado com sucesso!');
+                    this.render();
+                }
+            }
+
+            editCategory(categoryName) {
+                const newName = prompt(`Novo nome para a categoria "${categoryName}":`, categoryName);
+                if (newName && newName !== categoryName) {
+                    // Atualizar todos os produtos desta categoria
+                    const products = productManager.getProducts();
+                    products.forEach(product => {
+                        if (product.category === categoryName) {
+                            product.category = newName;
+                            productManager.updateProduct(product.id, product);
+                        }
+                    });
+                    toast.show('Categoria atualizada com sucesso!');
+                    this.render();
+                }
+            }
+
+            deleteCategory(categoryName) {
+                if (!confirm(`Tem certeza que deseja excluir a categoria "${categoryName}"? Os produtos serão movidos para "Sem categoria".`)) {
+                    return;
+                }
+
+                const products = productManager.getProducts();
+                products.forEach(product => {
+                    if (product.category === categoryName) {
+                        product.category = 'Sem categoria';
+                        productManager.updateProduct(product.id, product);
+                    }
+                });
+                
+                toast.show('Categoria excluída com sucesso!');
+                this.render();
+            }
+
+            editUser(username) {
+                const currentMultiplier = username === 'MoveisBonafe' ? 1 : 1.2;
+                const newMultiplier = prompt(`Multiplicador de preço para ${username}:`, currentMultiplier);
+                
+                if (newMultiplier && !isNaN(newMultiplier) && parseFloat(newMultiplier) > 0) {
+                    // Aqui você salvaria no sistema de usuários
+                    toast.show(`Multiplicador de ${username} atualizado para ${newMultiplier}x`);
+                    this.render();
+                }
             }
         }
 
