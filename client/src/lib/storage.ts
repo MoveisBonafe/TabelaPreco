@@ -37,10 +37,11 @@ export class LocalStorage {
     
     // Calcular automaticamente as tabelas de preço baseadas no preço à vista
     const priceAVista = productData.priceAVista;
-    const price30 = priceAVista * 1.02; // À vista + 2%
-    const price30_60 = priceAVista * 1.04; // À vista + 4%
-    const price30_60_90 = priceAVista * 1.06; // À vista + 6%
-    const price30_60_90_120 = priceAVista * 1.08; // À vista + 8%
+    // Se preço fixo, todas as tabelas têm o mesmo valor
+    const price30 = productData.fixedPrice ? priceAVista : priceAVista * 1.02;
+    const price30_60 = productData.fixedPrice ? priceAVista : priceAVista * 1.04;
+    const price30_60_90 = productData.fixedPrice ? priceAVista : priceAVista * 1.06;
+    const price30_60_90_120 = productData.fixedPrice ? priceAVista : priceAVista * 1.08;
     
     const product: Product = {
       ...productData,
@@ -71,13 +72,16 @@ export class LocalStorage {
       updatedProduct.finalPrice = updatedProduct.basePrice * (1 - (updatedProduct.discount || 0) / 100);
     }
     
-    // Recalcular tabelas de preço se o preço à vista foi alterado
-    if (productData.priceAVista !== undefined) {
-      const priceAVista = productData.priceAVista;
-      updatedProduct.price30 = priceAVista * 1.02; // À vista + 2%
-      updatedProduct.price30_60 = priceAVista * 1.04; // À vista + 4%
-      updatedProduct.price30_60_90 = priceAVista * 1.06; // À vista + 6%
-      updatedProduct.price30_60_90_120 = priceAVista * 1.08; // À vista + 8%
+    // Recalcular tabelas de preço se o preço à vista foi alterado ou fixedPrice mudou
+    if (productData.priceAVista !== undefined || productData.fixedPrice !== undefined) {
+      const priceAVista = updatedProduct.priceAVista;
+      const isFixedPrice = updatedProduct.fixedPrice;
+      
+      // Se preço fixo, todas as tabelas têm o mesmo valor
+      updatedProduct.price30 = isFixedPrice ? priceAVista : priceAVista * 1.02;
+      updatedProduct.price30_60 = isFixedPrice ? priceAVista : priceAVista * 1.04;
+      updatedProduct.price30_60_90 = isFixedPrice ? priceAVista : priceAVista * 1.06;
+      updatedProduct.price30_60_90_120 = isFixedPrice ? priceAVista : priceAVista * 1.08;
     }
 
     products[index] = updatedProduct;
