@@ -598,6 +598,19 @@
                     if (target.matches('[data-action="test-supabase-connection"]')) {
                         this.testSupabaseConnection();
                     }
+
+                    // Ações dos produtos
+                    if (target.matches('[data-action="toggle-view-mode"]')) {
+                        this.toggleViewMode();
+                    }
+                    if (target.matches('[data-action="edit-product"]')) {
+                        const productId = target.getAttribute('data-product-id');
+                        this.editProduct(productId);
+                    }
+                    if (target.matches('[data-action="delete-product"]')) {
+                        const productId = target.getAttribute('data-product-id');
+                        this.deleteProduct(productId);
+                    }
                 });
 
                 document.addEventListener('submit', (e) => {
@@ -1183,11 +1196,16 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Lista de Produtos</h3>
-                            ${user.level === 'admin' ? `
-                                <button class="btn btn-primary" data-action="add-product">
-                                    ➕ Novo Produto
+                            <div style="display: flex; gap: 0.5rem; align-items: center;">
+                                <button class="btn btn-secondary" data-action="toggle-view-mode" title="Alternar visualização">
+                                    <span id="view-mode-icon">📋</span>
                                 </button>
-                            ` : ''}
+                                ${user.level === 'admin' ? `
+                                    <button class="btn btn-primary" data-action="add-product">
+                                        ➕ Novo Produto
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
 
                         ${products.length === 0 ? `
@@ -1197,8 +1215,37 @@
                                 <p>Comece adicionando seu primeiro produto ao catálogo</p>
                             </div>
                         ` : `
-                            <div class="grid grid-cols-3">
-                                ${products.map(product => this.renderProductCard(product, user)).join('')}
+                            <div id="products-container" class="products-list-view">
+                                ${products.map(product => {
+                                    const finalPrice = product.fixedPrice ? product.price : product.price * user.multiplier;
+                                    const priceDisplay = finalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                                    
+                                    return `
+                                        <div class="product-card" data-product-id="${product.id}">
+                                            <div class="product-content">
+                                                <div class="product-info">
+                                                    <h4 class="product-name" title="${product.name}">${product.name}</h4>
+                                                    <div class="product-details">
+                                                        <span class="product-category">${product.category}</span>
+                                                        ${product.fixedPrice ? '<span class="fixed-price-badge">🔒 Fixo</span>' : ''}
+                                                    </div>
+                                                    <div class="product-price">${priceDisplay}</div>
+                                                    ${product.description ? `<div class="product-description" title="${product.description}">${product.description}</div>` : ''}
+                                                </div>
+                                                ${user.level === 'admin' ? `
+                                                    <div class="product-actions">
+                                                        <button class="btn-icon" data-action="edit-product" data-product-id="${product.id}" title="Editar">
+                                                            ✏️
+                                                        </button>
+                                                        <button class="btn-icon btn-danger" data-action="delete-product" data-product-id="${product.id}" title="Excluir">
+                                                            🗑️
+                                                        </button>
+                                                    </div>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         `}
                     </div>
@@ -2085,6 +2132,54 @@
                     }
                     toast.show('Erro ao testar conexão', 'error');
                 }
+            }
+
+            // === FUNÇÕES DE PRODUTOS ===
+
+            toggleViewMode() {
+                const container = document.getElementById('products-container');
+                const icon = document.getElementById('view-mode-icon');
+                
+                if (container.classList.contains('products-list-view')) {
+                    container.classList.remove('products-list-view');
+                    container.classList.add('products-grid-view');
+                    icon.textContent = '📋';
+                } else {
+                    container.classList.remove('products-grid-view');
+                    container.classList.add('products-list-view');
+                    icon.textContent = '⊞';
+                }
+            }
+
+            editProduct(productId) {
+                const products = productManager.getProducts();
+                const product = products.find(p => p.id == productId);
+                
+                if (!product) {
+                    toast.show('Produto não encontrado', 'error');
+                    return;
+                }
+
+                // Preencher modal de edição
+                document.getElementById('productName').value = product.name;
+                document.getElementById('productPrice').value = product.price;
+                document.getElementById('productCategory').value = product.category;
+                document.getElementById('productDescription').value = product.description || '';
+                document.querySelector('input[name="fixedPrice"]').checked = product.fixedPrice;
+
+                // Marcar como edição
+                this.editingProductId = productId;
+                this.showProductModal();
+            }
+
+            deleteProduct(productId) {
+                if (!confirm('Tem certeza que deseja excluir este produto?')) {
+                    return;
+                }
+
+                productManager.deleteProduct(productId);
+                toast.show('Produto excluído com sucesso!');
+                this.render();
             }
         }
 
