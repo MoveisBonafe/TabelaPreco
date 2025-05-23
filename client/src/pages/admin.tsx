@@ -5,6 +5,7 @@ import { AdminTabs } from '@/components/admin/admin-tabs';
 import { ProductsTab } from '@/components/admin/products-tab';
 import { CategoriesTab } from '@/components/admin/categories-tab';
 import { PricingTab } from '@/components/admin/pricing-tab';
+import { ExcelImportExport } from '@/components/admin/excel-import-export';
 import { ProductModal } from '@/components/modals/product-modal';
 import { useProducts } from '@/hooks/use-products';
 import { useCategories } from '@/hooks/use-categories';
@@ -77,6 +78,24 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
     }
   };
 
+  const handleImportProducts = (products: InsertProduct[]) => {
+    try {
+      products.forEach(product => createProduct(product));
+      showToast(`${products.length} produtos importados com sucesso!`);
+    } catch (error) {
+      showToast('Erro ao importar produtos', 'error');
+    }
+  };
+
+  const handleImportCategories = (categories: InsertCategory[]) => {
+    try {
+      categories.forEach(category => createCategory(category));
+      showToast(`${categories.length} categorias importadas com sucesso!`);
+    } catch (error) {
+      showToast('Erro ao importar categorias', 'error');
+    }
+  };
+
   const handleViewProduct = (product: Product) => {
     setSelectedProduct(product);
     setIsProductModalOpen(true);
@@ -114,6 +133,15 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
 
         {activeTab === 'pricing' && (
           <PricingTab products={products} />
+        )}
+
+        {activeTab === 'excel' && (
+          <ExcelImportExport
+            products={products}
+            categories={categories}
+            onImportProducts={handleImportProducts}
+            onImportCategories={handleImportCategories}
+          />
         )}
       </div>
 
