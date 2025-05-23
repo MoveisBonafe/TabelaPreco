@@ -139,15 +139,515 @@
     </div>
     
     <script>
-        // Simula carregamento para mostrar funcionalidade
+        // Carrega a aplicação completa
         setTimeout(() => {
             document.querySelector('.loading').innerHTML = '✅ Sistema carregado com sucesso!';
             document.querySelector('.spinner').style.display = 'none';
             
             setTimeout(() => {
-                window.location.href = 'app.html';
+                // Remove a tela de loading e mostra a aplicação
+                document.body.innerHTML = getAppHTML();
+                initializeApp();
             }, 2000);
         }, 3000);
+        
+        function getAppHTML() {
+            return `
+                <div id="app">
+                    <div class="login-container" id="loginContainer">
+                        <div class="login-card">
+                            <h1>🔐 Login - Catálogo Bonafé</h1>
+                            <form id="loginForm">
+                                <input type="text" id="username" placeholder="Usuário" required>
+                                <input type="password" id="password" placeholder="Senha" required>
+                                <button type="submit">Entrar</button>
+                            </form>
+                            <div class="login-info">
+                                <p><strong>Usuários disponíveis:</strong></p>
+                                <p>• MoveisBonafe / Bonafe1108 (Admin VIP)</p>
+                                <p>• Loja / Bonafe1108 (Básico)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="app-container" id="appContainer" style="display: none;">
+                        <header class="header">
+                            <h1>📱 Catálogo Móveis Bonafé</h1>
+                            <div class="user-info">
+                                <span id="userDisplay"></span>
+                                <button onclick="logout()" class="logout-btn">Sair</button>
+                            </div>
+                        </header>
+                        
+                        <nav class="nav-tabs">
+                            <button class="tab-btn active" onclick="showTab('catalog')">📦 Catálogo</button>
+                            <button class="tab-btn" onclick="showTab('admin')" id="adminTab" style="display: none;">⚙️ Admin</button>
+                        </nav>
+                        
+                        <main class="main-content">
+                            <div id="catalogTab" class="tab-content active">
+                                <div class="catalog-header">
+                                    <h2>Produtos Disponíveis</h2>
+                                    <div class="view-toggle">
+                                        <button onclick="toggleView()" id="viewToggle">📱 Compacto</button>
+                                    </div>
+                                </div>
+                                <div id="productList" class="product-grid">
+                                    <div class="empty-state">
+                                        <h3>📦 Nenhum produto encontrado</h3>
+                                        <p>Use o painel administrativo para adicionar produtos ao catálogo.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="adminTab" class="tab-content">
+                                <div class="admin-section">
+                                    <h2>🛠️ Painel Administrativo</h2>
+                                    <div class="admin-actions">
+                                        <button onclick="showAddProduct()" class="btn-primary">➕ Adicionar Produto</button>
+                                        <button onclick="importExcel()" class="btn-secondary">📊 Importar Excel</button>
+                                        <button onclick="exportExcel()" class="btn-secondary">💾 Exportar Excel</button>
+                                    </div>
+                                    
+                                    <div id="addProductForm" class="form-container" style="display: none;">
+                                        <h3>Novo Produto</h3>
+                                        <form id="productForm">
+                                            <input type="text" id="productName" placeholder="Nome do produto" required>
+                                            <input type="number" id="productPrice" placeholder="Preço" step="0.01" required>
+                                            <input type="text" id="productCategory" placeholder="Categoria">
+                                            <textarea id="productDescription" placeholder="Descrição"></textarea>
+                                            <label>
+                                                <input type="checkbox" id="fixedPrice"> 🔒 Preço Fixo (não aplica multiplicador)
+                                            </label>
+                                            <button type="submit">Salvar Produto</button>
+                                            <button type="button" onclick="hideAddProduct()">Cancelar</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+                
+                <style>
+                    * {
+                        margin: 0;
+                        padding: 0;
+                        box-sizing: border-box;
+                    }
+                    
+                    body {
+                        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        min-height: 100vh;
+                    }
+                    
+                    .login-container {
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 100vh;
+                        padding: 20px;
+                    }
+                    
+                    .login-card {
+                        background: rgba(255,255,255,0.1);
+                        backdrop-filter: blur(10px);
+                        border-radius: 15px;
+                        padding: 40px;
+                        border: 1px solid rgba(255,255,255,0.2);
+                        color: white;
+                        text-align: center;
+                        max-width: 400px;
+                        width: 100%;
+                    }
+                    
+                    .login-card h1 {
+                        margin-bottom: 30px;
+                        font-size: 1.8rem;
+                    }
+                    
+                    .login-card input {
+                        width: 100%;
+                        padding: 12px;
+                        margin-bottom: 15px;
+                        border: none;
+                        border-radius: 8px;
+                        background: rgba(255,255,255,0.9);
+                        font-size: 16px;
+                    }
+                    
+                    .login-card button {
+                        width: 100%;
+                        padding: 12px;
+                        background: #4CAF50;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        font-size: 16px;
+                        cursor: pointer;
+                        transition: background 0.3s;
+                    }
+                    
+                    .login-card button:hover {
+                        background: #45a049;
+                    }
+                    
+                    .login-info {
+                        margin-top: 20px;
+                        font-size: 0.9rem;
+                        opacity: 0.8;
+                    }
+                    
+                    .app-container {
+                        min-height: 100vh;
+                        background: #f5f5f5;
+                    }
+                    
+                    .header {
+                        background: white;
+                        padding: 15px 20px;
+                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+                    
+                    .header h1 {
+                        color: #333;
+                        font-size: 1.5rem;
+                    }
+                    
+                    .user-info {
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                    }
+                    
+                    .logout-btn {
+                        padding: 8px 16px;
+                        background: #ff4757;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    }
+                    
+                    .nav-tabs {
+                        background: white;
+                        display: flex;
+                        border-bottom: 1px solid #ddd;
+                    }
+                    
+                    .tab-btn {
+                        padding: 15px 25px;
+                        border: none;
+                        background: transparent;
+                        cursor: pointer;
+                        border-bottom: 3px solid transparent;
+                        transition: all 0.3s;
+                    }
+                    
+                    .tab-btn.active {
+                        border-bottom-color: #667eea;
+                        color: #667eea;
+                        font-weight: bold;
+                    }
+                    
+                    .main-content {
+                        padding: 20px;
+                    }
+                    
+                    .tab-content {
+                        display: none;
+                    }
+                    
+                    .tab-content.active {
+                        display: block;
+                    }
+                    
+                    .catalog-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .view-toggle button {
+                        padding: 8px 16px;
+                        background: #667eea;
+                        color: white;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    }
+                    
+                    .product-grid {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        gap: 20px;
+                    }
+                    
+                    .product-grid.compact {
+                        grid-template-columns: 1fr;
+                    }
+                    
+                    .product-card {
+                        background: white;
+                        border-radius: 10px;
+                        padding: 20px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                        transition: transform 0.3s;
+                    }
+                    
+                    .product-card:hover {
+                        transform: translateY(-2px);
+                    }
+                    
+                    .product-card.compact {
+                        padding: 15px;
+                        display: flex;
+                        align-items: center;
+                        gap: 15px;
+                    }
+                    
+                    .empty-state {
+                        text-align: center;
+                        padding: 60px 20px;
+                        color: #666;
+                    }
+                    
+                    .admin-section {
+                        background: white;
+                        border-radius: 10px;
+                        padding: 30px;
+                        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                    }
+                    
+                    .admin-actions {
+                        display: flex;
+                        gap: 15px;
+                        margin-bottom: 30px;
+                        flex-wrap: wrap;
+                    }
+                    
+                    .btn-primary {
+                        padding: 12px 24px;
+                        background: #4CAF50;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    }
+                    
+                    .btn-secondary {
+                        padding: 12px 24px;
+                        background: #2196F3;
+                        color: white;
+                        border: none;
+                        border-radius: 8px;
+                        cursor: pointer;
+                    }
+                    
+                    .form-container {
+                        background: #f9f9f9;
+                        padding: 20px;
+                        border-radius: 8px;
+                        margin-top: 20px;
+                    }
+                    
+                    .form-container input,
+                    .form-container textarea {
+                        width: 100%;
+                        padding: 10px;
+                        margin-bottom: 15px;
+                        border: 1px solid #ddd;
+                        border-radius: 5px;
+                        font-size: 14px;
+                    }
+                    
+                    .form-container button {
+                        padding: 10px 20px;
+                        margin-right: 10px;
+                        border: none;
+                        border-radius: 5px;
+                        cursor: pointer;
+                    }
+                    
+                    @media (max-width: 768px) {
+                        .header {
+                            flex-direction: column;
+                            gap: 10px;
+                            text-align: center;
+                        }
+                        
+                        .catalog-header {
+                            flex-direction: column;
+                            gap: 15px;
+                        }
+                        
+                        .admin-actions {
+                            flex-direction: column;
+                        }
+                        
+                        .product-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                </style>
+            `;
+        }
+        
+        function initializeApp() {
+            // Sistema de usuários
+            const users = {
+                'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
+                'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
+            };
+            
+            // Produtos em localStorage
+            let products = JSON.parse(localStorage.getItem('products') || '[]');
+            let currentUser = null;
+            let isCompactView = false;
+            
+            // Login
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (users[username] && users[username].password === password) {
+                    currentUser = { username, ...users[username] };
+                    document.getElementById('loginContainer').style.display = 'none';
+                    document.getElementById('appContainer').style.display = 'block';
+                    document.getElementById('userDisplay').textContent = username + ' (' + (users[username].level === 'admin' ? 'Admin VIP' : 'Básico') + ')';
+                    
+                    if (users[username].level === 'admin') {
+                        document.getElementById('adminTab').style.display = 'block';
+                    }
+                    
+                    renderProducts();
+                } else {
+                    alert('Usuário ou senha incorretos!');
+                }
+            });
+            
+            // Logout
+            window.logout = function() {
+                currentUser = null;
+                document.getElementById('loginContainer').style.display = 'flex';
+                document.getElementById('appContainer').style.display = 'none';
+                document.getElementById('username').value = '';
+                document.getElementById('password').value = '';
+            };
+            
+            // Navegação entre abas
+            window.showTab = function(tabName) {
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                
+                document.getElementById(tabName + 'Tab').classList.add('active');
+                event.target.classList.add('active');
+            };
+            
+            // Toggle view
+            window.toggleView = function() {
+                isCompactView = !isCompactView;
+                const grid = document.getElementById('productList');
+                const toggle = document.getElementById('viewToggle');
+                
+                if (isCompactView) {
+                    grid.classList.add('compact');
+                    toggle.textContent = '📋 Grade';
+                } else {
+                    grid.classList.remove('compact');
+                    toggle.textContent = '📱 Compacto';
+                }
+                
+                renderProducts();
+            };
+            
+            // Renderizar produtos
+            function renderProducts() {
+                const container = document.getElementById('productList');
+                
+                if (products.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <h3>📦 Nenhum produto encontrado</h3>
+                            <p>Use o painel administrativo para adicionar produtos ao catálogo.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = products.map(product => {
+                    const finalPrice = product.fixedPrice ? product.price : product.price * currentUser.multiplier;
+                    const priceDisplay = finalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                    const fixedIndicator = product.fixedPrice ? ' 🔒 Preço Fixo' : '';
+                    
+                    if (isCompactView) {
+                        return `
+                            <div class="product-card compact">
+                                <div>
+                                    <h3>${product.name}</h3>
+                                    <p class="price">${priceDisplay}${fixedIndicator}</p>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        return `
+                            <div class="product-card">
+                                <h3>${product.name}</h3>
+                                <p class="category">${product.category || 'Sem categoria'}</p>
+                                <p class="description">${product.description || ''}</p>
+                                <div class="price">${priceDisplay}${fixedIndicator}</div>
+                            </div>
+                        `;
+                    }
+                }).join('');
+            }
+            
+            // Admin functions
+            window.showAddProduct = function() {
+                document.getElementById('addProductForm').style.display = 'block';
+            };
+            
+            window.hideAddProduct = function() {
+                document.getElementById('addProductForm').style.display = 'none';
+                document.getElementById('productForm').reset();
+            };
+            
+            // Adicionar produto
+            document.getElementById('productForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const product = {
+                    id: Date.now(),
+                    name: document.getElementById('productName').value,
+                    price: parseFloat(document.getElementById('productPrice').value),
+                    category: document.getElementById('productCategory').value,
+                    description: document.getElementById('productDescription').value,
+                    fixedPrice: document.getElementById('fixedPrice').checked
+                };
+                
+                products.push(product);
+                localStorage.setItem('products', JSON.stringify(products));
+                renderProducts();
+                hideAddProduct();
+                alert('✅ Produto adicionado com sucesso!');
+            });
+            
+            // Excel functions
+            window.importExcel = function() {
+                alert('📊 Funcionalidade de importação Excel em desenvolvimento!');
+            };
+            
+            window.exportExcel = function() {
+                alert('💾 Funcionalidade de exportação Excel em desenvolvimento!');
+            };
+        }
     </script>
 </body>
 </html>
