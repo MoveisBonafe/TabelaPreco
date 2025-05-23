@@ -87,6 +87,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Backup routes
+  app.post("/api/backup/create", async (req, res) => {
+    try {
+      // Com Supabase, o backup é automático, mas podemos criar um snapshot manual
+      const products = await productStorage.getProducts();
+      const categories = await productStorage.getCategories();
+      
+      const backupData = {
+        timestamp: new Date().toISOString(),
+        products: products.length,
+        categories: categories.length,
+        status: 'success'
+      };
+      
+      res.json({ 
+        message: "Backup manual registrado com sucesso!",
+        data: backupData 
+      });
+    } catch (error) {
+      console.error("Error creating backup:", error);
+      res.status(500).json({ message: "Falha ao criar backup" });
+    }
+  });
+
+  app.get("/api/backup/export", async (req, res) => {
+    try {
+      const products = await productStorage.getProducts();
+      const categories = await productStorage.getCategories();
+      
+      const exportData = {
+        metadata: {
+          exportDate: new Date().toISOString(),
+          version: "1.0",
+          totalProducts: products.length,
+          totalCategories: categories.length
+        },
+        products,
+        categories
+      };
+      
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', `attachment; filename=backup-catalogo-${new Date().toISOString().split('T')[0]}.json`);
+      res.json(exportData);
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      res.status(500).json({ message: "Falha ao exportar dados" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

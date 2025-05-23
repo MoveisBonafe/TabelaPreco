@@ -4,6 +4,7 @@ import { Product } from '@shared/schema';
 import { Navbar } from '@/components/layout/navbar';
 import { ProductGrid } from '@/components/products/product-grid';
 import { ProductList } from '@/components/products/product-list';
+import { ProductCompact } from '@/components/products/product-compact';
 import { ProductModal } from '@/components/modals/product-modal';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -17,7 +18,7 @@ interface CatalogProps {
 export function Catalog({ onShowAdminLogin }: CatalogProps) {
   const { products } = useProducts();
   const { categories } = useCategories();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'compact'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name');
@@ -119,10 +120,15 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
             products={filteredProducts}
             onViewDetails={handleViewProduct}
           />
-        ) : (
+        ) : viewMode === 'list' ? (
           <ProductList
             products={filteredProducts}
             onViewDetails={handleViewProduct}
+          />
+        ) : (
+          <ProductCompact
+            products={filteredProducts}
+            onProductClick={handleViewProduct}
           />
         )}
       </div>
