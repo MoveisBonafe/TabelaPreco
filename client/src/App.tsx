@@ -12,24 +12,6 @@ function App() {
   const { showToast, ToastContainer } = useToast();
 
   useEffect(() => {
-    // Limpeza completa de dados antigos no localStorage
-    const keysToRemove = [
-      'catalog-products', 
-      'catalog-categories', 
-      'catalog-data',
-      'catalog-products-v1',
-      'catalog-categories-v1',
-      'catalog-settings',
-      'catalog-users'
-    ];
-    keysToRemove.forEach(key => localStorage.removeItem(key));
-    
-    // Força limpeza de qualquer cache antigo
-    if (localStorage.getItem('catalog-version') !== '2.0') {
-      localStorage.clear();
-      localStorage.setItem('catalog-version', '2.0');
-    }
-    
     // Verifica se já está logado ao carregar a página
     if (auth.isAuthenticated()) {
       setCurrentView('admin');

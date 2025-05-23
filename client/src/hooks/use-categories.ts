@@ -1,19 +1,17 @@
 import { useState, useEffect } from 'react';
 import { Category, InsertCategory } from '@shared/schema';
-import { storageAdapter } from '@/lib/storage-adapter';
-import { githubPagesSync } from '@/lib/github-pages-sync';
+import { storage } from '@/lib/storage';
 
 export function useCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadCategories = async () => {
+  const loadCategories = () => {
     try {
-      const data = await storageAdapter.getCategories();
-      setCategories(Array.isArray(data) ? data : []);
+      const data = storage.getCategories();
+      setCategories(data);
     } catch (error) {
       console.error('Failed to load categories:', error);
-      setCategories([]);
     } finally {
       setLoading(false);
     }
@@ -21,18 +19,11 @@ export function useCategories() {
 
   useEffect(() => {
     loadCategories();
-    
-    // Escuta atualizações de outros navegadores
-    const unsubscribe = githubPagesSync.onDataUpdated(() => {
-      loadCategories();
-    });
-    
-    return unsubscribe;
   }, []);
 
-  const createCategory = async (categoryData: InsertCategory) => {
+  const createCategory = (categoryData: InsertCategory) => {
     try {
-      const newCategory = await storageAdapter.createCategory(categoryData);
+      const newCategory = storage.saveCategory(categoryData);
       setCategories(prev => [...prev, newCategory]);
       return newCategory;
     } catch (error) {
@@ -41,21 +32,27 @@ export function useCategories() {
     }
   };
 
-  const updateCategory = async (id: string, categoryData: Partial<InsertCategory>) => {
+  const updateCategory = (id: string, categoryData: Partial<InsertCategory>) => {
     try {
-      // Para categorias, por enquanto apenas atualiza local
-      setCategories(prev => prev.map(c => 
-        c.id === id ? { ...c, ...categoryData } : c
-      ));
+      const updatedCategory = storage.updateCategory(id, categoryData);
+      if (updatedCategory) {
+        setCategories(prev => prev.map(c => c.id === id ? updatedCategory : c));
+        return updatedCategory;
+      }
+      throw new Error('Category not found');
     } catch (error) {
       console.error('Failed to update category:', error);
       throw error;
     }
   };
 
-  const deleteCategory = async (id: string) => {
+  const deleteCategory = (id: string) => {
     try {
-      setCategories(prev => prev.filter(c => c.id !== id));
+      const success = storage.deleteCategory(id);
+      if (success) {
+        setCategories(prev => prev.filter(c => c.id !== id));
+      }
+      return success;
     } catch (error) {
       console.error('Failed to delete category:', error);
       throw error;

@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Product, InsertProduct } from '@shared/schema';
-import { storageAdapter } from '@/lib/storage-adapter';
-import { githubPagesSync } from '@/lib/github-pages-sync';
+import { storage } from '@/lib/storage';
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadProducts = async () => {
+  const loadProducts = () => {
     try {
-      const data = await storageAdapter.getProducts();
+      const data = storage.getProducts();
       setProducts(data);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -20,19 +19,13 @@ export function useProducts() {
 
   useEffect(() => {
     loadProducts();
-    
-    // Escuta atualizações de outros navegadores (GitHub Pages)
-    const unsubscribe = githubPagesSync.onDataUpdated(() => {
-      loadProducts();
-    });
-    
-    return unsubscribe;
   }, []);
 
-  const createProduct = async (productData: InsertProduct) => {
+  const createProduct = (productData: InsertProduct) => {
     try {
-      const newProduct = await storageAdapter.createProduct(productData);
+      const newProduct = storage.saveProduct(productData);
       setProducts(prev => [...prev, newProduct]);
+      storage.updateCategoryProductCounts();
       return newProduct;
     } catch (error) {
       console.error('Failed to create product:', error);
@@ -40,38 +33,31 @@ export function useProducts() {
     }
   };
 
-  const updateProduct = async (id: string, productData: Partial<InsertProduct>) => {
+  const updateProduct = (id: string, productData: Partial<InsertProduct>) => {
     try {
-      const updatedProduct = await storageAdapter.updateProduct(id, productData);
+      const updatedProduct = storage.updateProduct(id, productData);
       if (updatedProduct) {
         setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
+        storage.updateCategoryProductCounts();
+        return updatedProduct;
       }
-      return updatedProduct;
+      throw new Error('Product not found');
     } catch (error) {
       console.error('Failed to update product:', error);
       throw error;
     }
   };
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = (id: string) => {
     try {
-      // Remove da interface imediatamente
-      setProducts(prev => prev.filter(p => p.id !== id));
-      
-      // Remove do backend/localStorage
-      const success = await storageAdapter.deleteProduct(id);
-      
-      if (!success) {
-        // Se falhou, restaura o produto na interface
-        await loadProducts();
-        throw new Error('Falha ao excluir produto');
+      const success = storage.deleteProduct(id);
+      if (success) {
+        setProducts(prev => prev.filter(p => p.id !== id));
+        storage.updateCategoryProductCounts();
       }
-      
-      console.log('✅ Produto excluído com sucesso');
+      return success;
     } catch (error) {
       console.error('Failed to delete product:', error);
-      // Recarrega para sincronizar estado
-      await loadProducts();
       throw error;
     }
   };

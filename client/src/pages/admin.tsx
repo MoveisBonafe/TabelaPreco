@@ -8,8 +8,6 @@ import { PricingTab } from '@/components/admin/pricing-tab';
 import { UsersTab } from '@/components/admin/users-tab';
 import { ExcelImportExport } from '@/components/admin/excel-import-export';
 import { BackupSystem } from '@/components/admin/backup-system';
-import { SupabaseMonitor } from '@/components/admin/supabase-monitor';
-import { StorageMonitor } from '@/components/admin/storage-monitor';
 import { ProductModal } from '@/components/modals/product-modal';
 import { ProductFormModal } from '@/components/modals/product-form-modal';
 import { useProducts } from '@/hooks/use-products';
@@ -35,27 +33,27 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
   const canEditProducts = currentUser?.permissions?.canEditProducts ?? false;
   const canEditPrices = currentUser?.permissions?.canEditPrices ?? false;
 
-  const handleCreateProduct = async (productData: InsertProduct) => {
+  const handleCreateProduct = (productData: InsertProduct) => {
     try {
-      await createProduct(productData);
+      createProduct(productData);
       showToast('Produto criado com sucesso!');
     } catch (error) {
       showToast('Erro ao criar produto', 'error');
     }
   };
 
-  const handleUpdateProduct = async (id: string, productData: Partial<InsertProduct>) => {
+  const handleUpdateProduct = (id: string, productData: Partial<InsertProduct>) => {
     try {
-      await updateProduct(id, productData);
+      updateProduct(id, productData);
       showToast('Produto atualizado com sucesso!');
     } catch (error) {
       showToast('Erro ao atualizar produto', 'error');
     }
   };
 
-  const handleDeleteProduct = async (id: string) => {
+  const handleDeleteProduct = (id: string) => {
     try {
-      await deleteProduct(id);
+      deleteProduct(id);
       showToast('Produto excluído com sucesso!');
     } catch (error) {
       showToast('Erro ao excluir produto', 'error');
@@ -174,10 +172,6 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
 
         {activeTab === 'backup' && (
           <BackupSystem />
-        )}
-
-        {activeTab === 'supabase' && (
-          import.meta.env.DEV ? <SupabaseMonitor /> : <StorageMonitor />
         )}
       </div>
 
