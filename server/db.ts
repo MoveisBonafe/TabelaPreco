@@ -1,60 +1,59 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
-import ws from "ws";
+import { Pool } from 'pg';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from "@shared/schema";
-import { supabaseLogger } from "./supabase-logger";
+import { supabaseLogger, reconnectWithRetry, testSupabaseConnection } from './supabase-logger';
 
-neonConfig.webSocketConstructor = ws;
+// Tenta conectar primeiro com Supabase, depois fallback para local
+const supabaseUrl = process.env.SUPABASE_DATABASE_URL || "postgresql://postgres:6OrkEBSgQUUuiKTH@db.oozesebwtrbzeelkcmwp.supabase.co:5432/postgres";
+const localUrl = process.env.DATABASE_URL;
 
-if (!process.env.SUPABASE_DATABASE_URL) {
-  throw new Error(
-    "SUPABASE_DATABASE_URL must be set. Did you forget to configure the database URL?",
-  );
+let pool: Pool | null = null;
+let isSupabaseConnected = false;
+
+async function initializeDatabase() {
+  console.log('🚀 Inicializando conexão com banco de dados...');
+  
+  // Tenta conectar com Supabase primeiro
+  if (supabaseUrl) {
+    console.log('🔗 Testando conexão com Supabase...');
+    const supabasePool = await reconnectWithRetry(supabaseUrl, 2);
+    
+    if (supabasePool) {
+      pool = supabasePool;
+      isSupabaseConnected = true;
+      console.log('✅ Conectado ao Supabase com sucesso!');
+    }
+  }
+  
+  // Fallback para banco local se Supabase falhar
+  if (!pool && localUrl) {
+    console.log('🔄 Fallback: conectando ao banco local...');
+    try {
+      pool = new Pool({ connectionString: localUrl });
+      await pool.query('SELECT 1'); // Testa conexão
+      console.log('✅ Conectado ao banco local!');
+    } catch (error) {
+      console.error('❌ Falha ao conectar ao banco local:', error);
+      throw new Error('Nenhuma conexão de banco disponível');
+    }
+  }
+  
+  if (!pool) {
+    throw new Error('Falha ao conectar com qualquer banco de dados');
+  }
 }
 
-// Criar pool com logging
-const connectionString = process.env.SUPABASE_DATABASE_URL;
-export const pool = new Pool({ connectionString });
+// Inicializa a conexão
+initializeDatabase().catch(console.error);
 
-// Interceptar eventos de conexão
-pool.on('connect', () => {
-  const responseTime = Date.now() - (pool as any)._lastConnectionAttempt || 0;
-  supabaseLogger.logSuccessfulConnection(responseTime);
-});
-
-pool.on('error', (error) => {
-  supabaseLogger.logConnectionError(error, connectionString);
-});
-
-// Wrapper para queries com logging
-const originalQuery = pool.query.bind(pool);
-pool.query = async (...args: any[]) => {
-  const startTime = Date.now();
-  supabaseLogger.logConnectionAttempt();
-  
-  try {
-    const result = await originalQuery(...args);
-    const responseTime = Date.now() - startTime;
-    supabaseLogger.logSuccessfulConnection(responseTime);
-    return result;
-  } catch (error) {
-    supabaseLogger.logConnectionError(error, connectionString);
-    throw error;
-  }
-};
-
-export const db = drizzle({ client: pool, schema });
+export { pool, isSupabaseConnected };
+export const db = pool ? drizzle(pool, { schema }) : null;
 
 // Função para obter status da conexão
 export function getConnectionStatus() {
-  const stats = supabaseLogger.getConnectionStats();
   return {
-    isConnected: stats.successfulConnections > 0,
-    lastConnection: stats.lastSuccessfulConnection,
-    totalAttempts: stats.totalAttempts,
-    successRate: stats.totalAttempts > 0 
-      ? ((stats.successfulConnections / stats.totalAttempts) * 100).toFixed(2)
-      : '0',
-    averageResponseTime: Math.round(stats.averageResponseTime)
+    isSupabaseConnected,
+    hasConnection: !!pool,
+    connectionStats: supabaseLogger.getConnectionStats()
   };
 }

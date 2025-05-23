@@ -128,16 +128,7 @@ export function UsersTab() {
   };
 
   const handleEditUser = (user: User) => {
-    setEditingUser({ 
-      ...user,
-      permissions: {
-        ...user.permissions
-      }
-    });
-    setShowPasswords({
-      ...showPasswords,
-      [user.id]: false
-    });
+    setEditingUser({ ...user });
   };
 
   const handleSaveEdit = () => {

@@ -31,7 +31,7 @@ export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModal
           <h2 className="text-2xl font-bold text-slate-800">Acesso ao Sistema</h2>
           <p className="text-slate-600 mt-2">Faça login para acessar o catálogo</p>
         </div>
-
+        
         <form onSubmit={handleAdminLogin} className="space-y-6">
           <div>
             <Label className="block text-sm font-medium text-slate-700 mb-2">Usuário</Label>
@@ -46,7 +46,7 @@ export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModal
               <User className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
             </div>
           </div>
-
+          
           <div>
             <Label className="block text-sm font-medium text-slate-700 mb-2">Senha</Label>
             <div className="relative">
@@ -56,12 +56,11 @@ export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModal
                 onChange={(e) => setPassword(e.target.value)}
                 className="w-full pl-10 pr-4 py-3"
                 placeholder="Digite sua senha"
-                autoComplete="current-password"
               />
               <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
             </div>
           </div>
-
+          
           <div className="space-y-3">
             <Button 
               type="submit" 

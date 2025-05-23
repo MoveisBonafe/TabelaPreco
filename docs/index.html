@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Catálogo de Produtos - Móveis Bonafé</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛋️</text></svg>">
     <meta name="description" content="Catálogo inteligente de produtos com sistema de preços personalizado para diferentes tipos de usuários.">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -371,27 +370,41 @@
     <div id="app"></div>
 
     <script>
-        // Sistema de autenticação (GitHub Pages)
+        // Sistema de autenticação com Supabase
         const auth = {
             currentUser: null,
 
             async login(username, password) {
-                // Sistema de autenticação local para GitHub Pages
-                const users = {
-                    'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
-                    'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
-                };
-                
-                if (users[username] && users[username].password === password) {
-                    this.currentUser = { 
-                        id: username, 
-                        username: username,
-                        ...users[username] 
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, password })
+                    });
+
+                    if (response.ok) {
+                        const userData = await response.json();
+                        this.currentUser = userData;
+                        localStorage.setItem('currentUser', JSON.stringify(userData));
+                        return true;
+                    }
+                    return false;
+                } catch (error) {
+                    // Fallback para localStorage em caso de erro de conexão
+                    const users = {
+                        'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
+                        'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
                     };
-                    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-                    return true;
+                    
+                    if (users[username] && users[username].password === password) {
+                        this.currentUser = { id: username, ...users[username] };
+                        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                        return true;
+                    }
+                    return false;
                 }
-                return false;
             },
 
             logout() {
@@ -414,48 +427,100 @@
             }
         };
 
-        // Sistema de produtos (localStorage - GitHub Pages)
+        // Sistema de produtos com Supabase
         const productManager = {
-            getProducts() {
-                const stored = localStorage.getItem('products');
-                return stored ? JSON.parse(stored) : [];
+            async getProducts() {
+                try {
+                    const response = await fetch('/api/products');
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    throw new Error('Erro ao buscar produtos');
+                } catch (error) {
+                    // Fallback para localStorage
+                    const stored = localStorage.getItem('products');
+                    return stored ? JSON.parse(stored) : [];
+                }
             },
 
-            saveProducts(products) {
+            async saveProducts(products) {
                 localStorage.setItem('products', JSON.stringify(products));
             },
 
-            addProduct(product) {
-                const products = this.getProducts();
-                const newProduct = {
-                    id: Date.now().toString(),
-                    ...product,
-                    createdAt: new Date().toISOString()
-                };
-                products.push(newProduct);
-                this.saveProducts(products);
-                return newProduct;
-            },
-
-            updateProduct(id, updates) {
-                const products = this.getProducts();
-                const index = products.findIndex(p => p.id === id);
-                if (index !== -1) {
-                    products[index] = { ...products[index], ...updates };
-                    this.saveProducts(products);
-                    return products[index];
+            async addProduct(product) {
+                try {
+                    const response = await fetch('/api/products', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(product)
+                    });
+                    
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    throw new Error('Erro ao criar produto');
+                } catch (error) {
+                    // Fallback para localStorage
+                    const products = JSON.parse(localStorage.getItem('products') || '[]');
+                    const newProduct = {
+                        id: Date.now().toString(),
+                        ...product,
+                        createdAt: new Date().toISOString()
+                    };
+                    products.push(newProduct);
+                    localStorage.setItem('products', JSON.stringify(products));
+                    return newProduct;
                 }
-                return null;
             },
 
-            deleteProduct(id) {
-                const products = this.getProducts();
-                const filtered = products.filter(p => p.id !== id);
-                this.saveProducts(filtered);
+            async updateProduct(id, updates) {
+                try {
+                    const response = await fetch(`/api/products/${id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(updates)
+                    });
+                    
+                    if (response.ok) {
+                        return await response.json();
+                    }
+                    throw new Error('Erro ao atualizar produto');
+                } catch (error) {
+                    // Fallback para localStorage
+                    const products = JSON.parse(localStorage.getItem('products') || '[]');
+                    const index = products.findIndex(p => p.id === id);
+                    if (index !== -1) {
+                        products[index] = { ...products[index], ...updates };
+                        localStorage.setItem('products', JSON.stringify(products));
+                        return products[index];
+                    }
+                    return null;
+                }
             },
 
-            getCategories() {
-                const products = this.getProducts();
+            async deleteProduct(id) {
+                try {
+                    const response = await fetch(`/api/products/${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('Erro ao deletar produto');
+                    }
+                } catch (error) {
+                    // Fallback para localStorage
+                    const products = JSON.parse(localStorage.getItem('products') || '[]');
+                    const filtered = products.filter(p => p.id !== id);
+                    localStorage.setItem('products', JSON.stringify(filtered));
+                }
+            },
+
+            async getCategories() {
+                const products = await this.getProducts();
                 const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
                 return categories.sort();
             }
@@ -547,9 +612,6 @@
                     if (target.matches('[data-action="import-excel"]')) {
                         this.handleImportExcel();
                     }
-                    if (target.matches('[data-action="download-template"]')) {
-                        this.handleDownloadTemplate();
-                    }
                     if (target.matches('[data-action="export-excel"]')) {
                         this.handleExportExcel();
                     }
@@ -557,7 +619,7 @@
                         this.handleExportCSV();
                     }
                     if (target.matches('[data-action="download-template"]')) {
-                        this.handleDownloadTemplate();
+                        this.downloadExcelTemplate();
                     }
 
                     // Backup
@@ -580,58 +642,6 @@
                     }
                     if (target.matches('[data-action="optimize-storage"]')) {
                         this.optimizeStorage();
-                    }
-                    
-                    // Ações do Monitor Supabase
-                    if (target.matches('[data-action="refresh-connection-status"]')) {
-                        this.refreshConnectionStatus();
-                    }
-                    if (target.matches('[data-action="refresh-error-logs"]')) {
-                        this.refreshErrorLogs();
-                    }
-                    if (target.matches('[data-action="clear-supabase-logs"]')) {
-                        this.clearSupabaseLogs();
-                    }
-                    if (target.matches('[data-action="generate-health-report"]')) {
-                        this.generateHealthReport();
-                    }
-                    if (target.matches('[data-action="test-supabase-connection"]')) {
-                        this.testSupabaseConnection();
-                    }
-
-                    // Ações dos produtos
-                    if (target.matches('[data-action="toggle-view-mode"]')) {
-                        this.toggleViewMode();
-                    }
-                    if (target.matches('[data-action="edit-product"]')) {
-                        const productId = target.getAttribute('data-product-id');
-                        this.editProduct(productId);
-                    }
-                    if (target.matches('[data-action="delete-product"]')) {
-                        const productId = target.getAttribute('data-product-id');
-                        this.deleteProduct(productId);
-                    }
-                    if (target.matches('[data-action="edit-price"]')) {
-                        const productId = target.getAttribute('data-product-id');
-                        this.editPrice(productId);
-                    }
-                    if (target.matches('[data-action="edit-category"]')) {
-                        const categoryName = target.getAttribute('data-category');
-                        this.editCategory(categoryName);
-                    }
-                    if (target.matches('[data-action="delete-category"]')) {
-                        const categoryName = target.getAttribute('data-category');
-                        this.deleteCategory(categoryName);
-                    }
-                    if (target.matches('[data-action="edit-user"]')) {
-                        const username = target.getAttribute('data-username');
-                        this.editUser(username);
-                    }
-                    if (target.matches('[data-action="export-price-history"]')) {
-                        this.exportPriceHistory();
-                    }
-                    if (target.matches('[data-action="clear-price-history"]')) {
-                        this.clearPriceHistory();
                     }
                 });
 
@@ -804,96 +814,28 @@
                         const lines = text.split('\n');
                         const products = [];
 
-                        // Detecta automaticamente se tem cabeçalho
-                        let startIndex = 0;
-                        if (lines.length > 0) {
-                            const firstLine = lines[0].toLowerCase();
-                            if (firstLine.includes('nome') || firstLine.includes('name') || firstLine.includes('preço') || firstLine.includes('price')) {
-                                startIndex = 1; // Pula cabeçalho
-                            }
-                        }
-                        
-                        console.log(`🔍 Processando arquivo CSV/Excel:`, { totalLinhas: lines.length, inicioEm: startIndex });
-                        
-                        for (let i = startIndex; i < lines.length; i++) {
-                            const line = lines[i].trim();
-                            if (!line) continue; // Pula linhas vazias
-                            
-                            const columns = line.split(',');
-                            const nomeColA = columns[0]?.trim(); // Coluna A = Nome
-                            const precoColB = columns[1]?.trim(); // Coluna B = Preço
-                            
-                            console.log(`📝 Linha ${i + 1}:`, { nomeColA, precoColB });
-                            
-                            // Valida se ambas as colunas existem
-                            if (nomeColA && precoColB) {
-                                // Limpa e converte o preço (aceita vírgula e ponto como decimal)
-                                let precoLimpo = precoColB.toString().trim();
-                                
-                                // Remove símbolos de moeda e espaços
-                                precoLimpo = precoLimpo.replace(/[R$\s]/g, '');
-                                
-                                // Substitui vírgula por ponto para conversão decimal
-                                if (precoLimpo.includes(',') && !precoLimpo.includes('.')) {
-                                    precoLimpo = precoLimpo.replace(',', '.');
-                                }
-                                
-                                const precoNumero = parseFloat(precoLimpo);
-                                
-                                if (!isNaN(precoNumero) && precoNumero > 0) {
-                                    const newProduct = {
-                                        id: Date.now() + Math.random(), // ID único
-                                        name: nomeColA.trim(),
-                                        price: precoNumero,
-                                        category: 'Importado',
-                                        description: '',
-                                        fixedPrice: false
-                                    };
-                                    
-                                    products.push(newProduct);
-                                    console.log(`✅ Produto adicionado:`, { nome: nomeColA, preco: precoNumero });
-                                } else {
-                                    console.log(`❌ Preço inválido na linha ${i + 1}:`, precoColB, '→', precoLimpo);
-                                }
-                            } else {
-                                console.log(`⚠️ Linha ${i + 1} ignorada - dados incompletos`);
+                        // Pula o cabeçalho
+                        for (let i = 1; i < lines.length; i++) {
+                            const columns = lines[i].split(',');
+                            if (columns.length >= 2 && columns[0].trim() && columns[1].trim()) {
+                                products.push({
+                                    name: columns[0].trim(),
+                                    price: parseFloat(columns[1].trim()) || 0,
+                                    category: columns[2]?.trim() || 'Importado',
+                                    description: columns[3]?.trim() || '',
+                                    fixedPrice: columns[4]?.trim().toLowerCase() === 'sim'
+                                });
                             }
                         }
 
-                        if (products.length > 0) {
-                            products.forEach(product => productManager.addProduct(product));
-                            toast.show(`${products.length} produtos importados com sucesso!`);
-                            this.render();
-                        } else {
-                            toast.show('Nenhum produto válido encontrado. Verifique se o arquivo tem as colunas: Nome, Preço', 'error');
-                        }
+                        products.forEach(product => productManager.addProduct(product));
+                        toast.show(`${products.length} produtos importados com sucesso!`);
+                        this.render();
                     } catch (error) {
-                        toast.show('Erro ao processar arquivo. Use formato CSV com Nome,Preço', 'error');
+                        toast.show('Erro ao processar arquivo. Use formato CSV.', 'error');
                     }
                 };
                 reader.readAsText(file);
-            }
-
-            handleDownloadTemplate() {
-                // Modelo CORRETO: Coluna A = Nome, Coluna B = Preço (APENAS)
-                const templateData = [
-                    'Nome,Preço',  // Cabeçalho simples: A1=Nome, B1=Preço
-                    'Mesa de Jantar,850',
-                    'Cadeira Estofada,320', 
-                    'Sofá 3 Lugares,1200',
-                    'Guarda-roupa,1800',
-                    'Cama Box Casal,950'
-                ];
-                
-                const csvContent = templateData.join('\n');
-                
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'modelo_produtos.csv';
-                link.click();
-                
-                toast.show('Modelo Excel baixado! Coluna A=Nome, Coluna B=Preço ✨');
             }
 
             handleExportExcel() {
@@ -908,7 +850,16 @@
                 toast.show('Arquivo CSV exportado com sucesso!');
             }
 
-
+            downloadExcelTemplate() {
+                const template = [
+                    ['Nome', 'Preço', 'Categoria', 'Descrição', 'Preço Fixo'],
+                    ['Sofá 3 Lugares', '1299.99', 'Móveis', 'Sofá confortável', 'Não'],
+                    ['Mesa de Jantar', '899.99', 'Móveis', 'Mesa para 6 pessoas', 'Sim']
+                ];
+                
+                this.downloadData(template, 'modelo_produtos.csv', 'csv');
+                toast.show('Modelo CSV baixado com sucesso!');
+            }
 
             // Funcionalidades de Backup
             handleBackupData() {
@@ -1055,11 +1006,11 @@
                                 <form id="loginForm">
                                     <div class="form-group">
                                         <label class="form-label">Usuário</label>
-                                        <input type="text" id="username" name="username" class="form-input" autocomplete="username" required>
+                                        <input type="text" id="username" name="username" class="form-input" required>
                                     </div>
                                     <div class="form-group">
                                         <label class="form-label">Senha</label>
-                                        <input type="password" id="password" name="password" class="form-input" autocomplete="current-password" required>
+                                        <input type="password" id="password" name="password" class="form-input" required>
                                     </div>
                                     <button type="submit" class="btn btn-primary" style="width: 100%;" data-action="login">
                                         Entrar
@@ -1084,7 +1035,7 @@
                             </div>
                             <div class="user-menu">
                                 <div class="user-info">
-                                    ${user.id || user.username} (${user.level === 'admin' ? 'Admin VIP' : 'Básico'})
+                                    ${user.username} (${user.level === 'admin' ? 'Admin VIP' : 'Básico'})
                                 </div>
                                 <button class="btn btn-danger" data-action="logout">Sair</button>
                             </div>
@@ -1184,8 +1135,6 @@
                         return this.renderExcelTab();
                     case 'backup':
                         return this.renderBackupTab();
-                    case 'notificacoes':
-                        return this.renderNotificationsTab();
                     case 'monitor':
                         return this.renderMonitorTab();
                     default:
@@ -1193,9 +1142,9 @@
                 }
             }
 
-            renderProductsTab() {
-                const products = productManager.getProducts();
-                const categories = productManager.getCategories();
+            async renderProductsTab() {
+                const products = await productManager.getProducts();
+                const categories = await productManager.getCategories();
                 const user = auth.getCurrentUser();
 
                 return `
@@ -1220,16 +1169,11 @@
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">Lista de Produtos</h3>
-                            <div style="display: flex; gap: 0.5rem; align-items: center;">
-                                <button class="btn btn-secondary" data-action="toggle-view-mode" title="Alternar visualização">
-                                    <span id="view-mode-icon">📋</span>
+                            ${user.level === 'admin' ? `
+                                <button class="btn btn-primary" data-action="add-product">
+                                    ➕ Novo Produto
                                 </button>
-                                ${user.level === 'admin' ? `
-                                    <button class="btn btn-primary" data-action="add-product">
-                                        ➕ Novo Produto
-                                    </button>
-                                ` : ''}
-                            </div>
+                            ` : ''}
                         </div>
 
                         ${products.length === 0 ? `
@@ -1239,37 +1183,8 @@
                                 <p>Comece adicionando seu primeiro produto ao catálogo</p>
                             </div>
                         ` : `
-                            <div id="products-container" class="products-list-view">
-                                ${products.map(product => {
-                                    const finalPrice = product.fixedPrice ? product.price : product.price * user.multiplier;
-                                    const priceDisplay = finalPrice.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-                                    
-                                    return `
-                                        <div class="product-card" data-product-id="${product.id}">
-                                            <div class="product-content">
-                                                <div class="product-info">
-                                                    <h4 class="product-name" title="${product.name}">${product.name}</h4>
-                                                    <div class="product-details">
-                                                        <span class="product-category">${product.category}</span>
-                                                        ${product.fixedPrice ? '<span class="fixed-price-badge">🔒 Fixo</span>' : ''}
-                                                    </div>
-                                                    <div class="product-price">${priceDisplay}</div>
-                                                    ${product.description ? `<div class="product-description" title="${product.description}">${product.description}</div>` : ''}
-                                                </div>
-                                                ${user.level === 'admin' ? `
-                                                    <div class="product-actions">
-                                                        <button class="btn-icon" data-action="edit-product" data-product-id="${product.id}" title="Editar">
-                                                            ✏️
-                                                        </button>
-                                                        <button class="btn-icon btn-danger" data-action="delete-product" data-product-id="${product.id}" title="Excluir">
-                                                            🗑️
-                                                        </button>
-                                                    </div>
-                                                ` : ''}
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
+                            <div class="grid grid-cols-3">
+                                ${products.map(product => this.renderProductCard(product, user)).join('')}
                             </div>
                         `}
                     </div>
@@ -1349,7 +1264,6 @@
             renderCategoriesTab() {
                 const categories = productManager.getCategories();
                 const products = productManager.getProducts();
-                const user = auth.getCurrentUser();
                 
                 return `
                     <div class="page-header">
@@ -1377,57 +1291,21 @@
                                 <p>As categorias são criadas automaticamente quando você adiciona produtos</p>
                             </div>
                         ` : `
-                            <div style="overflow-x: auto;">
-                                <table style="width: 100%; border-collapse: collapse;">
-                                    <thead>
-                                        <tr style="background: #f8fafc; border-bottom: 1px solid #e5e7eb;">
-                                            <th style="text-align: left; padding: 0.75rem; font-weight: 600;">Categoria</th>
-                                            <th style="text-align: left; padding: 0.75rem; font-weight: 600;">Produtos</th>
-                                            <th style="text-align: left; padding: 0.75rem; font-weight: 600;">Lista de Produtos</th>
-                                            ${user.level === 'admin' ? '<th style="text-align: left; padding: 0.75rem; font-weight: 600;">Ações</th>' : ''}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${categories.map(category => {
-                                            const categoryProducts = products.filter(p => p.category === category);
-                                            return `
-                                                <tr style="border-bottom: 1px solid #f1f5f9;">
-                                                    <td style="padding: 0.75rem;">
-                                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                                            <span style="font-size: 1.2rem;">📂</span>
-                                                            <strong>${category}</strong>
-                                                        </div>
-                                                    </td>
-                                                    <td style="padding: 0.75rem;">
-                                                        <span style="background: #f3f4f6; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-weight: 600;">
-                                                            ${categoryProducts.length}
-                                                        </span>
-                                                    </td>
-                                                    <td style="padding: 0.75rem; max-width: 300px;">
-                                                        <div style="font-size: 0.875rem; color: #6b7280;">
-                                                            ${categoryProducts.length > 0 ? 
-                                                                categoryProducts.map(p => p.name).slice(0, 4).join(', ') + 
-                                                                (categoryProducts.length > 4 ? ` e mais ${categoryProducts.length - 4}...` : '') 
-                                                                : 'Nenhum produto'}
-                                                        </div>
-                                                    </td>
-                                                    ${user.level === 'admin' ? `
-                                                        <td style="padding: 0.75rem;">
-                                                            <div style="display: flex; gap: 0.25rem;">
-                                                                <button class="btn-icon" data-action="edit-category" data-category="${category}" title="Editar categoria">
-                                                                    ✏️
-                                                                </button>
-                                                                <button class="btn-icon btn-danger" data-action="delete-category" data-category="${category}" title="Excluir categoria">
-                                                                    🗑️
-                                                                </button>
-                                                            </div>
-                                                        </td>
-                                                    ` : ''}
-                                                </tr>
-                                            `;
-                                        }).join('')}
-                                    </tbody>
-                                </table>
+                            <div class="grid grid-cols-2">
+                                ${categories.map(category => {
+                                    const categoryProducts = products.filter(p => p.category === category);
+                                    return `
+                                        <div class="card">
+                                            <div class="card-header">
+                                                <h4 class="card-title">📂 ${category}</h4>
+                                            </div>
+                                            <div class="card-subtitle">${categoryProducts.length} produtos</div>
+                                            <p style="color: #64748b; font-size: 0.875rem;">
+                                                Produtos: ${categoryProducts.map(p => p.name).join(', ')}
+                                            </p>
+                                        </div>
+                                    `;
+                                }).join('')}
                             </div>
                         `}
                     </div>
@@ -1435,10 +1313,7 @@
             }
 
             renderPricesTab() {
-                const users = {
-                    'MoveisBonafe': { level: 'admin', multiplier: 1 },
-                    'Loja': { level: 'basic', multiplier: 1.2 }
-                };
+                const users = auth.users;
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Preços</h1>
@@ -1495,10 +1370,7 @@
             }
 
             renderUsersTab() {
-                const users = {
-                    'MoveisBonafe': { level: 'admin', multiplier: 1 },
-                    'Loja': { level: 'basic', multiplier: 1.2 }
-                };
+                const users = auth.users;
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Usuários</h1>
@@ -1575,22 +1447,12 @@
                             <div style="margin: 1rem 0;">
                                 <input type="file" id="excelFile" accept=".xlsx,.xls,.csv" class="form-input">
                                 <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
-                                    <strong>Layout do Excel:</strong><br>
-                                    • Coluna A: Nome do produto<br>
-                                    • Coluna B: Preço (apenas números)
-                                </p>
-                                <p style="font-size: 0.875rem; color: #10b981; margin-top: 0.5rem;">
-                                    ✨ Super simples - apenas 2 colunas!
+                                    Formato: Nome, Preço, Categoria, Descrição, Preço Fixo
                                 </p>
                             </div>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button class="btn btn-primary" data-action="import-excel">
-                                    📥 Importar Arquivo
-                                </button>
-                                <button class="btn btn-secondary" data-action="download-template">
-                                    📋 Modelo Excel
-                                </button>
-                            </div>
+                            <button class="btn btn-primary" data-action="import-excel">
+                                📥 Importar Arquivo
+                            </button>
                         </div>
 
                         <div class="card">
@@ -1728,183 +1590,14 @@
                 `;
             }
 
-            renderNotificationsTab() {
-                const priceHistory = JSON.parse(localStorage.getItem('priceHistory') || '[]');
-                
-                return `
-                    <div class="page-header">
-                        <h1 class="page-title">🔔 Notificações de Preços</h1>
-                        <p class="page-description">Histórico de mudanças de preços e notificações</p>
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">📈 Histórico de Mudanças de Preços</h3>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button class="btn btn-secondary" data-action="export-price-history">
-                                    📤 Exportar Histórico
-                                </button>
-                                <button class="btn btn-danger" data-action="clear-price-history">
-                                    🗑️ Limpar Histórico
-                                </button>
-                            </div>
-                        </div>
-
-                        ${priceHistory.length === 0 ? `
-                            <div class="empty-state">
-                                <div class="empty-icon">📊</div>
-                                <h3 class="empty-title">Nenhuma mudança de preço registrada</h3>
-                                <p>As mudanças de preços aparecerão aqui automaticamente</p>
-                            </div>
-                        ` : `
-                            <div style="max-height: 600px; overflow-y: auto;">
-                                ${priceHistory.map(record => {
-                                    const isIncrease = record.newPrice > record.oldPrice;
-                                    const icon = isIncrease ? '📈' : '📉';
-                                    const color = isIncrease ? '#dc2626' : '#059669';
-                                    const date = new Date(record.timestamp).toLocaleString('pt-BR');
-                                    
-                                    return `
-                                        <div style="border-bottom: 1px solid #f1f5f9; padding: 1rem; display: flex; align-items: center; gap: 1rem;">
-                                            <span style="font-size: 1.5rem;">${icon}</span>
-                                            <div style="flex: 1;">
-                                                <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">
-                                                    ${record.productName}
-                                                </div>
-                                                <div style="font-size: 0.875rem; margin-bottom: 0.25rem;">
-                                                    <span style="color: #ef4444;">R$ ${record.oldPrice.toFixed(2)}</span>
-                                                    <span style="margin: 0 0.5rem;">→</span>
-                                                    <span style="color: ${color}; font-weight: 600;">R$ ${record.newPrice.toFixed(2)}</span>
-                                                    <span style="color: #6b7280; margin-left: 0.5rem;">
-                                                        (${record.percentChange > 0 ? '+' : ''}${record.percentChange}%)
-                                                    </span>
-                                                </div>
-                                                <div style="font-size: 0.75rem; color: #6b7280;">
-                                                    Por ${record.username} em ${date}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        `}
-                    </div>
-
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">⚙️ Configurações de Notificações</h3>
-                        </div>
-                        <div style="padding: 1rem;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                <span>Notificações visuais</span>
-                                <label style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <input type="checkbox" checked> Ativado
-                                </label>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                                <span>Auto-remover notificações</span>
-                                <select style="padding: 0.25rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
-                                    <option value="5">5 segundos</option>
-                                    <option value="10">10 segundos</option>
-                                    <option value="0">Manual</option>
-                                </select>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; align-items: center;">
-                                <span>Alertas para aumentos de preço</span>
-                                <label style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <input type="checkbox" checked> Ativado
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-
             renderMonitorTab() {
                 const products = productManager.getProducts();
                 const categories = productManager.getCategories();
-                const users = ['MoveisBonafe', 'Loja'];
+                const users = Object.keys(auth.users);
                 const storageSize = JSON.stringify(products).length;
                 const lastUpdate = localStorage.getItem('lastUpdate') || new Date().toLocaleDateString('pt-BR');
                 
                 return `
-                    <div class="page-header">
-                        <h1 class="page-title">Monitor Supabase</h1>
-                        <p class="page-description">Logs detalhados de conexão e diagnóstico em tempo real</p>
-                    </div>
-
-                    <!-- Status da Conexão em Tempo Real -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">🔗 Status da Conexão</h3>
-                            <button class="btn btn-secondary" data-action="refresh-connection-status">
-                                🔄 Atualizar
-                            </button>
-                        </div>
-                        <div id="connection-status" style="padding: 1rem;">
-                            <div style="text-align: center; color: #64748b;">
-                                Carregando status da conexão...
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Logs de Erros Recentes -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">📋 Logs de Erros Recentes</h3>
-                            <div style="display: flex; gap: 0.5rem;">
-                                <button class="btn btn-secondary" data-action="refresh-error-logs">
-                                    🔄 Atualizar Logs
-                                </button>
-                                <button class="btn btn-danger" data-action="clear-supabase-logs">
-                                    🗑️ Limpar Logs
-                                </button>
-                            </div>
-                        </div>
-                        <div id="error-logs" style="padding: 1rem;">
-                            <div style="text-align: center; color: #64748b;">
-                                Carregando logs de erro...
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Relatório de Saúde -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">🏥 Relatório de Saúde do Sistema</h3>
-                            <button class="btn btn-primary" data-action="generate-health-report">
-                                📊 Gerar Relatório
-                            </button>
-                        </div>
-                        <div id="health-report" style="padding: 1rem;">
-                            <div style="text-align: center; color: #64748b;">
-                                Clique em "Gerar Relatório" para ver diagnóstico completo
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Teste Manual de Conexão -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">🧪 Teste Manual de Conexão</h3>
-                        </div>
-                        <div style="padding: 1rem;">
-                            <div class="form-group">
-                                <label class="form-label" for="test-connection-string">String de Conexão do Supabase</label>
-                                <input type="password" id="test-connection-string" class="form-input" 
-                                       autocomplete="off" placeholder="postgresql://user:password@host:port/database">
-                                <p style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
-                                    Cole aqui sua string de conexão do Supabase para teste
-                                </p>
-                            </div>
-                            <button class="btn btn-primary" data-action="test-supabase-connection">
-                                🔌 Testar Conexão
-                            </button>
-                        </div>
-                        <div id="connection-test-result"></div>
-                    </div>
-
-                    <!-- Sistema Local (GitHub Pages) -->
                     <div class="page-header">
                         <h1 class="page-title">Monitor</h1>
                         <p class="page-description">Monitore o sistema e estatísticas</p>
@@ -1990,585 +1683,6 @@
                         </div>
                     </div>
                 `;
-            }
-            // === FUNÇÕES DO MONITOR SUPABASE ===
-
-            async refreshConnectionStatus() {
-                const statusElement = document.getElementById('connection-status');
-                if (!statusElement) return;
-
-                statusElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Verificando status...</div>';
-
-                try {
-                    // Verifica se estamos no GitHub Pages ou servidor local
-                    const isGitHubPages = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
-                    
-                    if (isGitHubPages) {
-                        // Modo GitHub Pages - simula status baseado no localStorage
-                        const products = productManager.getProducts();
-                        const hasData = products.length > 0;
-                        const lastUpdate = localStorage.getItem('lastUpdate');
-                        
-                        statusElement.innerHTML = `
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                <div style="text-align: center;">
-                                    <div style="font-size: 2rem; margin-bottom: 0.5rem;">📱</div>
-                                    <div style="font-weight: bold; color: #3b82f6;">GITHUB PAGES</div>
-                                </div>
-                                <div>
-                                    <div><strong>Modo:</strong> Offline (localStorage)</div>
-                                    <div><strong>Produtos:</strong> ${products.length}</div>
-                                    <div><strong>Status:</strong> ${hasData ? 'Com dados' : 'Vazio'}</div>
-                                    <div><strong>Última Atualização:</strong> ${lastUpdate || 'Nunca'}</div>
-                                    <div><strong>Armazenamento:</strong> ${(JSON.stringify(products).length / 1024).toFixed(1)}KB</div>
-                                </div>
-                            </div>
-                        `;
-                        return;
-                    }
-                    
-                    const response = await fetch('/api/supabase/status');
-                    const data = await response.json();
-
-                    const statusColor = data.isConnected ? '#10b981' : '#ef4444';
-                    const statusIcon = data.isConnected ? '🟢' : '🔴';
-                    const statusText = data.isConnected ? 'CONECTADO' : 'DESCONECTADO';
-
-                    statusElement.innerHTML = `
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                            <div style="text-align: center;">
-                                <div style="font-size: 2rem; margin-bottom: 0.5rem;">${statusIcon}</div>
-                                <div style="font-weight: bold; color: ${statusColor};">${statusText}</div>
-                            </div>
-                            <div>
-                                <div><strong>Tentativas:</strong> ${data.totalAttempts}</div>
-                                <div><strong>Taxa de Sucesso:</strong> ${data.successRate}%</div>
-                                <div><strong>Tempo Médio:</strong> ${data.averageResponseTime}ms</div>
-                                <div><strong>Última Conexão:</strong> ${data.lastConnection ? new Date(data.lastConnection).toLocaleString('pt-BR') : 'Nunca'}</div>
-                                <div><strong>Uptime:</strong> ${Math.floor(data.uptime / 60)}min</div>
-                            </div>
-                        </div>
-                    `;
-                } catch (error) {
-                    console.error('Erro ao carregar status:', error);
-                    statusElement.innerHTML = `
-                        <div style="color: #ef4444; text-align: center;">
-                            ❌ Erro ao carregar status da conexão
-                        </div>
-                    `;
-                }
-            }
-
-            async refreshErrorLogs() {
-                const logsElement = document.getElementById('error-logs');
-                if (!logsElement) return;
-
-                logsElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Carregando logs...</div>';
-
-                try {
-                    // Verifica se estamos no GitHub Pages
-                    const isGitHubPages = window.location.hostname.includes('github.io') || window.location.protocol === 'file:';
-                    
-                    if (isGitHubPages) {
-                        // Modo GitHub Pages - mostra logs do localStorage
-                        const errorLogs = JSON.parse(localStorage.getItem('errorLogs') || '[]');
-                        
-                        if (errorLogs.length > 0) {
-                            const errorsHtml = errorLogs.slice(-5).map(error => `
-                                <div style="border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; background: #fef2f2;">
-                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                        <strong style="color: #dc2626;">${error.message}</strong>
-                                        <span style="font-size: 0.875rem; color: #64748b;">${new Date(error.timestamp).toLocaleString('pt-BR')}</span>
-                                    </div>
-                                    <div><strong>Tipo:</strong> ${error.type}</div>
-                                </div>
-                            `).join('');
-
-                            logsElement.innerHTML = `
-                                <div style="margin-bottom: 1rem;">
-                                    <strong>Total de Logs:</strong> ${errorLogs.length} | 
-                                    <strong>Modo:</strong> GitHub Pages (localStorage)
-                                </div>
-                                ${errorsHtml}
-                            `;
-                        } else {
-                            logsElement.innerHTML = `
-                                <div style="text-align: center; color: #10b981;">
-                                    ✅ Nenhum erro registrado no localStorage
-                                </div>
-                            `;
-                        }
-                        return;
-                    }
-                    
-                    const response = await fetch('/api/supabase/logs');
-                    const data = await response.json();
-
-                    if (data.recentErrors && data.recentErrors.length > 0) {
-                        const errorsHtml = data.recentErrors.map(error => `
-                            <div style="border: 1px solid #e5e7eb; border-radius: 0.5rem; padding: 1rem; margin-bottom: 1rem; background: #fef2f2;">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                                    <strong style="color: #dc2626;">${error.error}</strong>
-                                    <span style="font-size: 0.875rem; color: #64748b;">${new Date(error.timestamp).toLocaleString('pt-BR')}</span>
-                                </div>
-                                ${error.code ? `<div><strong>Código:</strong> ${error.code}</div>` : ''}
-                            </div>
-                        `).join('');
-
-                        logsElement.innerHTML = `
-                            <div style="margin-bottom: 1rem;">
-                                <strong>Total de Erros:</strong> ${data.statistics.failedConnections} | 
-                                <strong>Último Erro:</strong> ${data.statistics.lastFailedConnection ? new Date(data.statistics.lastFailedConnection).toLocaleString('pt-BR') : 'Nenhum'}
-                            </div>
-                            ${errorsHtml}
-                        `;
-                    } else {
-                        logsElement.innerHTML = `
-                            <div style="text-align: center; color: #10b981;">
-                                ✅ Nenhum erro registrado
-                            </div>
-                        `;
-                    }
-                } catch (error) {
-                    console.error('Erro ao carregar logs:', error);
-                    logsElement.innerHTML = `
-                        <div style="color: #ef4444; text-align: center;">
-                            ❌ Erro ao carregar logs de erro
-                        </div>
-                    `;
-                }
-            }
-
-            async clearSupabaseLogs() {
-                if (!confirm('Tem certeza que deseja limpar todos os logs do Supabase?')) {
-                    return;
-                }
-
-                try {
-                    const response = await fetch('/api/supabase/clear-logs', {
-                        method: 'DELETE'
-                    });
-                    const data = await response.json();
-
-                    toast.show(data.message);
-                    this.refreshErrorLogs();
-                    this.refreshConnectionStatus();
-                } catch (error) {
-                    console.error('Erro ao limpar logs:', error);
-                    toast.show('Erro ao limpar logs', 'error');
-                }
-            }
-
-            async generateHealthReport() {
-                const reportElement = document.getElementById('health-report');
-                if (!reportElement) return;
-
-                reportElement.innerHTML = '<div style="text-align: center; color: #64748b;">🔄 Gerando relatório...</div>';
-
-                try {
-                    const response = await fetch('/api/supabase/health-report');
-                    const data = await response.json();
-                    const report = data.report;
-
-                    const statusColor = {
-                        'HEALTHY': '#10b981',
-                        'WARNING': '#f59e0b',
-                        'CRITICAL': '#ef4444'
-                    }[report.health.status] || '#64748b';
-
-                    const statusIcon = {
-                        'HEALTHY': '✅',
-                        'WARNING': '⚠️',
-                        'CRITICAL': '🚨'
-                    }[report.health.status] || '❓';
-
-                    reportElement.innerHTML = `
-                        <div style="margin-bottom: 2rem;">
-                            <h4 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
-                                <span style="font-size: 1.5rem;">${statusIcon}</span>
-                                Status: <span style="color: ${statusColor};">${report.health.status}</span>
-                            </h4>
-                            
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
-                                <div>
-                                    <strong>Taxa de Sucesso:</strong> ${report.health.successRate}<br>
-                                    <strong>Tentativas Totais:</strong> ${report.health.totalAttempts}<br>
-                                    <strong>Tempo Médio:</strong> ${report.health.averageResponseTime}
-                                </div>
-                                <div>
-                                    <strong>Última Conexão:</strong> ${report.health.lastConnection !== 'Never' ? new Date(report.health.lastConnection).toLocaleString('pt-BR') : 'Nunca'}<br>
-                                    <strong>Total de Erros:</strong> ${report.errors.totalErrors}<br>
-                                    <strong>Último Erro:</strong> ${report.errors.lastError !== 'None' ? new Date(report.errors.lastError).toLocaleString('pt-BR') : 'Nenhum'}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div style="margin-bottom: 1rem;">
-                            <h5>📊 Tipos de Erro</h5>
-                            ${Object.keys(report.errors.errorTypes).length > 0 ? 
-                                Object.entries(report.errors.errorTypes).map(([type, count]) => 
-                                    `<div><strong>${type}:</strong> ${count} ocorrências</div>`
-                                ).join('') : 
-                                '<div style="color: #10b981;">Nenhum erro registrado</div>'
-                            }
-                        </div>
-
-                        <div>
-                            <h5>💡 Recomendações</h5>
-                            ${report.recommendations.map(rec => `<div style="margin-bottom: 0.5rem;">${rec}</div>`).join('')}
-                        </div>
-
-                        <div style="margin-top: 1rem; font-size: 0.875rem; color: #64748b;">
-                            <strong>Relatório gerado em:</strong> ${new Date(data.generatedAt).toLocaleString('pt-BR')}
-                        </div>
-                    `;
-                } catch (error) {
-                    console.error('Erro ao gerar relatório:', error);
-                    reportElement.innerHTML = `
-                        <div style="color: #ef4444; text-align: center;">
-                            ❌ Erro ao gerar relatório de saúde
-                        </div>
-                    `;
-                }
-            }
-
-            async testSupabaseConnection() {
-                const connectionString = document.getElementById('test-connection-string').value;
-                const resultElement = document.getElementById('connection-test-result');
-                
-                if (!connectionString) {
-                    toast.show('Digite a string de conexão do Supabase', 'error');
-                    return;
-                }
-
-                if (resultElement) {
-                    resultElement.innerHTML = '<div style="padding: 1rem; color: #64748b;">🔄 Testando conexão...</div>';
-                }
-
-                try {
-                    const response = await fetch('/api/supabase/test', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ connectionString })
-                    });
-                    
-                    const data = await response.json();
-
-                    if (resultElement) {
-                        const color = data.success ? '#10b981' : '#ef4444';
-                        const icon = data.success ? '✅' : '❌';
-                        
-                        resultElement.innerHTML = `
-                            <div style="padding: 1rem; border-top: 1px solid #e5e7eb; background: ${data.success ? '#f0fdf4' : '#fef2f2'};">
-                                <div style="display: flex; align-items: center; gap: 0.5rem; color: ${color};">
-                                    <span>${icon}</span>
-                                    <strong>${data.message}</strong>
-                                </div>
-                                <div style="font-size: 0.875rem; color: #64748b; margin-top: 0.5rem;">
-                                    Testado em: ${new Date(data.timestamp).toLocaleString('pt-BR')}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    toast.show(data.message, data.success ? 'success' : 'error');
-                } catch (error) {
-                    console.error('Erro ao testar conexão:', error);
-                    if (resultElement) {
-                        resultElement.innerHTML = `
-                            <div style="padding: 1rem; border-top: 1px solid #e5e7eb; background: #fef2f2; color: #ef4444;">
-                                ❌ Erro ao testar conexão
-                            </div>
-                        `;
-                    }
-                    toast.show('Erro ao testar conexão', 'error');
-                }
-            }
-
-            // === FUNÇÕES DE PRODUTOS ===
-
-            toggleViewMode() {
-                const container = document.getElementById('products-container');
-                const icon = document.getElementById('view-mode-icon');
-                
-                if (container && icon) {
-                    if (container.classList.contains('products-list-view')) {
-                        container.classList.remove('products-list-view');
-                        container.classList.add('products-grid-view');
-                        icon.textContent = '📋';
-                        
-                        // Aplicar estilos de grade
-                        container.style.display = 'grid';
-                        container.style.gridTemplateColumns = 'repeat(auto-fill, minmax(280px, 1fr))';
-                        container.style.gap = '1rem';
-                    } else {
-                        container.classList.remove('products-grid-view');
-                        container.classList.add('products-list-view');
-                        icon.textContent = '⊞';
-                        
-                        // Aplicar estilos de lista
-                        container.style.display = 'block';
-                        container.style.gridTemplateColumns = '';
-                        container.style.gap = '';
-                    }
-                }
-            }
-
-            editProduct(productId) {
-                const products = productManager.getProducts();
-                const product = products.find(p => p.id == productId);
-                
-                if (!product) {
-                    toast.show('Produto não encontrado', 'error');
-                    return;
-                }
-
-                // Marcar como edição
-                this.editingProductId = productId;
-                
-                // Preencher modal de edição
-                setTimeout(() => {
-                    const nameField = document.getElementById('productName');
-                    const priceField = document.getElementById('productPrice');
-                    const categoryField = document.getElementById('productCategory');
-                    const descField = document.getElementById('productDescription');
-                    const fixedField = document.querySelector('input[name="fixedPrice"]');
-                    
-                    if (nameField) nameField.value = product.name;
-                    if (priceField) priceField.value = product.price;
-                    if (categoryField) categoryField.value = product.category;
-                    if (descField) descField.value = product.description || '';
-                    if (fixedField) fixedField.checked = product.fixedPrice;
-                }, 100);
-                
-                this.showProductModal();
-            }
-
-            deleteProduct(productId) {
-                if (!confirm('Tem certeza que deseja excluir este produto?')) {
-                    return;
-                }
-
-                productManager.deleteProduct(productId);
-                toast.show('Produto excluído com sucesso!');
-                this.render();
-            }
-
-            editPrice(productId) {
-                const products = productManager.getProducts();
-                const product = products.find(p => p.id == productId);
-                
-                if (!product) {
-                    toast.show('Produto não encontrado', 'error');
-                    return;
-                }
-
-                const oldPrice = product.price;
-                const newPrice = prompt(`Novo preço para ${product.name}:`, product.price);
-                
-                if (newPrice && !isNaN(newPrice) && parseFloat(newPrice) > 0) {
-                    const newPriceValue = parseFloat(newPrice);
-                    
-                    // Log da mudança de preço
-                    if (oldPrice !== newPriceValue) {
-                        this.logPriceChange(product.id, product.name, oldPrice, newPriceValue);
-                    }
-                    
-                    product.price = newPriceValue;
-                    productManager.updateProduct(product.id, product);
-                    toast.show('Preço atualizado com sucesso!');
-                    this.render();
-                }
-            }
-
-            logPriceChange(productId, productName, oldPrice, newPrice) {
-                const user = auth.getCurrentUser();
-                const changeRecord = {
-                    id: Date.now() + Math.random(),
-                    productId,
-                    productName,
-                    oldPrice,
-                    newPrice,
-                    username: user.username,
-                    timestamp: new Date().toISOString(),
-                    percentChange: ((newPrice - oldPrice) / oldPrice * 100).toFixed(2)
-                };
-
-                // Salvar no histórico
-                let priceHistory = JSON.parse(localStorage.getItem('priceHistory') || '[]');
-                priceHistory.unshift(changeRecord);
-                
-                if (priceHistory.length > 100) {
-                    priceHistory = priceHistory.slice(0, 100);
-                }
-                localStorage.setItem('priceHistory', JSON.stringify(priceHistory));
-
-                // Criar notificação visual
-                this.showPriceNotification(changeRecord);
-            }
-
-            showPriceNotification(changeRecord) {
-                // Criar container se não existir
-                let container = document.getElementById('notification-container');
-                if (!container) {
-                    container = document.createElement('div');
-                    container.id = 'notification-container';
-                    container.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        right: 20px;
-                        z-index: 10000;
-                        max-width: 350px;
-                    `;
-                    document.body.appendChild(container);
-                }
-
-                const isIncrease = changeRecord.newPrice > changeRecord.oldPrice;
-                const icon = isIncrease ? '📈' : '📉';
-                const color = isIncrease ? '#dc2626' : '#059669';
-
-                const notifElement = document.createElement('div');
-                notifElement.style.cssText = `
-                    background: white;
-                    border-radius: 0.5rem;
-                    border-left: 4px solid ${color};
-                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-                    padding: 1rem;
-                    margin-bottom: 0.5rem;
-                    animation: slideInRight 0.3s ease-out;
-                `;
-
-                notifElement.innerHTML = `
-                    <div style="display: flex; align-items: center; gap: 0.75rem;">
-                        <span style="font-size: 1.5rem;">${icon}</span>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">
-                                Preço Atualizado
-                            </div>
-                            <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">
-                                ${changeRecord.productName}
-                            </div>
-                            <div style="font-size: 0.875rem;">
-                                <span style="color: #ef4444;">R$ ${changeRecord.oldPrice.toFixed(2)}</span>
-                                <span style="margin: 0 0.5rem;">→</span>
-                                <span style="color: ${color}; font-weight: 600;">R$ ${changeRecord.newPrice.toFixed(2)}</span>
-                                <span style="color: #6b7280; margin-left: 0.5rem;">
-                                    (${changeRecord.percentChange > 0 ? '+' : ''}${changeRecord.percentChange}%)
-                                </span>
-                            </div>
-                        </div>
-                        <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: #9ca3af; font-size: 1.2rem; cursor: pointer;">×</button>
-                    </div>
-                `;
-
-                container.appendChild(notifElement);
-
-                // Auto-remover após 5 segundos
-                setTimeout(() => {
-                    if (notifElement.parentNode) {
-                        notifElement.remove();
-                    }
-                }, 5000);
-            }
-
-            editCategory(categoryName) {
-                const newName = prompt(`Novo nome para a categoria "${categoryName}":`, categoryName);
-                if (newName && newName !== categoryName) {
-                    // Atualizar todos os produtos desta categoria
-                    const products = productManager.getProducts();
-                    products.forEach(product => {
-                        if (product.category === categoryName) {
-                            product.category = newName;
-                            productManager.updateProduct(product.id, product);
-                        }
-                    });
-                    toast.show('Categoria atualizada com sucesso!');
-                    this.render();
-                }
-            }
-
-            deleteCategory(categoryName) {
-                if (!confirm(`Tem certeza que deseja excluir a categoria "${categoryName}"? Os produtos serão movidos para "Sem categoria".`)) {
-                    return;
-                }
-
-                const products = productManager.getProducts();
-                let productsUpdated = 0;
-                
-                products.forEach(product => {
-                    if (product.category === categoryName) {
-                        product.category = 'Sem categoria';
-                        productManager.updateProduct(product.id, product);
-                        productsUpdated++;
-                    }
-                });
-                
-                toast.show(`Categoria excluída! ${productsUpdated} produtos movidos para "Sem categoria".`);
-                this.render();
-            }
-
-            editUser(username) {
-                const currentMultiplier = username === 'MoveisBonafe' ? 1 : 1.2;
-                const newMultiplier = prompt(`Multiplicador de preço para ${username}:`, currentMultiplier);
-                
-                if (newMultiplier && !isNaN(newMultiplier) && parseFloat(newMultiplier) > 0) {
-                    // Aqui você salvaria no sistema de usuários
-                    toast.show(`Multiplicador de ${username} atualizado para ${newMultiplier}x`);
-                    this.render();
-                }
-            }
-
-            exportPriceHistory() {
-                const priceHistory = JSON.parse(localStorage.getItem('priceHistory') || '[]');
-                
-                if (priceHistory.length === 0) {
-                    toast.show('Nenhum histórico de preços para exportar', 'error');
-                    return;
-                }
-
-                // Preparar dados para CSV
-                const csvData = [
-                    ['Data/Hora', 'Produto', 'Preço Anterior', 'Preço Novo', 'Variação %', 'Usuário']
-                ];
-
-                priceHistory.forEach(record => {
-                    csvData.push([
-                        new Date(record.timestamp).toLocaleString('pt-BR'),
-                        record.productName,
-                        `R$ ${record.oldPrice.toFixed(2)}`,
-                        `R$ ${record.newPrice.toFixed(2)}`,
-                        `${record.percentChange}%`,
-                        record.username
-                    ]);
-                });
-
-                // Converter para CSV
-                const csvContent = csvData.map(row => 
-                    row.map(field => `"${field}"`).join(',')
-                ).join('\n');
-
-                // Download do arquivo
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = `historico_precos_${new Date().toISOString().split('T')[0]}.csv`;
-                link.click();
-
-                toast.show('Histórico de preços exportado com sucesso!');
-            }
-
-            clearPriceHistory() {
-                if (!confirm('Tem certeza que deseja limpar todo o histórico de mudanças de preços? Esta ação não pode ser desfeita.')) {
-                    return;
-                }
-
-                localStorage.removeItem('priceHistory');
-                localStorage.removeItem('priceNotifications');
-                
-                toast.show('Histórico de preços limpo com sucesso!');
-                this.render();
             }
         }
 

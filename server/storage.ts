@@ -1,119 +1,39 @@
-import {
-  users,
-  products,
-  categories,
-  type User,
-  type Product,
-  type Category,
-  type UpsertUser,
-  type InsertProduct,
-  type InsertCategory,
-} from "@shared/schema";
-import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { users, type User, type InsertUser } from "@shared/schema";
 
-// Interface for storage operations
+// modify the interface with any CRUD methods
+// you might need
+
 export interface IStorage {
-  // User operations (mandatory for authentication)
-  getUser(id: string): Promise<User | undefined>;
-  getUserByCredentials(username: string, password: string): Promise<User | undefined>;
-  upsertUser(user: UpsertUser): Promise<User>;
-  
-  // Product operations
-  getProducts(): Promise<Product[]>;
-  getProduct(id: string): Promise<Product | undefined>;
-  createProduct(product: InsertProduct): Promise<Product>;
-  updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined>;
-  deleteProduct(id: string): Promise<void>;
-  
-  // Category operations
-  getCategories(): Promise<Category[]>;
-  createCategory(category: InsertCategory): Promise<Category>;
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
 }
 
-export class DatabaseStorage implements IStorage {
-  // User operations
-  async getUser(id: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
+export class MemStorage implements IStorage {
+  private users: Map<number, User>;
+  currentId: number;
+
+  constructor() {
+    this.users = new Map();
+    this.currentId = 1;
+  }
+
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.username === username,
+    );
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const id = this.currentId++;
+    const user: User = { ...insertUser, id };
+    this.users.set(id, user);
     return user;
-  }
-
-  async getUserByCredentials(username: string, password: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, username));
-    if (user && user.password === password) {
-      return user;
-    }
-    return undefined;
-  }
-
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(userData)
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
-          ...userData,
-          updatedAt: new Date(),
-        },
-      })
-      .returning();
-    return user;
-  }
-
-  // Product operations
-  async getProducts(): Promise<Product[]> {
-    return await db.select().from(products);
-  }
-
-  async getProduct(id: string): Promise<Product | undefined> {
-    const [product] = await db.select().from(products).where(eq(products.id, id));
-    return product;
-  }
-
-  async createProduct(productData: InsertProduct): Promise<Product> {
-    const newProduct = {
-      ...productData,
-      id: Date.now().toString(),
-    };
-    
-    const [product] = await db
-      .insert(products)
-      .values(newProduct)
-      .returning();
-    return product;
-  }
-
-  async updateProduct(id: string, updates: Partial<Product>): Promise<Product | undefined> {
-    const [product] = await db
-      .update(products)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(products.id, id))
-      .returning();
-    return product;
-  }
-
-  async deleteProduct(id: string): Promise<void> {
-    await db.delete(products).where(eq(products.id, id));
-  }
-
-  // Category operations
-  async getCategories(): Promise<Category[]> {
-    return await db.select().from(categories);
-  }
-
-  async createCategory(categoryData: InsertCategory): Promise<Category> {
-    const newCategory = {
-      ...categoryData,
-      id: Date.now().toString(),
-    };
-    
-    const [category] = await db
-      .insert(categories)
-      .values(newCategory)
-      .returning();
-    return category;
   }
 }
 
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

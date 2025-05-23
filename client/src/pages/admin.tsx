@@ -32,11 +32,8 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
   const [isProductFormModalOpen, setIsProductFormModalOpen] = useState(false);
   
   const currentUser = auth.getUser();
-  if (!currentUser) {
-    return null; // Or redirect to login
-  }
-  const canEditProducts = currentUser.permissions?.canEditProducts ?? false;
-  const canEditPrices = currentUser.permissions?.canEditPrices ?? false;
+  const canEditProducts = currentUser?.permissions?.canEditProducts ?? false;
+  const canEditPrices = currentUser?.permissions?.canEditPrices ?? false;
 
   const handleCreateProduct = async (productData: InsertProduct) => {
     try {

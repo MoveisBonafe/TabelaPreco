@@ -76,15 +76,15 @@ export function SupabaseMonitor() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ connectionString: testConnectionString })
       });
-
+      
       const result = await response.json();
-
+      
       if (result.success) {
         showToast('✅ Conexão bem-sucedida!', 'success');
       } else {
         showToast('❌ Falha na conexão', 'error');
       }
-
+      
       // Recarrega status após teste
       await loadStatus();
       await loadLogs();
@@ -99,7 +99,7 @@ export function SupabaseMonitor() {
     try {
       const response = await fetch('/api/supabase/health-report');
       const data = await response.json();
-
+      
       // Mostra no console para análise detalhada
       console.log('📊 RELATÓRIO DE SAÚDE SUPABASE', data.report);
       showToast('Relatório gerado no console', 'success');
@@ -111,13 +111,13 @@ export function SupabaseMonitor() {
   useEffect(() => {
     loadStatus();
     loadLogs();
-
+    
     // Atualiza a cada 30 segundos
     const interval = setInterval(() => {
       loadStatus();
       loadLogs();
     }, 30000);
-
+    
     return () => clearInterval(interval);
   }, []);
 
@@ -160,13 +160,13 @@ export function SupabaseMonitor() {
                   {status.isSupabaseConnected ? 'Supabase Conectado' : 'Supabase Desconectado'}
                 </Badge>
               </div>
-
+              
               <div className="text-center">
                 <Clock className="h-8 w-8 mx-auto mb-2 text-blue-500" />
                 <p className="text-sm text-slate-600">Uptime</p>
                 <p className="font-semibold">{formatUptime(status.uptime)}</p>
               </div>
-
+              
               <div className="text-center">
                 <Activity className="h-8 w-8 mx-auto mb-2 text-purple-500" />
                 <p className="text-sm text-slate-600">Taxa de Sucesso</p>
@@ -254,20 +254,7 @@ export function SupabaseMonitor() {
               className="mt-1"
             />
           </div>
-
-          <div>
-            <Label htmlFor="test-connection-string">Teste a conexão</Label>
-            <form onSubmit={(e) => e.preventDefault()}>
-              <Input
-                type="password"
-                id="test-connection-string"
-                className="form-input"
-                autoComplete="new-password"
-                placeholder="postgresql://user:password@host:port/database"
-              />
-            </form>
-          </div>
-
+          
           <div className="flex gap-2">
             <Button onClick={testConnection} disabled={testing}>
               {testing ? (
@@ -279,7 +266,7 @@ export function SupabaseMonitor() {
                 'Testar Conexão'
               )}
             </Button>
-
+            
             <Button variant="outline" onClick={generateHealthReport}>
               Gerar Relatório Completo
             </Button>

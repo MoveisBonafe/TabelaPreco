@@ -98,8 +98,7 @@ export class AuthManager {
   }
 
   getUser() {
-    const state = this.getAuthState();
-    return state?.user || null;
+    return this.getAuthState().user;
   }
 }
 
