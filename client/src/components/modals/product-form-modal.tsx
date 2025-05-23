@@ -76,12 +76,26 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Verificar tamanho do arquivo (5MB máximo)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('O arquivo é muito grande. Tamanho máximo: 5MB');
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onload = (event) => {
-        setFormData(prev => ({ ...prev, image: event.target?.result as string }));
+        const result = event.target?.result as string;
+        if (result) {
+          setFormData(prev => ({ ...prev, image: result }));
+        }
+      };
+      reader.onerror = () => {
+        alert('Erro ao ler o arquivo. Tente novamente.');
       };
       reader.readAsDataURL(file);
     }
+    // Limpar o input para permitir selecionar o mesmo arquivo novamente
+    e.target.value = '';
   };
 
   if (!isVisible) return null;
@@ -245,9 +259,12 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
                   placeholder="https://exemplo.com/imagem.jpg"
                 />
                 <div className="text-center text-sm text-slate-500">ou</div>
-                <div className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors duration-200">
+                <div 
+                  className="border-2 border-dashed border-slate-300 rounded-lg p-4 text-center hover:border-blue-400 transition-colors duration-200 cursor-pointer"
+                  onClick={() => document.getElementById('image-upload')?.click()}
+                >
                   <Upload className="h-6 w-6 text-slate-400 mx-auto mb-2" />
-                  <p className="text-slate-600 text-sm">Fazer upload</p>
+                  <p className="text-slate-600 text-sm">Clique para fazer upload</p>
                   <input
                     type="file"
                     accept="image/*"
@@ -255,11 +272,11 @@ export function ProductFormModal({ product, isVisible, onClose, onSave }: Produc
                     className="hidden"
                     id="image-upload"
                   />
-                  <label htmlFor="image-upload" className="cursor-pointer">
-                    <Button type="button" variant="outline" size="sm" className="mt-2">
-                      Selecionar Arquivo
-                    </Button>
-                  </label>
+                  <div className="mt-2">
+                    <span className="text-xs text-slate-500 bg-slate-100 px-2 py-1 rounded">
+                      JPG, PNG, GIF até 5MB
+                    </span>
+                  </div>
                 </div>
               </div>
               
