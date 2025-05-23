@@ -627,6 +627,12 @@
                         const username = target.getAttribute('data-username');
                         this.editUser(username);
                     }
+                    if (target.matches('[data-action="export-price-history"]')) {
+                        this.exportPriceHistory();
+                    }
+                    if (target.matches('[data-action="clear-price-history"]')) {
+                        this.clearPriceHistory();
+                    }
                 });
 
                 document.addEventListener('submit', (e) => {
@@ -1178,6 +1184,8 @@
                         return this.renderExcelTab();
                     case 'backup':
                         return this.renderBackupTab();
+                    case 'notificacoes':
+                        return this.renderNotificationsTab();
                     case 'monitor':
                         return this.renderMonitorTab();
                     default:
@@ -1689,6 +1697,98 @@
                         <button class="btn btn-danger" data-action="reset-data">
                             🗑️ Limpar Todos os Dados
                         </button>
+                    </div>
+                `;
+            }
+
+            renderNotificationsTab() {
+                const priceHistory = JSON.parse(localStorage.getItem('priceHistory') || '[]');
+                
+                return `
+                    <div class="page-header">
+                        <h1 class="page-title">🔔 Notificações de Preços</h1>
+                        <p class="page-description">Histórico de mudanças de preços e notificações</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">📈 Histórico de Mudanças de Preços</h3>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="btn btn-secondary" data-action="export-price-history">
+                                    📤 Exportar Histórico
+                                </button>
+                                <button class="btn btn-danger" data-action="clear-price-history">
+                                    🗑️ Limpar Histórico
+                                </button>
+                            </div>
+                        </div>
+
+                        ${priceHistory.length === 0 ? `
+                            <div class="empty-state">
+                                <div class="empty-icon">📊</div>
+                                <h3 class="empty-title">Nenhuma mudança de preço registrada</h3>
+                                <p>As mudanças de preços aparecerão aqui automaticamente</p>
+                            </div>
+                        ` : `
+                            <div style="max-height: 600px; overflow-y: auto;">
+                                ${priceHistory.map(record => {
+                                    const isIncrease = record.newPrice > record.oldPrice;
+                                    const icon = isIncrease ? '📈' : '📉';
+                                    const color = isIncrease ? '#dc2626' : '#059669';
+                                    const date = new Date(record.timestamp).toLocaleString('pt-BR');
+                                    
+                                    return `
+                                        <div style="border-bottom: 1px solid #f1f5f9; padding: 1rem; display: flex; align-items: center; gap: 1rem;">
+                                            <span style="font-size: 1.5rem;">${icon}</span>
+                                            <div style="flex: 1;">
+                                                <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">
+                                                    ${record.productName}
+                                                </div>
+                                                <div style="font-size: 0.875rem; margin-bottom: 0.25rem;">
+                                                    <span style="color: #ef4444;">R$ ${record.oldPrice.toFixed(2)}</span>
+                                                    <span style="margin: 0 0.5rem;">→</span>
+                                                    <span style="color: ${color}; font-weight: 600;">R$ ${record.newPrice.toFixed(2)}</span>
+                                                    <span style="color: #6b7280; margin-left: 0.5rem;">
+                                                        (${record.percentChange > 0 ? '+' : ''}${record.percentChange}%)
+                                                    </span>
+                                                </div>
+                                                <div style="font-size: 0.75rem; color: #6b7280;">
+                                                    Por ${record.username} em ${date}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `}
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">⚙️ Configurações de Notificações</h3>
+                        </div>
+                        <div style="padding: 1rem;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <span>Notificações visuais</span>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" checked> Ativado
+                                </label>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                                <span>Auto-remover notificações</span>
+                                <select style="padding: 0.25rem 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem;">
+                                    <option value="5">5 segundos</option>
+                                    <option value="10">10 segundos</option>
+                                    <option value="0">Manual</option>
+                                </select>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span>Alertas para aumentos de preço</span>
+                                <label style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <input type="checkbox" checked> Ativado
+                                </label>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
@@ -2238,13 +2338,112 @@
                     return;
                 }
 
+                const oldPrice = product.price;
                 const newPrice = prompt(`Novo preço para ${product.name}:`, product.price);
+                
                 if (newPrice && !isNaN(newPrice) && parseFloat(newPrice) > 0) {
-                    product.price = parseFloat(newPrice);
+                    const newPriceValue = parseFloat(newPrice);
+                    
+                    // Log da mudança de preço
+                    if (oldPrice !== newPriceValue) {
+                        this.logPriceChange(product.id, product.name, oldPrice, newPriceValue);
+                    }
+                    
+                    product.price = newPriceValue;
                     productManager.updateProduct(product.id, product);
                     toast.show('Preço atualizado com sucesso!');
                     this.render();
                 }
+            }
+
+            logPriceChange(productId, productName, oldPrice, newPrice) {
+                const user = auth.getCurrentUser();
+                const changeRecord = {
+                    id: Date.now() + Math.random(),
+                    productId,
+                    productName,
+                    oldPrice,
+                    newPrice,
+                    username: user.username,
+                    timestamp: new Date().toISOString(),
+                    percentChange: ((newPrice - oldPrice) / oldPrice * 100).toFixed(2)
+                };
+
+                // Salvar no histórico
+                let priceHistory = JSON.parse(localStorage.getItem('priceHistory') || '[]');
+                priceHistory.unshift(changeRecord);
+                
+                if (priceHistory.length > 100) {
+                    priceHistory = priceHistory.slice(0, 100);
+                }
+                localStorage.setItem('priceHistory', JSON.stringify(priceHistory));
+
+                // Criar notificação visual
+                this.showPriceNotification(changeRecord);
+            }
+
+            showPriceNotification(changeRecord) {
+                // Criar container se não existir
+                let container = document.getElementById('notification-container');
+                if (!container) {
+                    container = document.createElement('div');
+                    container.id = 'notification-container';
+                    container.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        z-index: 10000;
+                        max-width: 350px;
+                    `;
+                    document.body.appendChild(container);
+                }
+
+                const isIncrease = changeRecord.newPrice > changeRecord.oldPrice;
+                const icon = isIncrease ? '📈' : '📉';
+                const color = isIncrease ? '#dc2626' : '#059669';
+
+                const notifElement = document.createElement('div');
+                notifElement.style.cssText = `
+                    background: white;
+                    border-radius: 0.5rem;
+                    border-left: 4px solid ${color};
+                    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+                    padding: 1rem;
+                    margin-bottom: 0.5rem;
+                    animation: slideInRight 0.3s ease-out;
+                `;
+
+                notifElement.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 0.75rem;">
+                        <span style="font-size: 1.5rem;">${icon}</span>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #1f2937; margin-bottom: 0.25rem;">
+                                Preço Atualizado
+                            </div>
+                            <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.25rem;">
+                                ${changeRecord.productName}
+                            </div>
+                            <div style="font-size: 0.875rem;">
+                                <span style="color: #ef4444;">R$ ${changeRecord.oldPrice.toFixed(2)}</span>
+                                <span style="margin: 0 0.5rem;">→</span>
+                                <span style="color: ${color}; font-weight: 600;">R$ ${changeRecord.newPrice.toFixed(2)}</span>
+                                <span style="color: #6b7280; margin-left: 0.5rem;">
+                                    (${changeRecord.percentChange > 0 ? '+' : ''}${changeRecord.percentChange}%)
+                                </span>
+                            </div>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: #9ca3af; font-size: 1.2rem; cursor: pointer;">×</button>
+                    </div>
+                `;
+
+                container.appendChild(notifElement);
+
+                // Auto-remover após 5 segundos
+                setTimeout(() => {
+                    if (notifElement.parentNode) {
+                        notifElement.remove();
+                    }
+                }, 5000);
             }
 
             editCategory(categoryName) {
