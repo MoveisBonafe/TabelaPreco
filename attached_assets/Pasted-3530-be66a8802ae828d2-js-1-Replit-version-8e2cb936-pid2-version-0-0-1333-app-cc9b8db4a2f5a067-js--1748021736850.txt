@@ -1,0 +1,224 @@
+3530-be66a8802ae828d2.js:1 Replit version 8e2cb936, pid2 version 0.0.1333
+_app-cc9b8db4a2f5a067.js:38 
+      /////////////////////
+   ///////////////////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////        Curious and driven?
+  ///////////////@@@@@@@///////        Work with us!
+  ///////////////@@@@@@@///////
+  ///////////////@@@@@@@///////        https://join.replit.com/hack.with.us
+  ////////@@@@@@@//////////////
+  ////////@@@@@@@//////////////
+  ////////@@@@@@#//////////////
+   ///////////////////////////
+      /////////////////////
+      
+_app-cc9b8db4a2f5a067.js:38  
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] LaunchDarkly client initialized
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Opening stream connection to https://clientstream.launchdarkly.com/eval/62b35a865152ab14c5942820/eyJrZXkiOiI0MjQ1NzIyNiIsImtpbmQiOiJ1c2VyIiwiYW5vbnltb3VzIjpmYWxzZX0
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Closing stream connection
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Opening stream connection to https://clientstream.launchdarkly.com/eval/62b35a865152ab14c5942820/eyJrZXkiOiI0MjQ1NzIyNiIsImtpbmQiOiJ1c2VyIiwibmFtZSI6Im1vdmVpc2JvbmFmZSIsInJvbGVzIjpbImludGVudF9idXNpbmVzcyIsIm9uYm9hcmRpbmdfam9iX290aGVyIiwib25ib2FyZGluZ19yb2xlX21lbWJlciJdLCJlbWFpbCI6Im1vdmVpc2JvbmFmZUBnbWFpbC5jb20iLCJ0aW1lX2NyZWF0ZWQiOjE3NDY3NDg3NDQ3MTgsIl9tZXRhIjp7InByaXZhdGVBdHRyaWJ1dGVzIjpbImVtYWlsIl19fQ
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Closing stream connection
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Opening stream connection to https://clientstream.launchdarkly.com/eval/62b35a865152ab14c5942820/eyJrZXkiOiI0MjQ1NzIyNiIsImtpbmQiOiJ1c2VyIiwibmFtZSI6Im1vdmVpc2JvbmFmZSIsInJvbGVzIjpbImludGVudF9idXNpbmVzcyIsIm9uYm9hcmRpbmdfam9iX290aGVyIiwib25ib2FyZGluZ19yb2xlX21lbWJlciJdLCJlbWFpbCI6Im1vdmVpc2JvbmFmZUBnbWFpbC5jb20iLCJ0aW1lX2NyZWF0ZWQiOjE3NDY3NDg3NDQ3MTgsIl9tZXRhIjp7InByaXZhdGVBdHRyaWJ1dGVzIjpbImVtYWlsIl19fQ
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+Error while parsing the 'sandbox' attribute: 'allow-downloads-without-user-activation' is an invalid sandbox flag.
+ Unrecognized feature: 'ambient-light-sensor'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'battery'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'execution-while-not-rendered'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'execution-while-out-of-viewport'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'layout-animations'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'legacy-image-formats'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'navigation-override'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'oversized-images'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'publickey-credentials'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'speaker-selection'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'unoptimized-images'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'unsized-media'.
+_ @ framework-490158855ea0490e.js:1
+ Unrecognized feature: 'pointer-lock'.
+_ @ framework-490158855ea0490e.js:1
+ Allow attribute will take precedence over 'allowfullscreen'.
+_ @ framework-490158855ea0490e.js:1
+ Allow attribute will take precedence over 'allowpaymentrequest'.
+_ @ framework-490158855ea0490e.js:1
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1  Failed to load resource: the server responded with a status of 404 ()
+_app-cc9b8db4a2f5a067.js:38 WARN: A component changed from uncontrolled to controlled.
+(anônimo) @ _app-cc9b8db4a2f5a067.js:38
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+gravatar.com/avatar/fb18eaa35c85980eb6a4f827c419b75e?d=404:1 
+            
+            
+           Failed to load resource: the server responded with a status of 404 ()
+workspace_iframe.html:32 Unrecognized feature: 'ambient-light-sensor'.
+workspace_iframe.html:32 Unrecognized feature: 'battery'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-not-rendered'.
+workspace_iframe.html:32 Unrecognized feature: 'execution-while-out-of-viewport'.
+workspace_iframe.html:32 Unrecognized feature: 'layout-animations'.
+workspace_iframe.html:32 Unrecognized feature: 'legacy-image-formats'.
+workspace_iframe.html:32 Unrecognized feature: 'navigation-override'.
+workspace_iframe.html:32 Unrecognized feature: 'oversized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'publickey-credentials'.
+workspace_iframe.html:32 Unrecognized feature: 'speaker-selection'.
+workspace_iframe.html:32 Unrecognized feature: 'unoptimized-images'.
+workspace_iframe.html:32 Unrecognized feature: 'unsized-media'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowfullscreen'.
+workspace_iframe.html:32 Allow attribute will take precedence over 'allowpaymentrequest'.
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/products:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/products:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/api/categories:1 
+            
+            
+           Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+Console.js:61 [vite] connecting...
+Console.js:61 [vite] connected.
+488cc318-869b-4306-abd0-867aefe0f428-00-3pisoxxjtpeyp.picard.replit.dev/:1 [DOM] Input elements should have autocomplete attributes (suggested: "current-password"): (More info: https://goo.gl/9p2vKq) null
+Console.js:61 📱 Carregando produtos do localStorage (GitHub Pages)...
+Console.js:61 ✅ 0 produtos carregados do localStorage
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Error on stream connection: {"isTrusted":true}, will continue retrying after 518 milliseconds.
+(anônimo) @ _app-cc9b8db4a2f5a067.js:38
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Closing stream connection
+_app-cc9b8db4a2f5a067.js:38 [LaunchDarkly] Opening stream connection to https://clientstream.launchdarkly.com/eval/62b35a865152ab14c5942820/eyJrZXkiOiI0MjQ1NzIyNiIsImtpbmQiOiJ1c2VyIiwibmFtZSI6Im1vdmVpc2JvbmFmZSIsInJvbGVzIjpbImludGVudF9idXNpbmVzcyIsIm9uYm9hcmRpbmdfam9iX290aGVyIiwib25ib2FyZGluZ19yb2xlX21lbWJlciJdLCJlbWFpbCI6Im1vdmVpc2JvbmFmZUBnbWFpbC5jb20iLCJ0aW1lX2NyZWF0ZWQiOjE3NDY3NDg3NDQ3MTgsIl9tZXRhIjp7InByaXZhdGVBdHRyaWJ1dGVzIjpbImVtYWlsIl19fQ
+Console.js:61 Erro ao carregar status: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 Erro ao carregar logs: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 Erro ao carregar logs: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Mt.forEach.n.<computed> @ Console.js:61
+Console.js:61 Erro ao carregar status: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Mt.forEach.n.<computed> @ Console.js:61
+
+                
+          
+          
+          
+         Chrome is moving towards a new experience that allows users to choose to browse without third-party cookies.
+Console.js:61 Erro ao carregar status: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Mt.forEach.n.<computed> @ Console.js:61
+loadStatus @ supabase-monitor.tsx:48
+await in loadStatus
+(anônimo) @ supabase-monitor.tsx:117
+Console.js:61 Erro ao carregar logs: SyntaxError: Unexpected token '<', "<!DOCTYPE "... is not valid JSON
+Mt.forEach.n.<computed> @ Console.js:61
+loadLogs @ supabase-monitor.tsx:59
+await in loadLogs
+(anônimo) @ supabase-monitor.tsx:118
+stallwart.build.js:1 stallwart: failed ping 1
