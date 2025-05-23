@@ -602,29 +602,21 @@
                         this.render();
                     }
 
-                    // Adicionar produto
+                    // Produtos
                     if (target.matches('[data-action="add-product"]')) {
                         this.showAddProductForm();
                     }
-
-                    // Salvar produto
                     if (target.matches('[data-action="save-product"]')) {
                         e.preventDefault();
                         this.handleSaveProduct();
                     }
-
-                    // Cancelar
                     if (target.matches('[data-action="cancel"]')) {
                         this.hideAddProductForm();
                     }
-
-                    // Toggle view
                     if (target.matches('[data-action="toggle-view"]')) {
                         this.isCompactView = !this.isCompactView;
                         this.render();
                     }
-
-                    // Deletar produto
                     if (target.matches('[data-action="delete-product"]')) {
                         const id = target.dataset.productId;
                         if (confirm('Tem certeza que deseja excluir este produto?')) {
@@ -632,6 +624,83 @@
                             toast.show('Produto excluído com sucesso!');
                             this.render();
                         }
+                    }
+
+                    // Categorias
+                    if (target.matches('[data-action="add-category"]')) {
+                        this.showAddCategoryForm();
+                    }
+                    if (target.matches('[data-action="save-category"]')) {
+                        e.preventDefault();
+                        this.handleSaveCategory();
+                    }
+                    if (target.matches('[data-action="cancel-category"]')) {
+                        this.hideAddCategoryForm();
+                    }
+                    if (target.matches('[data-action="view-category"]')) {
+                        const category = target.dataset.category;
+                        this.viewCategoryProducts(category);
+                    }
+
+                    // Preços
+                    if (target.matches('[data-action="update-multiplier"]')) {
+                        this.handleUpdateMultiplier(target);
+                    }
+
+                    // Usuários
+                    if (target.matches('[data-action="add-user"]')) {
+                        this.showAddUserForm();
+                    }
+                    if (target.matches('[data-action="save-user"]')) {
+                        e.preventDefault();
+                        this.handleSaveUser();
+                    }
+                    if (target.matches('[data-action="cancel-user"]')) {
+                        this.hideAddUserForm();
+                    }
+                    if (target.matches('[data-action="edit-user"]')) {
+                        const username = target.dataset.username;
+                        this.editUser(username);
+                    }
+                    if (target.matches('[data-action="delete-user"]')) {
+                        const username = target.dataset.username;
+                        this.deleteUser(username);
+                    }
+
+                    // Excel
+                    if (target.matches('[data-action="import-excel"]')) {
+                        this.handleImportExcel();
+                    }
+                    if (target.matches('[data-action="export-excel"]')) {
+                        this.handleExportExcel();
+                    }
+                    if (target.matches('[data-action="export-csv"]')) {
+                        this.handleExportCSV();
+                    }
+                    if (target.matches('[data-action="download-template"]')) {
+                        this.downloadExcelTemplate();
+                    }
+
+                    // Backup
+                    if (target.matches('[data-action="backup-data"]')) {
+                        this.handleBackupData();
+                    }
+                    if (target.matches('[data-action="restore-backup"]')) {
+                        this.handleRestoreBackup();
+                    }
+                    if (target.matches('[data-action="reset-data"]')) {
+                        this.handleResetData();
+                    }
+
+                    // Monitor
+                    if (target.matches('[data-action="refresh-stats"]')) {
+                        this.refreshStats();
+                    }
+                    if (target.matches('[data-action="check-storage"]')) {
+                        this.checkStorage();
+                    }
+                    if (target.matches('[data-action="optimize-storage"]')) {
+                        this.optimizeStorage();
                     }
                 });
 
@@ -704,6 +773,315 @@
                     form.style.display = 'none';
                     document.getElementById('productForm').reset();
                 }
+            }
+
+            // Categorias
+            showAddCategoryForm() {
+                const form = document.getElementById('addCategoryForm');
+                if (form) {
+                    form.style.display = 'block';
+                }
+            }
+
+            hideAddCategoryForm() {
+                const form = document.getElementById('addCategoryForm');
+                if (form) {
+                    form.style.display = 'none';
+                    document.getElementById('categoryForm').reset();
+                }
+            }
+
+            handleSaveCategory() {
+                const form = document.getElementById('categoryForm');
+                const formData = new FormData(form);
+                const categoryName = formData.get('categoryName');
+
+                if (!categoryName) {
+                    toast.show('Nome da categoria é obrigatório', 'error');
+                    return;
+                }
+
+                // Adiciona um produto placeholder para a categoria
+                const placeholder = {
+                    id: Date.now().toString(),
+                    name: `Produto de ${categoryName}`,
+                    price: 0,
+                    category: categoryName,
+                    description: 'Categoria criada manualmente'
+                };
+
+                productManager.addProduct(placeholder);
+                toast.show('Categoria criada com sucesso!');
+                this.hideAddCategoryForm();
+                this.render();
+            }
+
+            viewCategoryProducts(category) {
+                this.currentAdminTab = 'produtos';
+                this.render();
+                toast.show(`Visualizando produtos da categoria: ${category}`);
+            }
+
+            // Preços
+            handleUpdateMultiplier(input) {
+                const username = input.dataset.username;
+                const newMultiplier = parseFloat(input.value);
+                
+                if (newMultiplier < 0.1 || newMultiplier > 5) {
+                    toast.show('Multiplicador deve estar entre 0.1 e 5.0', 'error');
+                    input.value = auth.users[username].multiplier;
+                    return;
+                }
+
+                auth.users[username].multiplier = newMultiplier;
+                localStorage.setItem('users', JSON.stringify(auth.users));
+                toast.show(`Multiplicador de ${username} atualizado para ${newMultiplier}x`);
+            }
+
+            // Usuários
+            showAddUserForm() {
+                const form = document.getElementById('addUserForm');
+                if (form) {
+                    form.style.display = 'block';
+                }
+            }
+
+            hideAddUserForm() {
+                const form = document.getElementById('addUserForm');
+                if (form) {
+                    form.style.display = 'none';
+                    document.getElementById('userForm').reset();
+                }
+            }
+
+            handleSaveUser() {
+                const form = document.getElementById('userForm');
+                const formData = new FormData(form);
+
+                const userData = {
+                    username: formData.get('username'),
+                    password: formData.get('password'),
+                    level: formData.get('level'),
+                    multiplier: parseFloat(formData.get('multiplier'))
+                };
+
+                if (!userData.username || !userData.password) {
+                    toast.show('Nome de usuário e senha são obrigatórios', 'error');
+                    return;
+                }
+
+                if (auth.users[userData.username]) {
+                    toast.show('Usuário já existe', 'error');
+                    return;
+                }
+
+                auth.users[userData.username] = {
+                    password: userData.password,
+                    level: userData.level,
+                    multiplier: userData.multiplier
+                };
+
+                localStorage.setItem('users', JSON.stringify(auth.users));
+                toast.show('Usuário criado com sucesso!');
+                this.hideAddUserForm();
+                this.render();
+            }
+
+            editUser(username) {
+                toast.show(`Edição de usuário em desenvolvimento`);
+            }
+
+            deleteUser(username) {
+                if (confirm(`Tem certeza que deseja excluir o usuário ${username}?`)) {
+                    delete auth.users[username];
+                    localStorage.setItem('users', JSON.stringify(auth.users));
+                    toast.show('Usuário excluído com sucesso!');
+                    this.render();
+                }
+            }
+
+            // Excel
+            handleImportExcel() {
+                const fileInput = document.getElementById('excelFile');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    toast.show('Selecione um arquivo Excel primeiro', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        const products = [];
+
+                        // Pula o cabeçalho
+                        for (let i = 1; i < lines.length; i++) {
+                            const columns = lines[i].split(',');
+                            if (columns.length >= 2 && columns[0].trim() && columns[1].trim()) {
+                                products.push({
+                                    name: columns[0].trim(),
+                                    price: parseFloat(columns[1].trim()) || 0,
+                                    category: columns[2]?.trim() || 'Importado',
+                                    description: columns[3]?.trim() || '',
+                                    fixedPrice: columns[4]?.trim().toLowerCase() === 'sim'
+                                });
+                            }
+                        }
+
+                        products.forEach(product => productManager.addProduct(product));
+                        toast.show(`${products.length} produtos importados com sucesso!`);
+                        this.render();
+                    } catch (error) {
+                        toast.show('Erro ao processar arquivo. Use formato CSV.', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            handleExportExcel() {
+                const products = productManager.getProducts();
+                this.downloadData(products, 'produtos.csv', 'csv');
+            }
+
+            handleExportCSV() {
+                const products = productManager.getProducts();
+                this.downloadData(products, 'produtos.csv', 'csv');
+            }
+
+            downloadExcelTemplate() {
+                const template = [
+                    ['Nome', 'Preço', 'Categoria', 'Descrição', 'Preço Fixo'],
+                    ['Sofá 3 Lugares', '1299.99', 'Móveis', 'Sofá confortável', 'Não'],
+                    ['Mesa de Jantar', '899.99', 'Móveis', 'Mesa para 6 pessoas', 'Sim']
+                ];
+                
+                this.downloadData(template, 'modelo_produtos.csv', 'csv');
+            }
+
+            // Backup
+            handleBackupData() {
+                const data = {
+                    products: productManager.getProducts(),
+                    users: auth.users,
+                    timestamp: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                localStorage.setItem('lastBackup', new Date().toLocaleDateString('pt-BR'));
+                this.downloadData(data, 'backup_catalogo.json', 'json');
+                toast.show('Backup criado com sucesso!');
+            }
+
+            handleRestoreBackup() {
+                const fileInput = document.getElementById('backupFile');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    toast.show('Selecione um arquivo de backup primeiro', 'error');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const backup = JSON.parse(e.target.result);
+                        
+                        if (backup.products) {
+                            productManager.saveProducts(backup.products);
+                        }
+                        if (backup.users) {
+                            Object.assign(auth.users, backup.users);
+                            localStorage.setItem('users', JSON.stringify(auth.users));
+                        }
+
+                        toast.show('Backup restaurado com sucesso!');
+                        this.render();
+                    } catch (error) {
+                        toast.show('Arquivo de backup inválido', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            handleResetData() {
+                if (confirm('ATENÇÃO: Isso irá apagar todos os dados! Tem certeza?')) {
+                    localStorage.clear();
+                    auth.users = {
+                        'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
+                        'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
+                    };
+                    toast.show('Todos os dados foram limpos!');
+                    this.render();
+                }
+            }
+
+            // Monitor
+            refreshStats() {
+                localStorage.setItem('lastUpdate', new Date().toLocaleDateString('pt-BR'));
+                toast.show('Estatísticas atualizadas!');
+                this.render();
+            }
+
+            checkStorage() {
+                const products = productManager.getProducts();
+                const size = JSON.stringify(products).length;
+                const maxSize = 10 * 1024 * 1024; // 10MB
+                const percentage = (size / maxSize * 100).toFixed(2);
+                
+                toast.show(`Armazenamento: ${(size/1024).toFixed(2)}KB (${percentage}% usado)`);
+            }
+
+            optimizeStorage() {
+                const products = productManager.getProducts();
+                // Remove produtos duplicados
+                const unique = products.filter((product, index, self) => 
+                    index === self.findIndex(p => p.name === product.name)
+                );
+                
+                productManager.saveProducts(unique);
+                toast.show(`Otimização concluída! ${products.length - unique.length} duplicatas removidas`);
+                this.render();
+            }
+
+            // Utilitário para download
+            downloadData(data, filename, type) {
+                let content;
+                let mimeType;
+
+                if (type === 'csv') {
+                    if (Array.isArray(data) && Array.isArray(data[0])) {
+                        // Template format
+                        content = data.map(row => row.join(',')).join('\n');
+                    } else {
+                        // Products format
+                        const headers = ['Nome', 'Preço', 'Categoria', 'Descrição', 'Preço Fixo'];
+                        const rows = data.map(p => [
+                            p.name,
+                            p.price,
+                            p.category || '',
+                            p.description || '',
+                            p.fixedPrice ? 'Sim' : 'Não'
+                        ]);
+                        content = [headers, ...rows].map(row => row.join(',')).join('\n');
+                    }
+                    mimeType = 'text/csv';
+                } else {
+                    content = JSON.stringify(data, null, 2);
+                    mimeType = 'application/json';
+                }
+
+                const blob = new Blob([content], { type: mimeType });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
             }
 
             render() {
