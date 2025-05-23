@@ -37,13 +37,15 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
     // Se produto tem preço fixo, não aplica multiplicador
     const finalMultiplier = product.fixedPrice ? 1.0 : multiplier;
     
-    // Todos os usuários veem todas as tabelas, apenas com multiplicador diferente
+    // Se produto tem preço fixo, todas as tabelas mostram o mesmo valor
+    const basePrice = product.priceAVista * finalMultiplier;
+    
     return {
-      avista: product.priceAVista * finalMultiplier,
-      price30: product.price30 * finalMultiplier,
-      price30_60: product.price30_60 * finalMultiplier,
-      price30_60_90: product.price30_60_90 * finalMultiplier,
-      price30_60_90_120: product.price30_60_90_120 * finalMultiplier,
+      avista: basePrice,
+      price30: product.fixedPrice ? basePrice : product.price30 * finalMultiplier,
+      price30_60: product.fixedPrice ? basePrice : product.price30_60 * finalMultiplier,
+      price30_60_90: product.fixedPrice ? basePrice : product.price30_60_90 * finalMultiplier,
+      price30_60_90_120: product.fixedPrice ? basePrice : product.price30_60_90_120 * finalMultiplier,
       showOthers: true,
       maxInstallments: 4,
       multiplier: finalMultiplier,
