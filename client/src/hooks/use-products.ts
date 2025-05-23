@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Product, InsertProduct } from '@shared/schema';
+import { storageAdapter } from '@/lib/storage-adapter';
+import { githubPagesSync } from '@/lib/github-pages-sync';
 
 export function useProducts() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -7,8 +9,7 @@ export function useProducts() {
 
   const loadProducts = async () => {
     try {
-      const response = await fetch('/api/products');
-      const data = await response.json();
+      const data = await storageAdapter.getProducts();
       setProducts(data);
     } catch (error) {
       console.error('Failed to load products:', error);
@@ -19,21 +20,18 @@ export function useProducts() {
 
   useEffect(() => {
     loadProducts();
+    
+    // Escuta atualizações de outros navegadores (GitHub Pages)
+    const unsubscribe = githubPagesSync.onDataUpdated(() => {
+      loadProducts();
+    });
+    
+    return unsubscribe;
   }, []);
 
   const createProduct = async (productData: InsertProduct) => {
     try {
-      const response = await fetch('/api/products', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
-      
-      if (!response.ok) throw new Error('Failed to create product');
-      
-      const newProduct = await response.json();
+      const newProduct = await storageAdapter.createProduct(productData);
       setProducts(prev => [...prev, newProduct]);
       return newProduct;
     } catch (error) {
@@ -44,18 +42,10 @@ export function useProducts() {
 
   const updateProduct = async (id: string, productData: Partial<InsertProduct>) => {
     try {
-      const response = await fetch(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
-      
-      if (!response.ok) throw new Error('Failed to update product');
-      
-      const updatedProduct = await response.json();
-      setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
+      const updatedProduct = await storageAdapter.updateProduct(id, productData);
+      if (updatedProduct) {
+        setProducts(prev => prev.map(p => p.id === id ? updatedProduct : p));
+      }
       return updatedProduct;
     } catch (error) {
       console.error('Failed to update product:', error);
@@ -65,12 +55,7 @@ export function useProducts() {
 
   const deleteProduct = async (id: string) => {
     try {
-      const response = await fetch(`/api/products/${id}`, {
-        method: 'DELETE',
-      });
-      
-      if (!response.ok) throw new Error('Failed to delete product');
-      
+      await storageAdapter.deleteProduct(id);
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (error) {
       console.error('Failed to delete product:', error);
