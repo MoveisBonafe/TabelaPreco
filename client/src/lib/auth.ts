@@ -44,6 +44,15 @@ export class AuthManager {
           priceLevel: 'vip' as const
         }
       },
+      'Loja': {
+        password: 'Bonafe1108',
+        permissions: {
+          canEditProducts: true,
+          canViewPrices: true,
+          canEditPrices: true,
+          priceLevel: 'vip' as const
+        }
+      },
       'Vendedor1': {
         password: 'vend123',
         permissions: {
