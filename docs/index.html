@@ -1247,7 +1247,10 @@
             }
 
             renderPricesTab() {
-                const users = auth.users;
+                const users = {
+                    'MoveisBonafe': { level: 'admin', multiplier: 1 },
+                    'Loja': { level: 'basic', multiplier: 1.2 }
+                };
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Preços</h1>
@@ -1304,7 +1307,10 @@
             }
 
             renderUsersTab() {
-                const users = auth.users;
+                const users = {
+                    'MoveisBonafe': { level: 'admin', multiplier: 1 },
+                    'Loja': { level: 'basic', multiplier: 1.2 }
+                };
                 return `
                     <div class="page-header">
                         <h1 class="page-title">Usuários</h1>
@@ -1527,7 +1533,7 @@
             renderMonitorTab() {
                 const products = productManager.getProducts();
                 const categories = productManager.getCategories();
-                const users = Object.keys(auth.users);
+                const users = ['MoveisBonafe', 'Loja'];
                 const storageSize = JSON.stringify(products).length;
                 const lastUpdate = localStorage.getItem('lastUpdate') || new Date().toLocaleDateString('pt-BR');
                 
