@@ -16,45 +16,36 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
     );
   }
 
-  // Define quais preços mostrar baseado no nível de acesso
+  // Define os preços baseado no multiplicador do usuário
   const getPricesForLevel = () => {
-    switch (userAuth.permissions.priceLevel) {
-      case 'basic':
-        // Nível básico: apenas preço à vista com 5% adicional
-        return {
-          avista: product.priceAVista * 1.05,
-          showOthers: false
-        };
-      
-      case 'premium':
-        // Nível premium: preços normais sem desconto VIP
-        return {
-          avista: product.priceAVista,
-          price30: product.price30,
-          price30_60: product.price30_60,
-          showOthers: true,
-          maxInstallments: 2
-        };
-      
-      case 'vip':
-        // Nível VIP: todos os preços com desconto adicional de 3%
-        return {
-          avista: product.priceAVista * 0.97,
-          price30: product.price30 * 0.97,
-          price30_60: product.price30_60 * 0.97,
-          price30_60_90: product.price30_60_90 * 0.97,
-          price30_60_90_120: product.price30_60_90_120 * 0.97,
-          showOthers: true,
-          maxInstallments: 4,
-          vipDiscount: true
-        };
-      
-      default:
-        return {
-          avista: product.priceAVista,
-          showOthers: false
-        };
+    // Buscar o multiplicador do usuário salvo no sistema de usuários
+    const storedUsers = localStorage.getItem('catalog-users');
+    let multiplier = 1.0;
+    
+    if (storedUsers && userAuth) {
+      try {
+        const users = JSON.parse(storedUsers);
+        const currentUser = users.find((u: any) => u.username === userAuth.username);
+        if (currentUser) {
+          multiplier = currentUser.customMultiplier || 1.0;
+        }
+      } catch (error) {
+        console.error('Erro ao buscar multiplicador do usuário:', error);
+      }
     }
+
+    // Todos os usuários veem todas as tabelas, apenas com multiplicador diferente
+    return {
+      avista: product.priceAVista * multiplier,
+      price30: product.price30 * multiplier,
+      price30_60: product.price30_60 * multiplier,
+      price30_60_90: product.price30_60_90 * multiplier,
+      price30_60_90_120: product.price30_60_90_120 * multiplier,
+      showOthers: true,
+      maxInstallments: 4,
+      multiplier: multiplier,
+      isVip: userAuth.permissions.priceLevel === 'vip'
+    };
   };
 
   const prices = getPricesForLevel();
@@ -63,9 +54,15 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold text-slate-800">Preços para {userAuth.username}</h3>
-        {prices.vipDiscount && (
-          <span className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-            VIP -3%
+        {prices.multiplier !== 1.0 && (
+          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+            prices.multiplier < 1 ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' : 
+            'bg-gradient-to-r from-blue-400 to-blue-600 text-white'
+          }`}>
+            {prices.multiplier < 1 ? 
+              `Desconto ${((1 - prices.multiplier) * 100).toFixed(1)}%` : 
+              `+${((prices.multiplier - 1) * 100).toFixed(1)}%`
+            }
           </span>
         )}
       </div>
@@ -129,11 +126,12 @@ export function PriceDisplay({ product, userAuth }: PriceDisplayProps) {
         )}
       </div>
 
-      {/* Informação sobre nível de acesso */}
+      {/* Informação sobre o multiplicador */}
       <div className="text-xs text-slate-500 text-center">
-        {userAuth.permissions.priceLevel === 'basic' && 'Nível Básico - Preços especiais aplicados'}
-        {userAuth.permissions.priceLevel === 'premium' && 'Nível Premium - Acesso a condições de pagamento'}
-        {userAuth.permissions.priceLevel === 'vip' && 'Nível VIP - Melhores preços e todas as condições'}
+        {prices.multiplier === 1.0 ? 
+          'Preços normais aplicados' : 
+          `Multiplicador ${prices.multiplier}x aplicado aos preços base`
+        }
       </div>
     </div>
   );

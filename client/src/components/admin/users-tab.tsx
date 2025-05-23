@@ -8,7 +8,7 @@ interface User {
   id: string;
   username: string;
   password: string;
-  priceLevel: 'basic' | 'premium' | 'vip';
+  priceLevel: 'basic' | 'vip';
   customMultiplier: number; // Multiplicador para o preço base (ex: 1.05 = +5%, 0.97 = -3%)
   permissions: {
     canEditProducts: boolean;
@@ -47,7 +47,7 @@ export function UsersTab() {
         id: '2',
         username: 'Vendedor1',
         password: 'vend123',
-        priceLevel: 'premium',
+        priceLevel: 'basic',
         customMultiplier: 1.0, // preço normal
         permissions: {
           canEditProducts: false,
@@ -184,9 +184,8 @@ export function UsersTab() {
         <h3 className="font-semibold text-blue-800 mb-2">Como funciona o sistema de preços:</h3>
         <ul className="text-sm text-blue-700 space-y-1">
           <li><strong>Multiplicador:</strong> Define como o preço base será alterado (ex: 0.97 = -3%, 1.05 = +5%)</li>
-          <li><strong>VIP:</strong> Acesso a todas as condições de pagamento + desconto personalizado</li>
-          <li><strong>Premium:</strong> Acesso a condições de pagamento (até 30/60)</li>
-          <li><strong>Básico:</strong> Apenas preço à vista com multiplicador aplicado</li>
+          <li><strong>VIP:</strong> Acesso administrativo completo + multiplicador personalizado</li>
+          <li><strong>Básico:</strong> Acesso a todas as tabelas de preço com multiplicador personalizado</li>
         </ul>
       </div>
 
@@ -223,7 +222,6 @@ export function UsersTab() {
                 className="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="basic">Básico</option>
-                <option value="premium">Premium</option>
                 <option value="vip">VIP</option>
               </select>
             </div>
@@ -367,7 +365,6 @@ export function UsersTab() {
                         className="px-2 py-1 border border-slate-300 rounded text-sm"
                       >
                         <option value="basic">Básico</option>
-                        <option value="premium">Premium</option>
                         <option value="vip">VIP</option>
                       </select>
                     ) : (
