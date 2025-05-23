@@ -370,41 +370,27 @@
     <div id="app"></div>
 
     <script>
-        // Sistema de autenticação com Supabase
+        // Sistema de autenticação (GitHub Pages)
         const auth = {
             currentUser: null,
 
             async login(username, password) {
-                try {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ username, password })
-                    });
-
-                    if (response.ok) {
-                        const userData = await response.json();
-                        this.currentUser = userData;
-                        localStorage.setItem('currentUser', JSON.stringify(userData));
-                        return true;
-                    }
-                    return false;
-                } catch (error) {
-                    // Fallback para localStorage em caso de erro de conexão
-                    const users = {
-                        'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
-                        'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
+                // Sistema de autenticação local para GitHub Pages
+                const users = {
+                    'MoveisBonafe': { password: 'Bonafe1108', level: 'admin', multiplier: 1 },
+                    'Loja': { password: 'Bonafe1108', level: 'basic', multiplier: 1.2 }
+                };
+                
+                if (users[username] && users[username].password === password) {
+                    this.currentUser = { 
+                        id: username, 
+                        username: username,
+                        ...users[username] 
                     };
-                    
-                    if (users[username] && users[username].password === password) {
-                        this.currentUser = { id: username, ...users[username] };
-                        localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
-                        return true;
-                    }
-                    return false;
+                    localStorage.setItem('currentUser', JSON.stringify(this.currentUser));
+                    return true;
                 }
+                return false;
             },
 
             logout() {
@@ -427,100 +413,48 @@
             }
         };
 
-        // Sistema de produtos com Supabase
+        // Sistema de produtos (localStorage - GitHub Pages)
         const productManager = {
-            async getProducts() {
-                try {
-                    const response = await fetch('/api/products');
-                    if (response.ok) {
-                        return await response.json();
-                    }
-                    throw new Error('Erro ao buscar produtos');
-                } catch (error) {
-                    // Fallback para localStorage
-                    const stored = localStorage.getItem('products');
-                    return stored ? JSON.parse(stored) : [];
-                }
+            getProducts() {
+                const stored = localStorage.getItem('products');
+                return stored ? JSON.parse(stored) : [];
             },
 
-            async saveProducts(products) {
+            saveProducts(products) {
                 localStorage.setItem('products', JSON.stringify(products));
             },
 
-            async addProduct(product) {
-                try {
-                    const response = await fetch('/api/products', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(product)
-                    });
-                    
-                    if (response.ok) {
-                        return await response.json();
-                    }
-                    throw new Error('Erro ao criar produto');
-                } catch (error) {
-                    // Fallback para localStorage
-                    const products = JSON.parse(localStorage.getItem('products') || '[]');
-                    const newProduct = {
-                        id: Date.now().toString(),
-                        ...product,
-                        createdAt: new Date().toISOString()
-                    };
-                    products.push(newProduct);
-                    localStorage.setItem('products', JSON.stringify(products));
-                    return newProduct;
-                }
+            addProduct(product) {
+                const products = this.getProducts();
+                const newProduct = {
+                    id: Date.now().toString(),
+                    ...product,
+                    createdAt: new Date().toISOString()
+                };
+                products.push(newProduct);
+                this.saveProducts(products);
+                return newProduct;
             },
 
-            async updateProduct(id, updates) {
-                try {
-                    const response = await fetch(`/api/products/${id}`, {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(updates)
-                    });
-                    
-                    if (response.ok) {
-                        return await response.json();
-                    }
-                    throw new Error('Erro ao atualizar produto');
-                } catch (error) {
-                    // Fallback para localStorage
-                    const products = JSON.parse(localStorage.getItem('products') || '[]');
-                    const index = products.findIndex(p => p.id === id);
-                    if (index !== -1) {
-                        products[index] = { ...products[index], ...updates };
-                        localStorage.setItem('products', JSON.stringify(products));
-                        return products[index];
-                    }
-                    return null;
+            updateProduct(id, updates) {
+                const products = this.getProducts();
+                const index = products.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    products[index] = { ...products[index], ...updates };
+                    this.saveProducts(products);
+                    return products[index];
                 }
+                return null;
             },
 
-            async deleteProduct(id) {
-                try {
-                    const response = await fetch(`/api/products/${id}`, {
-                        method: 'DELETE'
-                    });
-                    
-                    if (!response.ok) {
-                        throw new Error('Erro ao deletar produto');
-                    }
-                } catch (error) {
-                    // Fallback para localStorage
-                    const products = JSON.parse(localStorage.getItem('products') || '[]');
-                    const filtered = products.filter(p => p.id !== id);
-                    localStorage.setItem('products', JSON.stringify(filtered));
-                }
+            deleteProduct(id) {
+                const products = this.getProducts();
+                const filtered = products.filter(p => p.id !== id);
+                this.saveProducts(filtered);
             },
 
-            async getCategories() {
-                const products = await this.getProducts();
+            getCategories() {
+                const products = this.getProducts();
                 const categories = [...new Set(products.map(p => p.category).filter(Boolean))];
                 return categories.sort();
             }
@@ -1035,7 +969,7 @@
                             </div>
                             <div class="user-menu">
                                 <div class="user-info">
-                                    ${user.username} (${user.level === 'admin' ? 'Admin VIP' : 'Básico'})
+                                    ${user.id || user.username} (${user.level === 'admin' ? 'Admin VIP' : 'Básico'})
                                 </div>
                                 <button class="btn btn-danger" data-action="logout">Sair</button>
                             </div>
@@ -1121,10 +1055,10 @@
                 `;
             }
 
-            async renderTabContent() {
+            renderTabContent() {
                 switch (this.currentTab) {
                     case 'produtos':
-                        return await this.renderProductsTab();
+                        return this.renderProductsTab();
                     case 'categorias':
                         return this.renderCategoriesTab();
                     case 'precos':
@@ -1138,13 +1072,13 @@
                     case 'monitor':
                         return this.renderMonitorTab();
                     default:
-                        return await this.renderProductsTab();
+                        return this.renderProductsTab();
                 }
             }
 
-            async renderProductsTab() {
-                const products = await productManager.getProducts();
-                const categories = await productManager.getCategories();
+            renderProductsTab() {
+                const products = productManager.getProducts();
+                const categories = productManager.getCategories();
                 const user = auth.getCurrentUser();
 
                 return `
