@@ -59,12 +59,16 @@ export function PricingTab({ products, onEditProduct }: PricingTabProps) {
                   >
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-lg bg-slate-200 mr-3 overflow-hidden">
+                        <div className="w-10 h-10 rounded-lg bg-slate-200 mr-3 overflow-hidden flex items-center justify-center">
                           <img 
                             src={product.image || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&h=100'} 
                             alt={product.name}
-                            className="w-full h-full object-cover"
-                            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+                            className="max-w-full max-h-full object-contain"
+                            style={{ 
+                              objectFit: 'contain',
+                              maxWidth: '100%',
+                              maxHeight: '100%'
+                            }}
                           />
                         </div>
                         <span className="font-medium text-slate-800">{product.name}</span>

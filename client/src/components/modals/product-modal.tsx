@@ -24,11 +24,18 @@ export function ProductModal({ product, isVisible, onClose }: ProductModalProps)
         </div>
         
         <div className="p-6">
-          <img 
-            src={product.image} 
-            alt={product.name}
-            className="w-full h-64 object-cover rounded-xl mb-6"
-          />
+          <div className="w-full h-64 bg-slate-100 rounded-xl overflow-hidden mb-6 flex items-center justify-center">
+            <img 
+              src={product.image || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300'} 
+              alt={product.name}
+              className="max-w-full max-h-full object-contain"
+              style={{ 
+                objectFit: 'contain',
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
+            />
+          </div>
           
           <div className="space-y-4">
             <div className="flex items-start justify-between">

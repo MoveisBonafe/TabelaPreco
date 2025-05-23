@@ -31,12 +31,18 @@ export function ProductGrid({ products, onViewDetails, onEdit, onDelete, isAdmin
           key={product.id}
           className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 animate-fade-in"
         >
-          <div className="w-full h-48 bg-slate-100 overflow-hidden">
+          <div className="w-full h-48 bg-slate-100 overflow-hidden flex items-center justify-center">
             <img
               src={product.image || 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=300'}
               alt={product.name}
-              className="w-full h-full object-cover"
-              style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+              className="max-w-full max-h-full object-contain"
+              style={{ 
+                objectFit: 'contain', 
+                width: 'auto', 
+                height: 'auto',
+                maxWidth: '100%',
+                maxHeight: '100%'
+              }}
             />
           </div>
           <div className={isAdmin ? 'p-6' : 'p-4'}>
