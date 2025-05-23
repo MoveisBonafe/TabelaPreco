@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -63,7 +63,6 @@ class GitHubPagesSyncManager {
     return GitHubPagesSyncManager.instance;
   }
 
-  // Verificar compatibilidade do navegador
   checkBrowserSupport(): number {
     let support = 0;
     if (typeof Storage !== 'undefined') support += 25;
@@ -73,7 +72,6 @@ class GitHubPagesSyncManager {
     return support;
   }
 
-  // Obter dados de produtos do localStorage
   getProducts(): any[] {
     try {
       const data = localStorage.getItem('catalog_products');
@@ -83,7 +81,6 @@ class GitHubPagesSyncManager {
     }
   }
 
-  // Obter dados de categorias do localStorage
   getCategories(): any[] {
     try {
       const data = localStorage.getItem('catalog_categories');
@@ -93,28 +90,25 @@ class GitHubPagesSyncManager {
     }
   }
 
-  // Sincronizar dados entre abas/janelas
   syncAcrossBrowsers(): void {
     const syncData = {
       products: this.getProducts(),
       categories: this.getCategories(),
       timestamp: new Date().toISOString(),
-      sessionId: this.generateSessionId()
+      sessionId: Math.random().toString(36).substr(2, 9)
     };
 
     localStorage.setItem(this.syncKey, JSON.stringify(syncData));
     localStorage.setItem(this.lastSyncKey, new Date().toISOString());
     
-    // Broadcast para outras abas
     if ('BroadcastChannel' in window) {
       const channel = new BroadcastChannel('catalog_sync');
       channel.postMessage({ type: 'SYNC_UPDATE', data: syncData });
     }
 
-    this.addActivityLog('Sincronização executada', 'Sistema', 'success');
+    this.addActivityLog('Sincronização executada entre navegadores', 'Sistema', 'success');
   }
 
-  // Verificar integridade dos dados
   checkDataIntegrity(): { issues: string[]; totalChecks: number } {
     const issues: string[] = [];
     let totalChecks = 0;
@@ -124,12 +118,12 @@ class GitHubPagesSyncManager {
 
     totalChecks++;
     if (!Array.isArray(products)) {
-      issues.push('Formato de produtos inválido');
+      issues.push('Formato de produtos inválido no localStorage');
     }
 
     totalChecks++;
     if (!Array.isArray(categories)) {
-      issues.push('Formato de categorias inválido');
+      issues.push('Formato de categorias inválido no localStorage');
     }
 
     totalChecks++;
@@ -151,7 +145,6 @@ class GitHubPagesSyncManager {
     return { issues, totalChecks };
   }
 
-  // Adicionar log de atividade
   addActivityLog(action: string, source: string, status: 'success' | 'error' | 'warning'): void {
     try {
       const logs = this.getActivityLogs();
@@ -165,7 +158,6 @@ class GitHubPagesSyncManager {
       
       logs.unshift(newLog);
       
-      // Manter apenas os últimos 50 logs
       if (logs.length > 50) {
         logs.splice(50);
       }
@@ -176,7 +168,6 @@ class GitHubPagesSyncManager {
     }
   }
 
-  // Obter logs de atividade
   getActivityLogs(): ActivityLog[] {
     try {
       const data = localStorage.getItem(this.activityKey);
@@ -186,12 +177,6 @@ class GitHubPagesSyncManager {
     }
   }
 
-  // Gerar ID de sessão
-  private generateSessionId(): string {
-    return Math.random().toString(36).substr(2, 9);
-  }
-
-  // Obter informações de armazenamento
   getStorageInfo(): { used: number; available: number } {
     try {
       let used = 0;
@@ -201,12 +186,11 @@ class GitHubPagesSyncManager {
         }
       }
       
-      // Estimativa: localStorage típico suporta ~5MB
-      const availableEstimate = 5 * 1024 * 1024; // 5MB em bytes
+      const availableEstimate = 5 * 1024 * 1024;
       
       return {
-        used: Math.round(used / 1024), // em KB
-        available: Math.round((availableEstimate - used) / 1024) // em KB
+        used: Math.round(used / 1024),
+        available: Math.round((availableEstimate - used) / 1024)
       };
     } catch {
       return { used: 0, available: 0 };
@@ -226,8 +210,32 @@ export function DatabaseMonitoring() {
 
   const syncManager = GitHubPagesSyncManager.getInstance();
 
-  // Atualizar dados do status
-  const updateStatus = () => {
+  const calculateUptime = (): string => {
+    const startTime = sessionStorage.getItem('app_start_time');
+    if (!startTime) {
+      sessionStorage.setItem('app_start_time', Date.now().toString());
+      return '0m';
+    }
+    
+    const elapsed = Date.now() - parseInt(startTime);
+    const minutes = Math.floor(elapsed / 60000);
+    const hours = Math.floor(minutes / 60);
+    
+    if (hours > 0) {
+      return `${hours}h ${minutes % 60}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  const measureQueryTime = (): number => {
+    const start = performance.now();
+    syncManager.getProducts();
+    syncManager.getCategories();
+    const end = performance.now();
+    return Math.round(end - start);
+  };
+
+  const updateStatus = useCallback(() => {
     setIsLoading(true);
     
     const products = syncManager.getProducts();
@@ -241,7 +249,7 @@ export function DatabaseMonitoring() {
       lastSync,
       totalProducts: products.length,
       totalCategories: categories.length,
-      totalUsers: 1, // GitHub Pages é single-user
+      totalUsers: 1,
       version: '1.0.0-github-pages',
       uptime: calculateUptime(),
       performance: {
@@ -264,36 +272,8 @@ export function DatabaseMonitoring() {
     setSyncStatus(syncStat);
     setActivityLogs(syncManager.getActivityLogs());
     setIsLoading(false);
-  };
+  }, [syncManager, isAutoRefresh]);
 
-  // Calcular uptime (tempo desde o carregamento da página)
-  const calculateUptime = (): string => {
-    const startTime = sessionStorage.getItem('app_start_time');
-    if (!startTime) {
-      sessionStorage.setItem('app_start_time', Date.now().toString());
-      return '0m';
-    }
-    
-    const elapsed = Date.now() - parseInt(startTime);
-    const minutes = Math.floor(elapsed / 60000);
-    const hours = Math.floor(minutes / 60);
-    
-    if (hours > 0) {
-      return `${hours}h ${minutes % 60}m`;
-    }
-    return `${minutes}m`;
-  };
-
-  // Medir tempo de consulta (simulado)
-  const measureQueryTime = (): number => {
-    const start = performance.now();
-    syncManager.getProducts();
-    syncManager.getCategories();
-    const end = performance.now();
-    return Math.round(end - start);
-  };
-
-  // Forçar sincronização
   const handleForceSync = async () => {
     setIsSyncing(true);
     try {
@@ -307,7 +287,6 @@ export function DatabaseMonitoring() {
     }
   };
 
-  // Verificar integridade
   const handleCheckIntegrity = async () => {
     setIsCheckingIntegrity(true);
     try {
@@ -321,7 +300,7 @@ export function DatabaseMonitoring() {
           'warning'
         );
       } else {
-        showToast('Base de dados íntegra! Nenhum problema encontrado.');
+        showToast('Dados íntegros! Nenhum problema encontrado.');
         syncManager.addActivityLog('Verificação de integridade: dados íntegros', 'Sistema', 'success');
       }
       
@@ -332,48 +311,6 @@ export function DatabaseMonitoring() {
       setIsCheckingIntegrity(false);
     }
   };
-
-  // UseEffect para carregar dados iniciais e configurar auto-refresh
-  useEffect(() => {
-    updateStatus();
-    
-    // Listener para mudanças no localStorage (sincronização entre abas)
-    const handleStorageChange = () => {
-      updateStatus();
-    };
-    
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Listener para BroadcastChannel (sincronização em tempo real)
-    if ('BroadcastChannel' in window) {
-      const channel = new BroadcastChannel('catalog_sync');
-      channel.onmessage = (event) => {
-        if (event.data.type === 'SYNC_UPDATE') {
-          updateStatus();
-        }
-      };
-      
-      return () => {
-        window.removeEventListener('storage', handleStorageChange);
-        channel.close();
-      };
-    }
-    
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
-  }, []);
-
-  // Auto-refresh
-  useEffect(() => {
-    if (!isAutoRefresh) return;
-    
-    const interval = setInterval(() => {
-      updateStatus();
-    }, 30000); // Atualiza a cada 30 segundos
-    
-    return () => clearInterval(interval);
-  }, [isAutoRefresh]);
 
   const handleRefresh = () => {
     updateStatus();
@@ -393,15 +330,49 @@ export function DatabaseMonitoring() {
     }
   };
 
-  const formatUptime = (uptime: string) => {
-    return uptime || 'N/A';
-  };
-
   const formatLastSync = (lastSync: string) => {
     if (!lastSync) return 'Nunca';
     const date = new Date(lastSync);
     return date.toLocaleString('pt-BR');
   };
+
+  // UseEffect para carregar dados iniciais e configurar sincronização
+  useEffect(() => {
+    updateStatus();
+    
+    const handleStorageChange = () => {
+      updateStatus();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    if ('BroadcastChannel' in window) {
+      const channel = new BroadcastChannel('catalog_sync');
+      channel.onmessage = () => {
+        updateStatus();
+      };
+      
+      return () => {
+        window.removeEventListener('storage', handleStorageChange);
+        channel.close();
+      };
+    }
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
+  }, [updateStatus]);
+
+  // Auto-refresh
+  useEffect(() => {
+    if (!isAutoRefresh) return;
+    
+    const interval = setInterval(() => {
+      updateStatus();
+    }, 30000);
+    
+    return () => clearInterval(interval);
+  }, [isAutoRefresh, updateStatus]);
 
   return (
     <div className="space-y-6">
@@ -409,7 +380,7 @@ export function DatabaseMonitoring() {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">Monitoramento GitHub Pages</h2>
-          <p className="text-slate-600">Sincronização entre navegadores e sistemas</p>
+          <p className="text-slate-600">Sincronização entre navegadores e sistemas em tempo real</p>
         </div>
         <div className="flex gap-2">
           <Button
@@ -443,11 +414,10 @@ export function DatabaseMonitoring() {
               <Globe className="h-8 w-8 text-blue-600" />
               <div>
                 <Badge className={getStatusColor(dbStatus?.connection || 'outdated')}>
-                  {dbStatus?.connection === 'synchronized' ? 'Sincronizado' : 
-                   dbStatus?.connection === 'connected' ? 'Conectado' : 'Aguardando'}
+                  {dbStatus?.connection === 'synchronized' ? 'Sincronizado' : 'Aguardando'}
                 </Badge>
                 <p className="text-xs text-slate-500 mt-1">
-                  Uptime: {formatUptime(dbStatus?.uptime || '')}
+                  Uptime: {dbStatus?.uptime || '0m'}
                 </p>
               </div>
             </div>
