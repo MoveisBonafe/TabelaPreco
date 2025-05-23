@@ -557,7 +557,7 @@
                         this.handleExportCSV();
                     }
                     if (target.matches('[data-action="download-template"]')) {
-                        this.downloadExcelTemplate();
+                        this.handleDownloadTemplate();
                     }
 
                     // Backup
@@ -828,9 +828,9 @@
             }
 
             handleDownloadTemplate() {
-                // Modelo simplificado: Coluna A = Nome, Coluna B = Preço
+                // Modelo CORRETO: Coluna A = Nome, Coluna B = Preço (APENAS)
                 const templateData = [
-                    'Nome,Preço',  // Cabeçalho nas colunas A e B
+                    'Nome,Preço',  // Cabeçalho simples: A1=Nome, B1=Preço
                     'Mesa de Jantar,850',
                     'Cadeira Estofada,320', 
                     'Sofá 3 Lugares,1200',
@@ -861,16 +861,7 @@
                 toast.show('Arquivo CSV exportado com sucesso!');
             }
 
-            downloadExcelTemplate() {
-                const template = [
-                    ['Nome', 'Preço', 'Categoria', 'Descrição', 'Preço Fixo'],
-                    ['Sofá 3 Lugares', '1299.99', 'Móveis', 'Sofá confortável', 'Não'],
-                    ['Mesa de Jantar', '899.99', 'Móveis', 'Mesa para 6 pessoas', 'Sim']
-                ];
-                
-                this.downloadData(template, 'modelo_produtos.csv', 'csv');
-                toast.show('Modelo CSV baixado com sucesso!');
-            }
+
 
             // Funcionalidades de Backup
             handleBackupData() {
