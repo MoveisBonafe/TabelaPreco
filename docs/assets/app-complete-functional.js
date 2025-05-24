@@ -759,7 +759,7 @@ async function saveCategory() {
   const iconValue = document.getElementById('category-icon').value;
   const categoryData = {
     name: document.getElementById('category-name').value,
-    icon: iconValue || (categoryImageData ? '🖼️' : '📁'),
+    icon: categoryImageData || iconValue || '📁',
     color: document.getElementById('category-color').value
   };
   
@@ -776,7 +776,7 @@ async function updateCategory(id) {
   const iconValue = document.getElementById('category-icon').value;
   const categoryData = {
     name: document.getElementById('category-name').value,
-    icon: iconValue || (categoryImageData ? '🖼️' : '📁'),
+    icon: categoryImageData || iconValue || '📁',
     color: document.getElementById('category-color').value
   };
   
@@ -1111,11 +1111,52 @@ window.importExcel = function() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.xlsx,.xls,.csv';
-  input.onchange = function(e) {
+  input.onchange = async function(e) {
     const file = e.target.files[0];
     if (file) {
       console.log('Arquivo selecionado:', file.name);
-      alert(`Arquivo ${file.name} selecionado! Funcionalidade de importação será implementada em breve.`);
+      
+      const reader = new FileReader();
+      reader.onload = async function(event) {
+        try {
+          const data = new Uint8Array(event.target.result);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const firstSheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[firstSheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+          let importedCount = 0;
+          for (const row of jsonData) {
+            if (row.nome || row.name) {
+              const productData = {
+                name: row.nome || row.name || '',
+                category: row.categoria || row.category || 'Geral',
+                price: parseFloat(row.preco || row.price || 0),
+                dimensions: row.dimensoes || row.dimensions || '',
+                weight: row.peso || row.weight || '',
+                description: row.descricao || row.description || '',
+                image: row.imagem || row.image || '',
+                isFixedPrice: (row.precoFixo || row.fixedPrice || '').toString().toLowerCase() === 'sim'
+              };
+
+              const result = await supabase.insert('products', productData);
+              if (result) importedCount++;
+            }
+          }
+
+          if (importedCount > 0) {
+            await loadSystemData();
+            renderTab('produtos');
+            alert(`✅ Importação concluída! ${importedCount} produtos foram importados com sucesso.`);
+          } else {
+            alert('❌ Nenhum produto foi importado. Verifique se o arquivo está no formato correto.');
+          }
+        } catch (error) {
+          console.error('❌ Erro na importação:', error);
+          alert('❌ Erro ao importar arquivo. Verifique se é um arquivo Excel válido.');
+        }
+      };
+      reader.readAsArrayBuffer(file);
     }
   };
   input.click();
@@ -1993,8 +2034,11 @@ function renderCatalogView() {
               const productCount = systemData.products.filter(p => p.category === category.name).length;
               return `
                 <div onclick="filterByCategory('${category.name}')" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 3px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden; padding: 0.75rem;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                  <div style="height: 60px; background-image: url('${category.image}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6; border-radius: 0.375rem; margin-bottom: 0.5rem;">
-                    <div style="background: rgba(255,255,255,0.9); padding: 0.25rem; border-radius: 50%; font-size: 1.25rem;">${category.icon}</div>
+                  <div style="height: 60px; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6; border-radius: 0.375rem; margin-bottom: 0.5rem; overflow: hidden;">
+                    ${category.icon && category.icon.startsWith('data:image') ? 
+                      `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">` 
+                      : `<div style="font-size: 1.5rem;">${category.icon || '📁'}</div>`
+                    }
                   </div>
                   <h4 style="margin: 0; color: #1e293b; font-size: 0.875rem;">${category.name}</h4>
                   <p style="margin: 0; color: #6b7280; font-size: 0.75rem;">${productCount} produtos</p>
