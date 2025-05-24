@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase, TABLES } from '@/lib/supabase';
+import { supabase, TABLES, hasSupabaseCredentials } from '@/lib/supabase';
 import { useQueryClient } from '@tanstack/react-query';
 
 export interface Product {
@@ -46,6 +46,19 @@ export function useSupabaseProducts() {
     try {
       setIsLoading(true);
       
+      // Verificar se Supabase está configurado
+      if (!hasSupabaseCredentials || !supabase) {
+        console.log('🔄 Supabase não configurado. Sistema funcionando localmente.');
+        setProducts([]);
+        setCategories([
+          { id: 1, name: 'Sofás', description: 'Sofás e estofados', icon: '🛋️', color: '#3b82f6', active: true, product_count: 0, created_at: new Date().toISOString() },
+          { id: 2, name: 'Mesas', description: 'Mesas de centro e jantar', icon: '🪑', color: '#8b5cf6', active: true, product_count: 0, created_at: new Date().toISOString() },
+          { id: 3, name: 'Cadeiras', description: 'Cadeiras e assentos', icon: '💺', color: '#06b6d4', active: true, product_count: 0, created_at: new Date().toISOString() },
+          { id: 4, name: 'Decoração', description: 'Itens decorativos', icon: '🏺', color: '#84cc16', active: true, product_count: 0, created_at: new Date().toISOString() }
+        ]);
+        return;
+      }
+      
       // Carregar produtos
       const { data: productsData, error: productsError } = await supabase
         .from(TABLES.PRODUCTS)
@@ -79,6 +92,12 @@ export function useSupabaseProducts() {
   // Configurar sincronização em tempo real
   useEffect(() => {
     loadData();
+
+    // Só configurar sincronização se Supabase estiver disponível
+    if (!hasSupabaseCredentials || !supabase) {
+      console.log('🔄 Supabase não configurado. Sincronização desabilitada.');
+      return;
+    }
 
     // Canal para produtos
     const productsChannel = supabase
@@ -141,13 +160,19 @@ export function useSupabaseProducts() {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(productsChannel);
-      supabase.removeChannel(categoriesChannel);
+      if (supabase) {
+        supabase.removeChannel(productsChannel);
+        supabase.removeChannel(categoriesChannel);
+      }
     };
   }, []);
 
   // Funções CRUD para produtos
   const addProduct = async (productData: Omit<Product, 'id' | 'created_at'>) => {
+    if (!hasSupabaseCredentials || !supabase) {
+      console.warn('Supabase não configurado');
+      return null;
+    }
     try {
       const { data, error } = await supabase
         .from(TABLES.PRODUCTS)
@@ -166,6 +191,10 @@ export function useSupabaseProducts() {
   };
 
   const updateProduct = async (id: number, productData: Partial<Product>) => {
+    if (!hasSupabaseCredentials || !supabase) {
+      console.warn('Supabase não configurado');
+      return null;
+    }
     try {
       const { data, error } = await supabase
         .from(TABLES.PRODUCTS)
@@ -185,6 +214,10 @@ export function useSupabaseProducts() {
   };
 
   const deleteProduct = async (id: number) => {
+    if (!hasSupabaseCredentials || !supabase) {
+      console.warn('Supabase não configurado');
+      return false;
+    }
     try {
       const { error } = await supabase
         .from(TABLES.PRODUCTS)
@@ -203,6 +236,10 @@ export function useSupabaseProducts() {
 
   // Funções CRUD para categorias
   const addCategory = async (categoryData: Omit<Category, 'id' | 'created_at' | 'product_count'>) => {
+    if (!hasSupabaseCredentials || !supabase) {
+      console.warn('Supabase não configurado');
+      return null;
+    }
     try {
       const { data, error } = await supabase
         .from(TABLES.CATEGORIES)
