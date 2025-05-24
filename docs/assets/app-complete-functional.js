@@ -991,7 +991,7 @@ function showPriceTableModal(tableName = null) {
         </div>
         
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
-          <button type="button" onclick="closeModal()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
+          <button type="button" onclick="document.getElementById('price-table-modal').remove()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
             Cancelar
           </button>
           <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
@@ -1075,6 +1075,20 @@ window.deletePriceTable = function(tableName) {
     renderTab('precos');
     alert(`Tabela "${tableName}" excluída com sucesso!`);
   }
+};
+
+// Função para ordenar tabelas de preços
+window.sortPriceTables = function() {
+  // Alternar entre ordenação por nome e por percentual
+  if (!window.priceTableSortOrder) {
+    window.priceTableSortOrder = 'name';
+  } else if (window.priceTableSortOrder === 'name') {
+    window.priceTableSortOrder = 'percentage';
+  } else {
+    window.priceTableSortOrder = 'name';
+  }
+  
+  renderTab('precos');
 };
 
 // FUNÇÕES DE EXCEL
@@ -1377,12 +1391,33 @@ function renderCategoriesTab() {
 function renderPricesTab() {
   const tablesArray = Object.entries(systemData.priceSettings);
   
+  // Aplicar ordenação baseada na preferência do usuário
+  let sortedTables;
+  if (window.priceTableSortOrder === 'percentage') {
+    sortedTables = tablesArray.sort((a, b) => {
+      if (a[0] === 'A Vista') return -1;
+      if (b[0] === 'A Vista') return 1;
+      return a[1] - b[1];
+    });
+  } else {
+    sortedTables = tablesArray.sort((a, b) => {
+      if (a[0] === 'A Vista') return -1;
+      if (b[0] === 'A Vista') return 1;
+      return a[0].localeCompare(b[0]);
+    });
+  }
+  
   return `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
       <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Tabelas de Preços</h2>
-      <button onclick="showAddPriceTableModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-        + Nova Tabela
-      </button>
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button onclick="sortPriceTables()" style="padding: 0.5rem; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.375rem; cursor: pointer;" title="Ordenar tabelas">
+          ↕️
+        </button>
+        <button onclick="showAddPriceTableModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+          + Nova Tabela
+        </button>
+      </div>
     </div>
     
     <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb; margin-bottom: 2rem;">
@@ -1400,7 +1435,7 @@ function renderPricesTab() {
             </tr>
           </thead>
           <tbody>
-            ${tablesArray.map(([tableName, percentage]) => {
+            ${sortedTables.map(([tableName, percentage]) => {
               const multiplier = (1 + percentage / 100).toFixed(3);
               const example = (100 * (1 + percentage / 100)).toFixed(2);
               const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
