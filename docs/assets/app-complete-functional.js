@@ -1,5 +1,5 @@
-// MoveisBonafe - Sistema completo e funcional
-console.log('🎉 Sistema MoveisBonafe completo carregando...');
+// MoveisBonafe - Sistema completo e funcional - Atualizado em 24/05/2025 19:56
+console.log('🎉 Sistema MoveisBonafe completo carregando - VERSÃO ATUALIZADA 19:56...');
 
 // Configuração do Supabase - Credenciais corretas
 const SUPABASE_URL = 'https://oozesebwtrbzeelkcmwp.supabase.co';
