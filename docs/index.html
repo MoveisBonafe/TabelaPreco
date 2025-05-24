@@ -1,16 +1,76 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <!-- Biblioteca SheetJS para exportar Excel verdadeiro -->
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MoveisBonafe - Catálogo de Móveis</title>
+    <meta name="description" content="MoveisBonafe - Móveis de qualidade com os melhores preços. Veja nosso catálogo completo com tabelas de preços personalizadas.">
+    
+    <!-- SheetJS para Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script type="module" crossorigin src="./assets/app-complete-functional.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/asset-CNKj2dFu.css">
-  </head>
-  <body>
-    <div id="root"></div>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment-->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
-  </body>
+    
+    <!-- CSS básico -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: #f8fafc;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 1.2rem;
+            color: #6b7280;
+        }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div class="loading">
+            🔄 Carregando MoveisBonafe...
+        </div>
+    </div>
+    
+    <!-- Sistema principal -->
+    <script>
+        // Carregar o sistema principal
+        const script = document.createElement('script');
+        script.src = './assets/app-complete-functional.js';
+        script.type = 'module';
+        script.onload = function() {
+            console.log('✅ Sistema MoveisBonafe carregado!');
+        };
+        script.onerror = function() {
+            console.error('❌ Erro ao carregar sistema');
+            document.getElementById('root').innerHTML = `
+                <div style="padding: 2rem; text-align: center;">
+                    <h1>MoveisBonafe</h1>
+                    <p>Erro ao carregar o sistema. Verifique sua conexão.</p>
+                    <button onclick="location.reload()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; margin-top: 1rem;">
+                        Tentar Novamente
+                    </button>
+                </div>
+            `;
+        };
+        document.head.appendChild(script);
+        
+        // Carregar CSS
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = './assets/asset-CNKj2dFu.css';
+        link.onerror = function() {
+            console.warn('CSS não carregado, usando estilos básicos');
+        };
+        document.head.appendChild(link);
+    </script>
+</body>
 </html>
