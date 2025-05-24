@@ -158,16 +158,19 @@ function updateCarousel(carouselId, totalImages) {
 
 // Funções de touch para mobile
 window.handleTouchStart = function(event, carouselId, totalImages) {
+  event.preventDefault();
   const touch = event.touches[0];
   touchStartX = touch.clientX;
   touchStartY = touch.clientY;
+  console.log('Touch start:', touchStartX);
 };
 
 window.handleTouchMove = function(event) {
-  event.preventDefault(); // Evita scroll durante o swipe
+  event.preventDefault();
 };
 
 window.handleTouchEnd = function(event, carouselId, totalImages) {
+  event.preventDefault();
   const touch = event.changedTouches[0];
   const touchEndX = touch.clientX;
   const touchEndY = touch.clientY;
@@ -175,13 +178,15 @@ window.handleTouchEnd = function(event, carouselId, totalImages) {
   const deltaX = touchEndX - touchStartX;
   const deltaY = touchEndY - touchStartY;
   
-  // Verifica se é um swipe horizontal (não vertical)
-  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+  console.log('Touch end - deltaX:', deltaX, 'deltaY:', deltaY);
+  
+  // Verifica se é um swipe horizontal com movimento mínimo de 30px
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
     if (deltaX > 0) {
-      // Swipe para direita - imagem anterior
+      console.log('Swipe direita - imagem anterior');
       previousImage(carouselId, totalImages);
     } else {
-      // Swipe para esquerda - próxima imagem
+      console.log('Swipe esquerda - próxima imagem');
       nextImage(carouselId, totalImages);
     }
   }
@@ -909,25 +914,73 @@ window.exportExcel = function() {
     Descricao: p.description || ''
   }));
   
-  console.log('Exportando produtos:', data);
+  console.log('Exportando produtos para Excel:', data);
   
-  // Criar CSV com separação por TAB para melhor compatibilidade com Excel
+  // Criar arquivo Excel real usando SheetJS
+  try {
+    // Verificar se a biblioteca XLSX está disponível
+    if (typeof XLSX === 'undefined') {
+      // Fallback para CSV se XLSX não estiver disponível
+      console.log('XLSX não disponível, usando CSV como fallback');
+      exportAsCSV(data);
+      return;
+    }
+    
+    // Criar workbook
+    const wb = XLSX.utils.book_new();
+    
+    // Criar worksheet com os dados
+    const ws = XLSX.utils.json_to_sheet(data);
+    
+    // Definir largura das colunas
+    const colWidths = [
+      { wch: 30 }, // Nome
+      { wch: 15 }, // Categoria
+      { wch: 12 }, // Preco
+      { wch: 10 }, // Altura
+      { wch: 10 }, // Largura
+      { wch: 12 }, // Comprimento
+      { wch: 10 }, // Peso
+      { wch: 40 }  // Descricao
+    ];
+    ws['!cols'] = colWidths;
+    
+    // Adicionar worksheet ao workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
+    
+    // Gerar arquivo Excel
+    const fileName = `produtos-moveisbonafe-${new Date().toISOString().split('T')[0]}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    
+    alert(`${data.length} produtos exportados para Excel (.xlsx)!`);
+    
+  } catch (error) {
+    console.error('Erro ao exportar Excel:', error);
+    // Fallback para CSV em caso de erro
+    exportAsCSV(data);
+  }
+};
+
+// Função fallback para exportar como CSV
+function exportAsCSV(data) {
   const headers = ['Nome', 'Categoria', 'Preco', 'Altura', 'Largura', 'Comprimento', 'Peso', 'Descricao'];
   const csvContent = [
-    headers.join('\t'),
-    ...data.map(row => headers.map(header => `"${row[header]}"`).join('\t'))
+    headers.join(';'),
+    ...data.map(row => headers.map(header => `"${row[header] || ''}"`).join(';'))
   ].join('\n');
   
-  const blob = new Blob([csvContent], { type: 'text/tab-separated-values;charset=utf-8' });
+  // Adicionar BOM para UTF-8 (melhor compatibilidade com Excel)
+  const bom = '\uFEFF';
+  const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `produtos-moveisbonafe-${new Date().toISOString().split('T')[0]}.tsv`;
+  a.download = `produtos-moveisbonafe-${new Date().toISOString().split('T')[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
   
-  alert(`${data.length} produtos exportados para Excel!`);
-};
+  alert(`${data.length} produtos exportados para CSV (compatível com Excel)!`);
+}
 
 // FUNÇÕES DE BACKUP
 window.createBackup = function() {
