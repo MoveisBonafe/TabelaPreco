@@ -209,7 +209,7 @@ window.login = function() {
   const defaultUsers = {
     'admin': { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0, active: true },
     'vendedor': { id: 2, username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0, active: true },
-    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.0, active: true }
+    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.2, active: true }
   };
   
   const defaultUser = defaultUsers[username];
@@ -285,16 +285,28 @@ async function loadSystemData() {
 
 // Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
 function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
+  // Garantir que os valores sejam numéricos
+  const safBasePrice = parseFloat(basePrice) || 0;
+  const safeMultiplier = parseFloat(userMultiplier) || 1;
+  
+  console.log('🧮 Cálculo - Preço base:', safBasePrice, 'Multiplicador:', safeMultiplier, 'Preço fixo:', isFixedPrice);
+  
   if (isFixedPrice) {
     // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
     return Object.keys(systemData.priceSettings).reduce((acc, table) => {
-      acc[table] = basePrice; // Mesmo preço para todas as tabelas
+      acc[table] = safBasePrice; // Mesmo preço para todas as tabelas
       return acc;
     }, {});
   } else {
     return Object.keys(systemData.priceSettings).reduce((acc, table) => {
       const increment = systemData.priceSettings[table] / 100;
-      acc[table] = basePrice * userMultiplier * (1 + increment);
+      const finalPrice = safBasePrice * safeMultiplier * (1 + increment);
+      acc[table] = finalPrice;
+      
+      if (table === 'A Vista') {
+        console.log('📊 À Vista - Base:', safBasePrice, '× Mult:', safeMultiplier, '× (1+0%) =', finalPrice);
+      }
+      
       return acc;
     }, {});
   }
@@ -932,171 +944,8 @@ window.deleteUser = async function(id) {
 // FUNÇÕES DE PREÇOS
 window.updatePricePercentage = function(table, value) {
   systemData.priceSettings[table] = parseFloat(value);
+  // Aqui você poderia salvar as configurações no banco
   console.log('Percentual atualizado:', table, value + '%');
-  // Recarregar a aba para mostrar os novos valores
-  setTimeout(() => renderTab('precos'), 100);
-};
-
-// Função para adicionar nova tabela de preços
-window.showAddPriceTableModal = function() {
-  showPriceTableModal();
-};
-
-// Função para editar tabela de preços
-window.showEditPriceTableModal = function(tableName) {
-  showPriceTableModal(tableName);
-};
-
-// Modal para gerenciar tabelas de preços
-function showPriceTableModal(tableName = null) {
-  const isEdit = !!tableName;
-  const currentPercentage = isEdit ? systemData.priceSettings[tableName] : 0;
-  
-  const modal = document.createElement('div');
-  modal.id = 'price-table-modal';
-  modal.style.cssText = `
-    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-    background: rgba(0,0,0,0.5); display: flex; align-items: center; 
-    justify-content: center; z-index: 1000;
-  `;
-  
-  modal.innerHTML = `
-    <div style="background: white; border-radius: 0.5rem; padding: 2rem; max-width: 500px; width: 90%;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0; color: #1e293b;">${isEdit ? 'Editar' : 'Adicionar'} Tabela de Preços</h2>
-        <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
-      </div>
-      
-      <form id="price-table-form" style="display: grid; gap: 1rem;">
-        <div>
-          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome da Tabela</label>
-          <input type="text" id="table-name" value="${tableName || ''}" placeholder="Ex: 30/60/90/120/150" 
-                 style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" 
-                 ${isEdit ? 'readonly' : 'required'}>
-          ${isEdit ? '<p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">O nome não pode ser alterado</p>' : ''}
-        </div>
-        
-        <div>
-          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Percentual (%)</label>
-          <input type="number" id="table-percentage" value="${currentPercentage}" step="0.1" min="0" max="100" 
-                 placeholder="0.0" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
-          <p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">Percentual de acréscimo sobre o preço base</p>
-        </div>
-        
-        <div style="padding: 1rem; background: #f0f9ff; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">
-          <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Simulação</h4>
-          <div id="price-simulation">
-            <p style="margin: 0; color: #6b7280;">Produto de R$ 100,00 ficará: <strong id="simulated-price">R$ ${(100 * (1 + currentPercentage / 100)).toFixed(2)}</strong></p>
-          </div>
-        </div>
-        
-        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
-          <button type="button" onclick="closePriceTableModal()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
-            Cancelar
-          </button>
-          <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-            ${isEdit ? 'Atualizar' : 'Criar'} Tabela
-          </button>
-        </div>
-      </form>
-    </div>
-  `;
-  
-  document.body.appendChild(modal);
-  
-  // Atualizar simulação em tempo real
-  document.getElementById('table-percentage').addEventListener('input', function() {
-    const percentage = parseFloat(this.value) || 0;
-    const simulatedPrice = (100 * (1 + percentage / 100)).toFixed(2);
-    document.getElementById('simulated-price').textContent = `R$ ${simulatedPrice}`;
-  });
-  
-  // Event listener do formulário
-  document.getElementById('price-table-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (isEdit) {
-      updatePriceTable(tableName);
-    } else {
-      savePriceTable();
-    }
-  });
-}
-
-// Salvar nova tabela de preços
-async function savePriceTable() {
-  const tableName = document.getElementById('table-name').value.trim();
-  const percentage = parseFloat(document.getElementById('table-percentage').value) || 0;
-  
-  if (!tableName) {
-    alert('Por favor, digite um nome para a tabela!');
-    return;
-  }
-  
-  if (systemData.priceSettings.hasOwnProperty(tableName)) {
-    alert('Já existe uma tabela com este nome!');
-    return;
-  }
-  
-  systemData.priceSettings[tableName] = percentage;
-  
-  // Fechar modal específico
-  const modal = document.getElementById('price-table-modal');
-  if (modal) modal.remove();
-  
-  renderTab('precos');
-  alert(`Tabela "${tableName}" criada com ${percentage}% de acréscimo!`);
-}
-
-// Atualizar tabela de preços existente
-async function updatePriceTable(tableName) {
-  const percentage = parseFloat(document.getElementById('table-percentage').value) || 0;
-  
-  systemData.priceSettings[tableName] = percentage;
-  
-  // Fechar modal específico
-  const modal = document.getElementById('price-table-modal');
-  if (modal) modal.remove();
-  
-  renderTab('precos');
-  alert(`Tabela "${tableName}" atualizada para ${percentage}%!`);
-}
-
-// Excluir tabela de preços
-window.deletePriceTable = function(tableName) {
-  const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
-  
-  if (isDefault) {
-    alert('Não é possível excluir tabelas padrão do sistema!');
-    return;
-  }
-  
-  if (confirm(`Tem certeza que deseja excluir a tabela "${tableName}"?`)) {
-    delete systemData.priceSettings[tableName];
-    renderTab('precos');
-    alert(`Tabela "${tableName}" excluída com sucesso!`);
-  }
-};
-
-// Função para ordenar tabelas de preços
-window.sortPriceTables = function() {
-  // Alternar entre ordenação por nome e por percentual
-  if (!window.priceTableSortOrder) {
-    window.priceTableSortOrder = 'name';
-  } else if (window.priceTableSortOrder === 'name') {
-    window.priceTableSortOrder = 'percentage';
-  } else {
-    window.priceTableSortOrder = 'name';
-  }
-  
-  renderTab('precos');
-};
-
-// Função para fechar modal de tabela de preços
-window.closePriceTableModal = function() {
-  const modal = document.getElementById('price-table-modal');
-  if (modal) {
-    modal.remove();
-  }
 };
 
 // FUNÇÕES DE EXCEL
@@ -1397,104 +1246,27 @@ function renderCategoriesTab() {
 
 // Renderizar aba de preços
 function renderPricesTab() {
-  const tablesArray = Object.entries(systemData.priceSettings);
-  
-  // Aplicar ordenação baseada na preferência do usuário
-  let sortedTables;
-  if (window.priceTableSortOrder === 'percentage') {
-    sortedTables = tablesArray.sort((a, b) => {
-      if (a[0] === 'A Vista') return -1;
-      if (b[0] === 'A Vista') return 1;
-      return a[1] - b[1];
-    });
-  } else {
-    sortedTables = tablesArray.sort((a, b) => {
-      if (a[0] === 'A Vista') return -1;
-      if (b[0] === 'A Vista') return 1;
-      return a[0].localeCompare(b[0]);
-    });
-  }
+  // Ordem correta das tabelas com À Vista primeiro
+  const orderedTables = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'];
   
   return `
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-      <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Tabelas de Preços</h2>
-      <div style="display: flex; gap: 1rem; align-items: center;">
-        <button onclick="sortPriceTables()" style="padding: 0.5rem; background: #f3f4f6; border: 1px solid #d1d5db; border-radius: 0.375rem; cursor: pointer;" title="Ordenar tabelas">
-          ↕️
-        </button>
-        <button onclick="showAddPriceTableModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-          + Nova Tabela
-        </button>
-      </div>
-    </div>
+    <h2 style="margin: 0 0 1.5rem; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Preços</h2>
     
-    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb; margin-bottom: 2rem;">
-      <h3 style="margin: 0 0 1.5rem; color: #1e293b;">Tabelas de Preços Configuradas</h3>
-      
-      <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; overflow: hidden;">
-        <table style="width: 100%; border-collapse: collapse;">
-          <thead style="background: #f9fafb;">
-            <tr>
-              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Nome da Tabela</th>
-              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Percentual (%)</th>
-              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Multiplicador</th>
-              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Exemplo (R$ 100)</th>
-              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${sortedTables.map(([tableName, percentage]) => {
-              const multiplier = (1 + percentage / 100).toFixed(3);
-              const example = (100 * (1 + percentage / 100)).toFixed(2);
-              const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
-              
-              return `
-                <tr style="border-bottom: 1px solid #e5e7eb;">
-                  <td style="padding: 1rem;">
-                    <div style="display: flex; align-items: center; gap: 0.5rem;">
-                      <span style="font-weight: 600; color: #1e293b;">${tableName}</span>
-                      ${tableName === 'A Vista' ? '<span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Padrão</span>' : ''}
-                    </div>
-                  </td>
-                  <td style="padding: 1rem;">
-                    <input type="number" value="${percentage}" step="0.1" min="0" max="100" 
-                           onchange="updatePricePercentage('${tableName}', this.value)"
-                           style="width: 80px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; text-align: center;">
-                  </td>
-                  <td style="padding: 1rem; color: #6b7280; font-family: monospace;">${multiplier}x</td>
-                  <td style="padding: 1rem; color: #10b981; font-weight: 600;">R$ ${example}</td>
-                  <td style="padding: 1rem;">
-                    <div style="display: flex; gap: 0.5rem;">
-                      <button onclick="showEditPriceTableModal('${tableName}')" 
-                              style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
-                        Editar
-                      </button>
-                      ${!isDefault ? `
-                        <button onclick="deletePriceTable('${tableName}')" 
-                                style="padding: 0.25rem 0.5rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
-                          Excluir
-                        </button>
-                      ` : `
-                        <span style="color: #6b7280; font-size: 0.75rem;">Sistema</span>
-                      `}
-                    </div>
-                  </td>
-                </tr>
-              `;
-            }).join('')}
-          </tbody>
-        </table>
+    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb;">
+      <h3 style="margin: 0 0 1rem; color: #1e293b;">Configurar Percentuais das Tabelas</h3>
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+        ${orderedTables.map(table => `
+          <div style="padding: 1rem; background: ${table === 'A Vista' ? '#f0fdf4' : '#eff6ff'}; border-radius: 0.5rem; border-left: 4px solid ${table === 'A Vista' ? '#10b981' : '#3b82f6'};">
+            <h4 style="margin: 0 0 0.5rem; color: #1e293b;">${table}</h4>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <input type="number" value="${systemData.priceSettings[table]}" step="0.1" min="0" max="100" 
+                     onchange="updatePricePercentage('${table}', this.value)"
+                     style="width: 60px; padding: 0.25rem; border: 1px solid #d1d5db; border-radius: 0.25rem; text-align: center;">
+              <span style="color: #6b7280;">%</span>
+            </div>
+          </div>
+        `).join('')}
       </div>
-    </div>
-    
-    <div style="background: #f0f9ff; border-radius: 0.5rem; padding: 1.5rem; border: 1px solid #3b82f6;">
-      <h4 style="margin: 0 0 1rem; color: #1e293b;">💡 Como Funciona</h4>
-      <ul style="margin: 0; color: #6b7280; line-height: 1.6;">
-        <li><strong>Percentual:</strong> Define o acréscimo sobre o preço base</li>
-        <li><strong>Multiplicador:</strong> Valor calculado automaticamente (1 + percentual/100)</li>
-        <li><strong>À Vista:</strong> Sempre 0% - é o preço base de referência</li>
-        <li><strong>Exemplo:</strong> Com 2%, um produto de R$ 100 fica R$ 102</li>
-      </ul>
     </div>
   `;
 }
@@ -1747,14 +1519,7 @@ function renderApp() {
 
 // Renderizar visão do catálogo (para clientes)
 function renderCatalogView() {
-  // Buscar o multiplicador atual do usuário na aba de usuários
-  let userMultiplier = 1.0;
-  const userInSystem = systemData.users.find(u => u.username === currentUser.username);
-  if (userInSystem) {
-    userMultiplier = userInSystem.price_multiplier || 1.0;
-  } else {
-    userMultiplier = currentUser.price_multiplier || 1.0;
-  }
+  const userMultiplier = parseFloat(currentUser.price_multiplier) || 1.0; // Usa multiplicador real do usuário
   
   const productsHtml = systemData.products.map((product, index) => {
     const basePrice = product.base_price || 0;
@@ -1898,7 +1663,7 @@ function renderCatalogView() {
             ${systemData.categories.map(category => {
               const productCount = systemData.products.filter(p => p.category === category.name).length;
               return `
-                <div onclick="filterByCategory('${category.name}')" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                   <div style="height: 120px; background-image: url('${category.image}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6;">
                     <div style="background: rgba(255,255,255,0.9); padding: 0.5rem; border-radius: 50%; font-size: 1.5rem;">${category.icon}</div>
                   </div>
@@ -1974,26 +1739,40 @@ function renderCatalogView() {
                   height: 140px !important;
                 }
                 
-                /* Preços super compactos no mobile - TODAS as 5 tabelas FORÇADAS */
-                .price-tables {
+                /* Preços super compactos no mobile - TODAS as 5 tabelas visíveis */
+                [style*="grid-template-columns: 1fr 1fr"] {
                   display: grid !important;
                   grid-template-columns: repeat(5, 1fr) !important;
                   gap: 0.1rem !important;
-                  font-size: 0.55rem !important;
-                  width: 100% !important;
-                  overflow: hidden !important;
+                  font-size: 0.6rem !important;
                 }
                 
-                .price-tables > div {
-                  padding: 0.15rem 0.05rem !important;
+                [style*="grid-template-columns: 1fr 1fr"] > div {
+                  padding: 0.2rem 0.05rem !important;
                   min-width: 0 !important;
-                  overflow: hidden !important;
-                  text-overflow: ellipsis !important;
                 }
                 
-                .price-tables > div:nth-child(5) {
-                  grid-column: 5 !important;
-                  grid-row: 1 !important;
+                [style*="grid-column: 1 / -1"] {
+                  grid-column: auto !important;
+                  grid-row: auto !important;
+                }
+                
+                /* Força exibição de todos os preços */
+                .price-tables,
+                .price-tables-mobile,
+                [class*="price"] {
+                  display: grid !important;
+                  grid-template-columns: repeat(5, 1fr) !important;
+                  gap: 0.1rem !important;
+                }
+                
+                /* Ajusta texto para caber */
+                [style*="font-size: 0.75rem"] {
+                  font-size: 0.55rem !important;
+                }
+                
+                [style*="font-size: 0.9rem"] {
+                  font-size: 0.65rem !important;
                 }
                 
                 .price-tables [style*="font-size: 0.75rem"] {
@@ -2306,14 +2085,7 @@ window.filterProducts = function() {
 
 // Função para atualizar exibição dos produtos
 function updateProductsDisplay(productsToShow) {
-  // Buscar o multiplicador atual do usuário na aba de usuários
-  let userMultiplier = 1.0;
-  const userInSystem = systemData.users.find(u => u.username === currentUser.username);
-  if (userInSystem) {
-    userMultiplier = userInSystem.price_multiplier || 1.0;
-  } else {
-    userMultiplier = currentUser.price_multiplier || 1.0;
-  }
+  const userMultiplier = currentUser.price_multiplier || 1.5;
   
   const productsHtml = productsToShow.map((product, index) => {
     const basePrice = product.base_price || 0;
@@ -2430,48 +2202,6 @@ function updateProductsDisplay(productsToShow) {
       `;
     }
   }
-};
-
-// Função para filtrar por categoria quando clicar no card da categoria
-window.filterByCategory = function(categoryName) {
-  console.log('Filtrando por categoria:', categoryName);
-  
-  // Atualizar o select de categoria
-  const categoryFilter = document.getElementById('category-filter');
-  if (categoryFilter) {
-    categoryFilter.value = categoryName;
-  }
-  
-  // Limpar busca por texto
-  const searchInput = document.getElementById('search-input');
-  if (searchInput) {
-    searchInput.value = '';
-  }
-  
-  // Filtrar produtos da categoria
-  const filteredProducts = systemData.products.filter(product => product.category === categoryName);
-  
-  console.log(`Produtos da categoria "${categoryName}":`, filteredProducts.length);
-  updateProductsDisplay(filteredProducts);
-  
-  // Scroll suave para a seção de produtos
-  setTimeout(() => {
-    const productsSection = document.querySelector('h3');
-    if (productsSection) {
-      productsSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  }, 100);
-};
-
-// Função para limpar filtros e mostrar todos os produtos
-window.clearFilters = function() {
-  const searchInput = document.getElementById('search-input');
-  const categoryFilter = document.getElementById('category-filter');
-  
-  if (searchInput) searchInput.value = '';
-  if (categoryFilter) categoryFilter.value = '';
-  
-  updateProductsDisplay(systemData.products);
 };
 
 // Inicializar aplicação
