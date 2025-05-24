@@ -323,19 +323,33 @@ window.showAddProductModal = function() {
   });
 };
 
-// Função para salvar produto (simplificada)
+// Função para salvar produto (corrigida)
 async function saveProduct() {
+  const categoryId = parseInt(document.getElementById('product-category').value);
+  const categoryName = systemData.categories.find(c => c.id === categoryId)?.name || 'Categoria';
+  
+  const basePrice = parseFloat(document.getElementById('product-price').value) || 0;
+  
   const productData = {
     name: document.getElementById('product-name').value,
-    category_id: parseInt(document.getElementById('product-category').value),
-    description: document.getElementById('product-description').value || null,
-    price: parseFloat(document.getElementById('product-price').value) || 0,
-    weight: parseFloat(document.getElementById('product-weight').value) || null,
-    height: parseFloat(document.getElementById('product-height').value) || null,
-    width: parseFloat(document.getElementById('product-width').value) || null,
-    length: parseFloat(document.getElementById('product-length').value) || null,
+    category: categoryName,
+    description: document.getElementById('product-description').value || '',
+    base_price: basePrice,
+    final_price: basePrice,
+    price_a_vista: basePrice,
+    price_30: basePrice * 1.02,
+    price_30_60: basePrice * 1.04,
+    price_30_60_90: basePrice * 1.06,
+    price_30_60_90_120: basePrice * 1.08,
+    weight: parseFloat(document.getElementById('product-weight').value) || 0,
+    height: parseFloat(document.getElementById('product-height').value) || 0,
+    width: parseFloat(document.getElementById('product-width').value) || 0,
+    length: parseFloat(document.getElementById('product-length').value) || 0,
     fixed_price: document.getElementById('product-fixed-price').checked,
     image_url: document.getElementById('product-image').value || null,
+    active: true,
+    discount: 0,
+    discount_percent: 0,
     created_at: new Date().toISOString()
   };
   
@@ -437,9 +451,9 @@ function renderTab(tabName) {
 // Renderizar aba de produtos
 function renderProductsTab() {
   const productsHtml = systemData.products.map(product => {
-    const category = systemData.categories.find(c => c.id === product.category_id);
     const userMultiplier = currentUser.price_multiplier || 1.0;
-    const priceTable = calculatePriceTable(product.price || 0, userMultiplier, product.fixed_price);
+    const basePrice = product.base_price || 0;
+    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
     
     return `
       <tr style="border-bottom: 1px solid #e5e7eb;">
@@ -451,7 +465,7 @@ function renderProductsTab() {
         </td>
         <td style="padding: 1rem;">
           <div style="font-weight: 600; color: #1e293b;">${product.name}</div>
-          <div style="font-size: 0.875rem; color: #6b7280;">${category ? category.name : 'N/A'}</div>
+          <div style="font-size: 0.875rem; color: #6b7280;">${product.category || 'N/A'}</div>
           ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #f59e0b;">🔒 Preço Fixo</div>' : ''}
         </td>
         <td style="padding: 1rem; color: #10b981; font-weight: 600;">R$ ${priceTable['A Vista'].toFixed(2)}</td>
