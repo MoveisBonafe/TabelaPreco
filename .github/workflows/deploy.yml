@@ -21,12 +21,12 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: |
-        npm install
-        npm install @supabase/supabase-js
+      run: npm ci
 
-    - name: Build project
-      run: npx vite build --config vite.config.github.ts
+    - name: Build project for GitHub Pages
+      run: |
+        export NODE_ENV=production
+        npx --yes vite build --mode production --base="/TabelaPreco/"
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
@@ -37,4 +37,4 @@ jobs:
       if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist
+        publish_dir: ./client/dist
