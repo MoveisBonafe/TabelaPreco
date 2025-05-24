@@ -1,59 +1,70 @@
-name: Deploy to GitHub Pages
+name: Deploy MoveisBonafe to GitHub Pages
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      
+      uses: actions/checkout@v3
+
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v3
       with:
-        node-version: '20'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    - name: Build for GitHub Pages
-      run: npm run build
+        node-version: '18'
+
+    - name: Clean install dependencies
+      run: |
+        echo "🧹 Limpando dependências antigas..."
+        rm -rf node_modules package-lock.json
+        echo "📦 Instalando dependências..."
+        npm install
+        echo "✅ Dependências instaladas"
+
+    - name: Debug - Check source files
+      run: |
+        echo "🔍 Verificando arquivos fonte..."
+        echo "Arquivo principal App.tsx:"
+        head -20 client/src/App.tsx
+        echo ""
+        echo "Arquivo main.tsx:"
+        cat client/src/main.tsx
+        echo ""
+        echo "CSS sendo usado:"
+        ls -la client/src/index-*.css
+
+    - name: Force clean build for GitHub Pages
+      run: |
+        echo "🧹 Limpando build antigo completamente..."
+        rm -rf dist .vite node_modules/.vite
+        echo "🏗️ Iniciando build com código novo..."
+        echo "Configuração Vite:"
+        cat ../vite.config.github.ts
+        echo ""
+        echo "🚀 Executando build..."
+        npx vite build --config ../vite.config.github.ts
+        echo "✅ Build concluído"
+        echo "📁 Arquivos gerados:"
+        ls -la dist/
+        echo "🔍 Conteúdo do index.html:"
+        cat dist/index.html
+      working-directory: ./client
       env:
-        VITE_GITHUB_PAGES: 'true'
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
-        
-    - name: Setup Pages
-      uses: actions/configure-pages@v4
-      
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: './dist'
+        VITE_GITHUB_PAGES: true
+        VITE_BUILD_TIMESTAMP: ${{ github.run_number }}
 
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./client/dist
+        force_orphan: true

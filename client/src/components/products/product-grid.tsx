@@ -57,20 +57,6 @@ export function ProductGrid({ products, onViewDetails, onEdit, onDelete, isAdmin
             <p className={`text-slate-600 mb-4 line-clamp-2 ${isAdmin ? 'text-sm' : 'text-xs'}`}>
               {product.description}
             </p>
-            {/* Tabela de Preços */}
-            <div className="mb-4">
-              <div className="text-xs text-slate-600 mb-2">À Vista: R$ {product.priceAVista.toFixed(2).replace('.', ',')}</div>
-              <div className="grid grid-cols-4 gap-1 text-xs border border-slate-200 rounded overflow-hidden">
-                <div className="bg-blue-100 text-blue-800 p-2 text-center font-medium">30 dias</div>
-                <div className="bg-blue-100 text-blue-800 p-2 text-center font-medium">30/60</div>
-                <div className="bg-blue-100 text-blue-800 p-2 text-center font-medium">30/60/90</div>
-                <div className="bg-blue-100 text-blue-800 p-2 text-center font-medium">30/60/90/120</div>
-                <div className="p-2 text-center bg-white">R$ {product.price30.toFixed(2).replace('.', ',')}</div>
-                <div className="p-2 text-center bg-white">R$ {product.price30_60.toFixed(2).replace('.', ',')}</div>
-                <div className="p-2 text-center bg-white">R$ {product.price30_60_90.toFixed(2).replace('.', ',')}</div>
-                <div className="p-2 text-center bg-white">R$ {product.price30_60_90_120.toFixed(2).replace('.', ',')}</div>
-              </div>
-            </div>
             <div className="flex items-center justify-between">
               <span className={`font-bold text-emerald-600 ${isAdmin ? 'text-lg' : 'text-lg'}`}>
                 R$ {product.finalPrice.toFixed(2).replace('.', ',')}
