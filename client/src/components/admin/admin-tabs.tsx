@@ -16,6 +16,8 @@ const tabs = [
 ];
 
 export function AdminTabs({ activeTab, onTabChange }: AdminTabsProps) {
+  console.log('AdminTabs renderizando com', tabs.length, 'abas'); // Debug
+  
   return (
     <div className="mb-8">
       <div className="border-b border-slate-200">
