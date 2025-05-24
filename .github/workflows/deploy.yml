@@ -26,10 +26,11 @@ jobs:
         npm install @supabase/supabase-js
 
     - name: Build project
-      run: npm run build
+      run: vite build --config vite.config.github.ts
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        VITE_GITHUB_PAGES: true
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
