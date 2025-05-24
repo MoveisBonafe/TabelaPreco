@@ -2537,6 +2537,64 @@ function updateProductsDisplay(productsToShow) {
   if (productsContainer) {
     if (productsToShow.length > 0) {
       productsContainer.innerHTML = productsHtml;
+      // Aplicar melhorias visuais após filtrar
+      setTimeout(() => {
+        const priceTables = document.querySelectorAll('[style*="grid-template-columns: 1fr 1fr"]');
+        priceTables.forEach((table, tableIndex) => {
+          if (table.innerHTML.includes('À Vista')) {
+            // Atualizar para 5 tabelas coloridas
+            table.style.gridTemplateColumns = 'repeat(5, 1fr)';
+            table.style.gap = '0.5rem';
+            table.style.fontSize = '0.75rem';
+            table.style.cursor = 'pointer';
+            table.onclick = () => showProductModal(tableIndex);
+            
+            const boxes = table.children;
+            if (boxes.length >= 4) {
+              // Aplicar cores corretas
+              if (boxes[0]) {
+                boxes[0].style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                boxes[0].style.color = 'white';
+                boxes[0].style.fontWeight = '700';
+                boxes[0].innerHTML = boxes[0].innerHTML.replace('À Vista', 'À Vista').replace('color: #6b7280', 'font-weight: 700').replace('color: #10b981', 'font-weight: 600');
+              }
+              if (boxes[1]) {
+                boxes[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+                boxes[1].style.color = 'white';
+                boxes[1].style.fontWeight = '700';
+                boxes[1].innerHTML = boxes[1].innerHTML.replace('30 dias', '30').replace('color: #6b7280', 'font-weight: 700').replace('color: #3b82f6', 'font-weight: 600');
+              }
+              if (boxes[2]) {
+                boxes[2].style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
+                boxes[2].style.color = 'white';
+                boxes[2].style.fontWeight = '700';
+                boxes[2].innerHTML = boxes[2].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #3b82f6', 'font-weight: 600');
+              }
+              if (boxes[3]) {
+                boxes[3].style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                boxes[3].style.color = 'white';
+                boxes[3].style.fontWeight = '700';
+                boxes[3].innerHTML = boxes[3].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #3b82f6', 'font-weight: 600');
+              }
+              
+              // Adicionar 5ª tabela se não existir
+              if (boxes.length === 4) {
+                const lastPrice = boxes[3].querySelector('[style*="font-weight: 600"]');
+                const baseValue = lastPrice ? parseFloat(lastPrice.textContent.replace('R$ ', '').replace(',', '.')) : 0;
+                const newPrice = (baseValue * 1.02).toFixed(2);
+                
+                const newBox = document.createElement('div');
+                newBox.style.cssText = 'padding: 0.5rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.375rem; text-align: center; color: white;';
+                newBox.innerHTML = `
+                  <div style="font-weight: 700;">30/60/90/120</div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">R$ ${newPrice}</div>
+                `;
+                table.appendChild(newBox);
+              }
+            }
+          }
+        });
+      }, 100);
     } else {
       productsContainer.innerHTML = `
         <div style="grid-column: 1 / -1; background: white; padding: 3rem; border-radius: 0.5rem; text-align: center; border: 2px dashed #d1d5db;">
