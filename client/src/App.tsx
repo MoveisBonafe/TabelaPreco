@@ -13,22 +13,16 @@ type View = 'login' | 'catalog' | 'admin';
 const isGitHubPages = window.location.hostname.includes('github.io');
 
 function App() {
-  const [currentView, setCurrentView] = useState<View>(isGitHubPages ? 'catalog' : 'login');
+  const [currentView, setCurrentView] = useState<View>('login');
   const { showToast, ToastContainer } = useToast();
   
-  // Só ativar sincronização se não for GitHub Pages
+  // Ativar sincronização WebSocket apenas se não for GitHub Pages
   if (!isGitHubPages) {
     useSync();
   }
   const { isConnected } = useSupabaseProducts();
 
   useEffect(() => {
-    // Se for GitHub Pages, sempre mostrar catálogo
-    if (isGitHubPages) {
-      setCurrentView('catalog');
-      return;
-    }
-
     // Verifica se já está logado ao carregar a página
     if (auth.isAuthenticated()) {
       setCurrentView('admin');

@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy MoveisBonafe to GitHub Pages
 
 on:
   push:
@@ -12,28 +12,28 @@ jobs:
     
     steps:
     - name: Checkout
-      uses: actions/checkout@v4
-      
+      uses: actions/checkout@v3
+
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v3
       with:
-        node-version: '20'
+        node-js-version: '18'
         cache: 'npm'
-        
+
     - name: Install dependencies
-      run: npm ci
-      
+      run: |
+        npm install
+        npm install @supabase/supabase-js
+
     - name: Build project
       run: npm run build
-      
-    - name: Copy build files
-      run: |
-        cp -r dist/public/* dist/
-        echo 'TabelaPreco' > dist/CNAME
-      
+      env:
+        VITE_SUPABASE_URL: https://oozesebwtrbzeelkcmwp.supabase.co
+        VITE_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwNDI4ODAsImV4cCI6MjA2MzYxODg4MH0.B7r5fxV2mCvQ0GQUk-oEEXsPlYdJTHhQ8KH8zwEWMn8
+
     - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main'
       uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/main'
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./dist/public
+        publish_dir: ./dist
