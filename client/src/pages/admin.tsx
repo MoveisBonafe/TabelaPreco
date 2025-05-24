@@ -34,30 +34,27 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
   const canEditProducts = currentUser?.permissions?.canEditProducts ?? false;
   const canEditPrices = currentUser?.permissions?.canEditPrices ?? false;
 
-  const handleCreateProduct = (productData: InsertProduct) => {
+  const handleCreateProduct = async (productData: InsertProduct) => {
     try {
-      createProduct(productData);
-      showToast('Produto criado com sucesso!');
+      await createProduct(productData);
     } catch (error) {
-      showToast('Erro ao criar produto', 'error');
+      console.error('Erro ao criar produto:', error);
     }
   };
 
-  const handleUpdateProduct = (id: string, productData: Partial<InsertProduct>) => {
+  const handleUpdateProduct = async (id: string, productData: Partial<InsertProduct>) => {
     try {
-      updateProduct(id, productData);
-      showToast('Produto atualizado com sucesso!');
+      await updateProduct(id, productData);
     } catch (error) {
-      showToast('Erro ao atualizar produto', 'error');
+      console.error('Erro ao atualizar produto:', error);
     }
   };
 
-  const handleDeleteProduct = (id: string) => {
+  const handleDeleteProduct = async (id: string) => {
     try {
-      deleteProduct(id);
-      showToast('Produto excluído com sucesso!');
+      await deleteProduct(id);
     } catch (error) {
-      showToast('Erro ao excluir produto', 'error');
+      console.error('Erro ao excluir produto:', error);
     }
   };
 
