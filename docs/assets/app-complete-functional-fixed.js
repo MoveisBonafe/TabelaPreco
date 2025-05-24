@@ -490,7 +490,7 @@ window.closePriceTableModal = function() {
   }
 };
 
-// Renderizar visão do catálogo (para clientes) - VERSÃO CORRIGIDA
+// Renderizar visão do catálogo (para clientes) - VERSÃO COMPLETA RESTAURADA
 function renderCatalogView() {
   // Buscar o multiplicador atual do usuário na aba de usuários
   let userMultiplier = 1.0;
@@ -500,138 +500,296 @@ function renderCatalogView() {
   } else {
     userMultiplier = currentUser.price_multiplier || 1.0;
   }
-  
-  const productsHtml = systemData.products.map((product, index) => {
-    const basePrice = product.base_price || 0;
-    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
+
+  document.body.innerHTML = `
+    <style>
+      * { box-sizing: border-box; }
+      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; }
+      
+      .header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
+      .header-content { display: flex; justify-content: space-between; align-items: center; }
+      .logo { display: flex; align-items: center; gap: 0.75rem; }
+      .logo-icon { width: 32px; height: 32px; background: #3b82f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; }
+      .user-badge { padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem; }
+      .logout-btn { padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; }
+      
+      .main { padding: 1.5rem; max-width: 1200px; margin: 0 auto; }
+      .hero { text-align: center; margin-bottom: 2rem; }
+      .hero h2 { margin: 0 0 0.5rem; color: #1e293b; font-size: 2rem; }
+      .hero p { margin: 0; color: #6b7280; }
+      
+      .filters { background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+      .filters-content { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+      .search-input { flex: 1; min-width: 250px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; }
+      .category-select { padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; }
+      
+      .categories-section { margin-bottom: 2rem; }
+      .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+      .category-card { background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; text-align: center; cursor: pointer; transition: transform 0.2s; }
+      .category-card:hover { transform: translateY(-2px); }
+      .category-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+      .category-name { margin: 0 0 0.25rem; color: #1e293b; }
+      .category-count { margin: 0; color: #6b7280; font-size: 0.875rem; }
+      
+      .products-section h3 { margin: 0 0 1rem; color: #1e293b; }
+      #products-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+      
+      .product-card { background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; padding: 1rem; transition: transform 0.2s; }
+      .product-card:hover { transform: translateY(-2px); }
+      
+      .carousel-container { position: relative; margin-bottom: 1rem; overflow: hidden; border-radius: 0.375rem; background: #f8f9fa; }
+      .carousel-track { display: flex; transition: transform 0.3s ease; }
+      .carousel-slide { min-width: 100%; position: relative; }
+      .carousel-img { width: 100%; height: 200px; object-fit: cover; border-radius: 0.375rem; }
+      .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; }
+      .carousel-prev { left: 0.5rem; }
+      .carousel-next { right: 0.5rem; }
+      .carousel-indicators { display: flex; justify-content: center; gap: 0.25rem; position: absolute; bottom: 0.5rem; left: 50%; transform: translateX(-50%); }
+      .carousel-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.5); cursor: pointer; }
+      .carousel-dot.active { background: white; }
+      
+      .product-title { margin: 0 0 0.5rem; color: #1e293b; font-size: 1.125rem; font-weight: 600; }
+      .product-category { margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem; }
+      
+      .price-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+      .price-item { padding: 0.5rem; background: #f8fafc; border-radius: 0.375rem; text-align: center; border-left: 3px solid; }
+      .price-label { font-size: 0.75rem; color: #6b7280; margin: 0 0 0.25rem; font-weight: 500; }
+      .price-value { font-size: 1rem; color: #1e293b; margin: 0; font-weight: 600; }
+      
+      /* Responsividade móvel */
+      @media (max-width: 768px) {
+        .main { padding: 1rem; }
+        .filters-content { flex-direction: column; align-items: stretch; }
+        .search-input { min-width: 100%; }
+        .categories-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+        #products-container { grid-template-columns: 1fr; }
+        .price-grid { grid-template-columns: repeat(2, 1fr); gap: 0.25rem; }
+        .price-item { padding: 0.375rem; }
+        .price-label { font-size: 0.7rem; }
+        .price-value { font-size: 0.9rem; }
+      }
+    </style>
     
-    // Pegar todas as imagens com verificação segura
-    let allImages = [];
-    try {
-      if (product.images && product.images !== 'null' && product.images !== '') {
-        const parsed = JSON.parse(product.images);
-        if (Array.isArray(parsed)) {
-          allImages = parsed;
+    <div class="header">
+      <div class="header-content">
+        <div class="logo">
+          <div class="logo-icon">📋</div>
+          <h1 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Catálogo MoveisBonafe</h1>
+          <span class="user-badge">${currentUser.role === 'admin' ? 'Admin' : currentUser.role === 'seller' ? 'Vendedor' : 'Cliente'} - ${currentUser.name}</span>
+        </div>
+        <button class="logout-btn" onclick="logout()">Sair</button>
+      </div>
+    </div>
+    
+    <div class="main">
+      <div class="hero">
+        <h2>Produtos Disponíveis</h2>
+        <p>Navegue pelos nossos produtos e confira os preços personalizados</p>
+      </div>
+      
+      <div class="filters">
+        <div class="filters-content">
+          <input type="text" class="search-input" placeholder="🔍 Buscar produtos..." id="search-input" oninput="filterProducts()">
+          <select class="category-select" id="category-filter" onchange="filterProducts()">
+            <option value="all">🏷️ Todas as Categorias</option>
+            ${Object.keys(systemData.categories).map(cat => 
+              `<option value="${cat}">${systemData.categories[cat].icon} ${cat}</option>`
+            ).join('')}
+          </select>
+        </div>
+      </div>
+      
+      <div class="categories-section">
+        <h3>🎯 Filtrar por Categoria</h3>
+        <div class="categories-grid">
+          ${Object.entries(systemData.categories).map(([name, cat]) => {
+            const productCount = systemData.products.filter(p => p.category === name && p.active !== false).length;
+            return `
+              <div class="category-card" onclick="filterByCategory('${name}')" style="border-color: ${cat.color};">
+                <div class="category-icon">${cat.icon}</div>
+                <h4 class="category-name">${name}</h4>
+                <p class="category-count">${productCount} produto${productCount !== 1 ? 's' : ''}</p>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+      
+      <div class="products-section">
+        <h3>📦 Nossos Produtos</h3>
+        <div id="products-container"></div>
+      </div>
+    </div>
+  `;
+
+  // Função para filtrar por categoria
+  window.filterByCategory = function(categoryName) {
+    const categoryFilter = document.getElementById('category-filter');
+    categoryFilter.value = categoryName;
+    filterProducts();
+  };
+
+  // Função para filtrar produtos
+  window.filterProducts = function() {
+    const searchInput = document.getElementById('search-input');
+    const categoryFilter = document.getElementById('category-filter');
+    
+    const searchTerm = searchInput.value.toLowerCase();
+    const selectedCategory = categoryFilter.value;
+    
+    renderFilteredProducts(searchTerm, selectedCategory);
+  };
+
+  // Renderizar produtos filtrados
+  function renderFilteredProducts(searchTerm = '', selectedCategory = 'all') {
+    const container = document.getElementById('products-container');
+    
+    const filteredProducts = systemData.products.filter(product => {
+      if (product.active === false) return false;
+      
+      const matchesSearch = !searchTerm || 
+        product.name.toLowerCase().includes(searchTerm) ||
+        (product.description && product.description.toLowerCase().includes(searchTerm)) ||
+        product.category.toLowerCase().includes(searchTerm);
+      
+      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
+      
+      return matchesSearch && matchesCategory;
+    });
+
+    if (filteredProducts.length === 0) {
+      container.innerHTML = `
+        <div style="grid-column: 1 / -1; text-align: center; padding: 3rem; color: #6b7280;">
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+          <h3 style="margin: 0 0 0.5rem; color: #374151;">Nenhum produto encontrado</h3>
+          <p style="margin: 0;">Tente ajustar os filtros ou termos de busca</p>
+        </div>
+      `;
+      return;
+    }
+
+    const productsHtml = filteredProducts.map((product, index) => {
+      const basePrice = product.base_price || 0;
+      const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
+      
+      // Pegar todas as imagens com verificação segura
+      let allImages = [];
+      try {
+        if (product.images && product.images !== 'null' && product.images !== '') {
+          const parsed = JSON.parse(product.images);
+          if (Array.isArray(parsed)) {
+            allImages = parsed;
+          }
+        }
+        if (product.image_url && !allImages.includes(product.image_url)) {
+          allImages.unshift(product.image_url);
+        }
+      } catch (e) {
+        if (product.image_url) {
+          allImages = [product.image_url];
         }
       }
-      if (product.image_url && !allImages.includes(product.image_url)) {
-        allImages.unshift(product.image_url);
-      }
-    } catch (e) {
-      if (product.image_url) {
-        allImages = [product.image_url];
-      }
-    }
+      
+      // Filtrar imagens válidas
+      allImages = allImages.filter(img => img && img.trim() !== '');
     
-    // Filtrar imagens válidas
-    allImages = allImages.filter(img => img && img.trim() !== '');
-    
-    const hasMultipleImages = allImages.length > 1;
-    const carouselId = `carousel-${product.id || index}`;
-    
-    return `
-      <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; padding: 1rem; transition: transform 0.2s; max-width: 100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-        <!-- Carrossel de Imagens -->
-        <div style="position: relative; margin-bottom: 1rem; overflow: hidden; border-radius: 0.375rem;">
-          <div id="${carouselId}" style="display: flex; transition: transform 0.3s ease; width: ${allImages.length * 100}%;">
-            ${allImages.length > 0 ? allImages.map((img, imgIndex) => `
-              <div style="width: ${100 / allImages.length}%; flex-shrink: 0;">
-                <img src="${img}" alt="${product.name}" style="width: 100%; height: 180px; object-fit: cover; display: block;">
+      const hasMultipleImages = allImages.length > 1;
+      const carouselId = `carousel-${product.id || index}`;
+      
+      // Cores para cada tabela de preço
+      const priceColors = {
+        'A Vista': '#10b981',
+        '30': '#3b82f6', 
+        '30/60': '#8b5cf6',
+        '30/60/90': '#f59e0b',
+        '30/60/90/120': '#ef4444'
+      };
+      
+      return `
+        <div class="product-card">
+          <div class="carousel-container" id="${carouselId}">
+            <div class="carousel-track" id="${carouselId}-track">
+              ${allImages.length > 0 ? allImages.map((img, imgIndex) => `
+                <div class="carousel-slide">
+                  <img src="${img}" alt="${product.name}" class="carousel-img" 
+                       onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><rect width=%22100%25%22 height=%22100%25%22 fill=%22%23f3f4f6%22/><text x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%236b7280%22>Sem Imagem</text></svg>'">
+                </div>
+              `).join('') : `
+                <div class="carousel-slide">
+                  <div style="width: 100%; height: 200px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #6b7280; border-radius: 0.375rem;">
+                    📦 Sem Imagem
+                  </div>
+                </div>
+              `}
+            </div>
+            
+            ${hasMultipleImages ? `
+              <button class="carousel-btn carousel-prev" onclick="moveCarousel('${carouselId}', -1)">‹</button>
+              <button class="carousel-btn carousel-next" onclick="moveCarousel('${carouselId}', 1)">›</button>
+              
+              <div class="carousel-indicators">
+                ${allImages.map((_, imgIndex) => `
+                  <div class="carousel-dot ${imgIndex === 0 ? 'active' : ''}" onclick="goToSlide('${carouselId}', ${imgIndex})"></div>
+                `).join('')}
               </div>
-            `).join('') : `
-              <div style="width: 100%; height: 180px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 2rem;">📷</div>
-            `}
+            ` : ''}
           </div>
           
-          ${hasMultipleImages ? `
-            <!-- Setas de Navegação -->
-            <button onclick="previousImage('${carouselId}', ${allImages.length})" 
-                    style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10;">
-              ←
-            </button>
-            <button onclick="nextImage('${carouselId}', ${allImages.length})" 
-                    style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10;">
-              →
-            </button>
-            
-            <!-- Indicadores -->
-            <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px; z-index: 10;">
-              ${allImages.map((_, imgIndex) => `
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${imgIndex === 0 ? 'white' : 'rgba(255,255,255,0.5)'};" id="dot-${carouselId}-${imgIndex}"></div>
-              `).join('')}
-            </div>
-            
-            <!-- Configurar swipe touch para mobile -->
-            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5;" 
-                 ontouchstart="handleTouchStart(event, '${carouselId}', ${allImages.length})" 
-                 ontouchmove="handleTouchMove(event)" 
-                 ontouchend="handleTouchEnd(event, '${carouselId}', ${allImages.length})">
-            </div>
-          ` : ''}
-        </div>
-        
-        <h3 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 1.1rem; font-weight: 600;">${product.name}</h3>
-        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">${product.category || 'Categoria'}</p>
-        
-        <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 0.4rem; font-size: 0.75rem;">
-            ${Object.entries(priceTable).map(([tableName, price]) => `
-              <div style="padding: 0.4rem; background: ${tableName === 'A Vista' ? '#f0fdf4' : '#eff6ff'}; 
-                          border-radius: 0.25rem; text-align: center; border-left: 3px solid ${tableName === 'A Vista' ? '#10b981' : '#3b82f6'};">
-                <div style="color: #6b7280; font-size: 0.65rem; margin-bottom: 0.2rem; font-weight: 500;">${tableName}</div>
-                <div style="color: ${tableName === 'A Vista' ? '#10b981' : '#3b82f6'}; font-weight: 600; font-size: 0.8rem;">R$ ${price.toFixed(2)}</div>
+          <h3 class="product-title">${product.name}</h3>
+          <p class="product-category">${product.category || 'Sem categoria'}</p>
+          
+          ${product.description ? `<p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ''}
+          
+          <div class="price-grid">
+            ${Object.entries(priceTable).map(([table, price]) => `
+              <div class="price-item" style="border-color: ${priceColors[table] || '#6b7280'};">
+                <p class="price-label">${table}</p>
+                <p class="price-value">R$ ${price.toFixed(2)}</p>
               </div>
             `).join('')}
           </div>
         </div>
-        
-        ${product.description ? `<p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ''}
-        
-        ${product.fixed_price ? '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #fef3c7; color: #92400e; border-radius: 0.25rem; font-size: 0.75rem; text-align: center;">🔒 Preço Fixo</div>' : ''}
-      </div>
-    `;
-  }).join('');
+      `;
+    }).join('');
+    
+    container.innerHTML = productsHtml;
+  }
 
-  document.body.innerHTML = `
-    <div style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
-      <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">📋</div>
-            <h1 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Catálogo MoveisBonafe</h1>
-            <span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Cliente - ${currentUser.name}</span>
-          </div>
-          <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-            Sair
-          </button>
-        </div>
-      </header>
-      
-      <main style="padding: 1.5rem; max-width: 1200px; margin: 0 auto;">
-        <div style="text-align: center; margin-bottom: 2rem;">
-          <h2 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 2rem;">Produtos Disponíveis</h2>
-          <p style="margin: 0; color: #6b7280;">Navegue pelos nossos produtos e confira os preços personalizados</p>
-        </div>
-        
-        ${systemData.products.length > 0 ? `
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 1.5rem;">
-            ${productsHtml}
-          </div>
-        ` : `
-          <div style="text-align: center; padding: 3rem;">
-            <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
-            <h3 style="margin: 0 0 0.5rem; color: #1e293b;">Nenhum produto disponível</h3>
-            <p style="margin: 0; color: #6b7280;">Os produtos serão exibidos aqui quando adicionados pelo administrador.</p>
-          </div>
-        `}
-      </main>
-      
-      <footer style="background: white; border-top: 1px solid #e2e8f0; padding: 2rem; text-align: center; margin-top: 2rem;">
-        <p style="margin: 0; color: #6b7280;">© 2024 MoveisBonafe - Móveis de qualidade com os melhores preços</p>
-      </footer>
-    </div>
-  `;
+  // Carregar produtos inicialmente
+  renderFilteredProducts();
 }
+
+// Funções globais do carrossel
+window.moveCarousel = function(carouselId, direction) {
+  const track = document.getElementById(`${carouselId}-track`);
+  const slides = track.children;
+  const currentIndex = parseInt(track.dataset.currentIndex || '0');
+  const newIndex = Math.max(0, Math.min(slides.length - 1, currentIndex + direction));
+  
+  track.style.transform = `translateX(-${newIndex * 100}%)`;
+  track.dataset.currentIndex = newIndex;
+  
+  // Atualizar indicadores
+  const indicators = track.parentElement.querySelectorAll('.carousel-dot');
+  indicators.forEach((dot, index) => {
+    dot.classList.toggle('active', index === newIndex);
+  });
+};
+
+window.goToSlide = function(carouselId, slideIndex) {
+  const track = document.getElementById(`${carouselId}-track`);
+  const slides = track.children;
+  const newIndex = Math.max(0, Math.min(slides.length - 1, slideIndex));
+  
+  track.style.transform = `translateX(-${newIndex * 100}%)`;
+  track.dataset.currentIndex = newIndex;
+  
+  // Atualizar indicadores
+  const indicators = track.parentElement.querySelectorAll('.carousel-dot');
+  indicators.forEach((dot, index) => {
+    dot.classList.toggle('active', index === newIndex);
+  });
+};
 
 // Renderizar aba de preços
 function renderPricesTab() {
