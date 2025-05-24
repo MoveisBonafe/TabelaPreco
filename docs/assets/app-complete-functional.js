@@ -1948,20 +1948,30 @@ function renderCatalogView() {
                   font-size: 1rem !important;
                 }
                 
-                /* Garantir espaço suficiente para tabelas de preços no mobile */
+                /* FORÇAR todas as tabelas de preços aparecerem no mobile */
                 [style*="border-top: 1px solid #e5e7eb; padding-top: 1rem"] {
-                  min-height: 150px !important;
+                  min-height: 250px !important;
                   padding-top: 1rem !important;
+                  padding-bottom: 1rem !important;
                 }
                 
-                /* Grid de preços com espaço otimizado para mostrar TODAS as tabelas */
+                /* Grid de preços OBRIGATÓRIO para mostrar 30/60/90/120 */
                 [style*="display: grid; grid-template-columns: 1fr 1fr"] {
                   display: grid !important;
                   grid-template-columns: 1fr 1fr !important;
                   gap: 0.3rem !important;
-                  min-height: 180px !important;
-                  grid-auto-rows: minmax(32px, auto) !important;
+                  min-height: 220px !important;
+                  grid-auto-rows: minmax(40px, auto) !important;
                   overflow: visible !important;
+                  max-height: none !important;
+                }
+                
+                /* Forçar altura mínima dos itens de preço */
+                [style*="padding: 0.5rem; background: #eff6ff"] {
+                  min-height: 35px !important;
+                  display: flex !important;
+                  flex-direction: column !important;
+                  justify-content: center !important;
                 }
                 
                 /* Preços compactos no tablet */
