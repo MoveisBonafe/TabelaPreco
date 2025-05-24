@@ -1118,38 +1118,50 @@ window.closePriceTableModal = function() {
 
 // FUNÇÕES DE EXCEL
 window.importExcel = function() {
+  console.log('🔍 Iniciando importação Excel...');
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.xlsx,.xls,.csv';
-  input.onchange = async function(e) {
+  
+  input.onchange = function(e) {
     const file = e.target.files[0];
     if (file) {
-      console.log('Arquivo selecionado:', file.name);
+      console.log('📁 Arquivo selecionado:', file.name, 'Tipo:', file.type);
       
       const reader = new FileReader();
       reader.onload = async function(event) {
         try {
+          console.log('📖 Lendo arquivo...');
           const data = new Uint8Array(event.target.result);
+          console.log('📊 Dados carregados, tamanho:', data.length);
+          
           const workbook = XLSX.read(data, { type: 'array' });
+          console.log('📋 Planilhas encontradas:', workbook.SheetNames);
+          
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          console.log('📄 Dados JSON extraídos:', jsonData);
 
           let importedCount = 0;
           for (const row of jsonData) {
-            if (row.nome || row.name) {
+            console.log('🔍 Processando linha:', row);
+            
+            if (row.nome || row.name || row.Nome || row.Name) {
               const productData = {
-                name: row.nome || row.name || '',
-                category: row.categoria || row.category || 'Geral',
-                price: parseFloat(row.preco || row.price || 0),
-                dimensions: row.dimensoes || row.dimensions || '',
-                weight: row.peso || row.weight || '',
-                description: row.descricao || row.description || '',
-                image: row.imagem || row.image || '',
-                isFixedPrice: (row.precoFixo || row.fixedPrice || '').toString().toLowerCase() === 'sim'
+                name: row.nome || row.name || row.Nome || row.Name || '',
+                category: row.categoria || row.category || row.Categoria || row.Category || 'Geral',
+                price: parseFloat(row.preco || row.price || row.Preco || row.Price || 0),
+                dimensions: row.dimensoes || row.dimensions || row.Dimensões || row.Dimensions || '',
+                weight: row.peso || row.weight || row.Peso || row.Weight || '',
+                description: row.descricao || row.description || row.Descrição || row.Description || '',
+                image: row.imagem || row.image || row.Imagem || row.Image || '',
+                isFixedPrice: (row.precoFixo || row.fixedPrice || row.PrecoFixo || row.FixedPrice || '').toString().toLowerCase() === 'sim'
               };
 
+              console.log('💾 Salvando produto:', productData);
               const result = await supabase.insert('products', productData);
+              console.log('✅ Resultado da inserção:', result);
               if (result) importedCount++;
             }
           }
@@ -1159,11 +1171,12 @@ window.importExcel = function() {
             renderTab('produtos');
             alert(`✅ Importação concluída! ${importedCount} produtos foram importados com sucesso.`);
           } else {
+            console.log('❌ Nenhum produto válido encontrado');
             alert('❌ Nenhum produto foi importado. Verifique se o arquivo está no formato correto.');
           }
         } catch (error) {
           console.error('❌ Erro na importação:', error);
-          alert('❌ Erro ao importar arquivo. Verifique se é um arquivo Excel válido.');
+          alert(`❌ Erro ao importar arquivo: ${error.message}`);
         }
       };
       reader.readAsArrayBuffer(file);
