@@ -1182,9 +1182,9 @@ window.importExcel = function() {
                 price_30_60_90_120: basePrice * 1.08,
                 
                 // Campos individuais de dimensões - detectar múltiplas variações
-                altura: parseFloat((row.altura || row.Altura || row.ALTURA || row.height || row.Height || '0').toString().replace(',', '.')),
-                largura: parseFloat((row.largura || row.Largura || row.LARGURA || row.width || row.Width || '0').toString().replace(',', '.')),
-                comprimento: parseFloat((row.comprimento || row.Comprimento || row.COMPRIMENTO || row.length || row.Length || '0').toString().replace(',', '.')),
+                height: parseFloat((row.altura || row.Altura || row.ALTURA || row.height || row.Height || '0').toString().replace(',', '.')),
+                width: parseFloat((row.largura || row.Largura || row.LARGURA || row.width || row.Width || '0').toString().replace(',', '.')),
+                length: parseFloat((row.comprimento || row.Comprimento || row.COMPRIMENTO || row.length || row.Length || '0').toString().replace(',', '.')),
                 
                 // Campos de texto
                 dimensions: `${row.altura || ''}x${row.largura || ''}x${row.comprimento || ''}`.replace(/^x|x$/g, ''),
