@@ -1727,10 +1727,176 @@ function renderCatalogView() {
 // Renderizar visão admin
 function renderAdminView() {
   document.body.innerHTML = `
-    <div style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
-      <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
+    <style>
+      /* CSS específico para admin mobile */
+      .admin-container {
+        min-height: 100vh;
+        background: #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+      }
+      
+      .admin-header {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+      }
+      
+      .admin-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .admin-logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+      
+      .admin-nav {
+        background: white;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 0 1.5rem;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      .admin-nav-content {
+        display: flex;
+        gap: 0;
+        min-width: max-content;
+      }
+      
+      .admin-tab {
+        padding: 1rem 1.5rem;
+        background: none;
+        border: none;
+        border-bottom: 2px solid transparent;
+        color: #6b7280;
+        cursor: pointer;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      
+      .admin-tab.active {
+        border-bottom: 2px solid #3b82f6;
+        color: #3b82f6;
+      }
+      
+      .admin-main {
+        padding: 1.5rem;
+      }
+      
+      @media (max-width: 768px) {
+        .admin-header {
+          padding: 0.75rem 1rem;
+        }
+        
+        .admin-header-content {
+          flex-direction: column;
+          gap: 0.5rem;
+          align-items: stretch;
+        }
+        
+        .admin-logo {
+          justify-content: center;
+        }
+        
+        .admin-logo h1 {
+          font-size: 1.1rem !important;
+        }
+        
+        .admin-nav {
+          padding: 0 1rem;
+        }
+        
+        .admin-tab {
+          padding: 0.75rem 1rem;
+          font-size: 0.875rem;
+        }
+        
+        .admin-main {
+          padding: 1rem;
+        }
+        
+        /* Ajustes para tabelas em mobile */
+        table {
+          font-size: 0.875rem;
+        }
+        
+        th, td {
+          padding: 0.5rem !important;
+        }
+        
+        /* Botões menores em mobile */
+        button {
+          font-size: 0.875rem;
+          padding: 0.375rem 0.75rem !important;
+        }
+        
+        /* Formulários responsivos */
+        .modal-content {
+          max-width: 95vw !important;
+          margin: 1rem !important;
+        }
+        
+        /* Grid responsivo */
+        [style*="grid-template-columns"] {
+          grid-template-columns: 1fr !important;
+          gap: 0.75rem !important;
+        }
+      }
+      
+      @media (max-width: 480px) {
+        .admin-header {
+          padding: 0.5rem;
+        }
+        
+        .admin-tab {
+          padding: 0.5rem 0.75rem;
+          font-size: 0.75rem;
+        }
+        
+        .admin-main {
+          padding: 0.75rem;
+        }
+        
+        /* Esconder texto dos ícones em telas muito pequenas */
+        .admin-tab span:last-child {
+          display: none;
+        }
+        
+        /* Ajustar cards para mobile */
+        [style*="padding: 1.5rem"] {
+          padding: 1rem !important;
+        }
+        
+        [style*="padding: 2rem"] {
+          padding: 1rem !important;
+        }
+        
+        /* Formulários mais compactos */
+        input, select, textarea {
+          font-size: 1rem;
+          padding: 0.5rem !important;
+        }
+        
+        /* Botões de ação menores */
+        .action-buttons button {
+          padding: 0.25rem 0.5rem !important;
+          font-size: 0.75rem !important;
+        }
+      }
+    </style>
+    
+    <div class="admin-container">
+      <header class="admin-header">
+        <div class="admin-header-content">
+          <div class="admin-logo">
             <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">📋</div>
             <h1 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Admin Panel</h1>
             <span style="padding: 0.25rem 0.5rem; background: #dc2626; color: white; border-radius: 0.25rem; font-size: 0.75rem;">${currentUser.name}</span>
@@ -1741,33 +1907,33 @@ function renderAdminView() {
         </div>
       </header>
 
-      <nav style="background: white; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem;">
-        <div style="display: flex; gap: 0;">
-          <button onclick="showTab('produtos')" id="tab-produtos" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid #3b82f6; color: #3b82f6; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-            📦 Produtos
+      <nav class="admin-nav">
+        <div class="admin-nav-content">
+          <button onclick="showTab('produtos')" id="tab-produtos" class="admin-tab active">
+            📦 <span>Produtos</span>
           </button>
-          <button onclick="showTab('categorias')" id="tab-categorias" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-            📁 Categorias
+          <button onclick="showTab('categorias')" id="tab-categorias" class="admin-tab">
+            📁 <span>Categorias</span>
           </button>
-          <button onclick="showTab('precos')" id="tab-precos" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-            💰 Preços
+          <button onclick="showTab('precos')" id="tab-precos" class="admin-tab">
+            💰 <span>Preços</span>
           </button>
-          <button onclick="showTab('usuarios')" id="tab-usuarios" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-            👥 Usuários
+          <button onclick="showTab('usuarios')" id="tab-usuarios" class="admin-tab">
+            👥 <span>Usuários</span>
           </button>
-          <button onclick="showTab('excel')" id="tab-excel" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-            📊 Excel
+          <button onclick="showTab('excel')" id="tab-excel" class="admin-tab">
+            📊 <span>Excel</span>
           </button>
-          <button onclick="showTab('backup')" id="tab-backup" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-            💾 Backup
+          <button onclick="showTab('backup')" id="tab-backup" class="admin-tab">
+            💾 <span>Backup</span>
           </button>
-          <button onclick="showTab('monitoramento')" id="tab-monitoramento" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem;">
-            📈 Monitoramento
+          <button onclick="showTab('monitoramento')" id="tab-monitoramento" class="admin-tab">
+            📈 <span>Monitor</span>
           </button>
         </div>
       </nav>
 
-      <main style="padding: 1.5rem;">
+      <main class="admin-main">
         <div id="content-produtos">${renderProductsTab()}</div>
         <div id="content-categorias" style="display: none;"></div>
         <div id="content-precos" style="display: none;"></div>
