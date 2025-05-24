@@ -1156,7 +1156,7 @@ window.importExcel = function() {
           let importedCount = 0;
           for (const row of jsonData) {
             console.log('🔍 Processando linha:', row);
-            console.log('📏 Dimensões do Excel - altura:', row.altura, 'largura:', row.largura, 'comprimento:', row.comprimento);
+            console.log('📏 Dimensões do Excel - Altura:', row.Altura, 'Largura:', row.Largura, 'Comprimento:', row.Comprimento);
             
             // Detectar nome do produto de forma mais flexível
             const productName = row.nome || row.name || row.Nome || row.Name || 
@@ -1187,7 +1187,7 @@ window.importExcel = function() {
                 length: parseFloat((row.comprimento || row.Comprimento || row.COMPRIMENTO || row.length || row.Length || '0').toString().replace(',', '.')),
                 
                 // Campos de texto
-                dimensions: `${row.altura || ''}x${row.largura || ''}x${row.comprimento || ''}`.replace(/^x|x$/g, ''),
+                dimensions: `${row.Altura || row.altura || ''}x${row.Largura || row.largura || ''}x${row.Comprimento || row.comprimento || ''}`.replace(/^x|x$/g, ''),
                 weight_text: (row.peso || row.weight || row.Peso || row.Weight || '').toString(),
                 weight: parseFloat((row.peso || row.weight || row.Peso || row.Weight || '0').toString().replace(',', '.')),
                 description: row.descricao || row.description || row.Descrição || row.Description || '',
