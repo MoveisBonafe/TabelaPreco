@@ -13,7 +13,10 @@ export function CategoryFilter({ categories, onCategoryClick }: CategoryFilterPr
         {categories.map((category) => (
           <div
             key={category.id}
-            onClick={() => onCategoryClick(category.name)}
+            onClick={() => {
+              console.log('Clicou na categoria:', category.name);
+              onCategoryClick(category.name);
+            }}
             className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md hover:-translate-y-1 transition-all duration-200 cursor-pointer"
             style={{ borderLeft: `4px solid ${category.color}` }}
           >
