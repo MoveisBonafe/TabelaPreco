@@ -16,7 +16,7 @@ const tabs = [
 ];
 
 export function AdminTabs({ activeTab, onTabChange }: AdminTabsProps) {
-  console.log('AdminTabs renderizando com', tabs.length, 'abas'); // Debug
+  console.log('AdminTabs renderizando com', tabs.length, 'abas:', tabs.map(t => t.label)); // Debug
   
   return (
     <div className="mb-8">
