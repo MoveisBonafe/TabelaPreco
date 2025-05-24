@@ -3,24 +3,33 @@ import { Catalog } from '@/pages/catalog';
 import { Admin } from '@/pages/admin';
 import { LoginModal } from '@/components/modals/login-modal';
 import { useToast } from '@/components/ui/toast';
-import { useSync } from '@/hooks/use-sync';
+
 import { useSupabaseProducts } from '@/hooks/use-supabase-products';
 import { auth } from '@/lib/auth';
 
 type View = 'login' | 'catalog' | 'admin';
 
 // Detectar se está rodando no GitHub Pages
-const isGitHubPages = window.location.hostname.includes('github.io');
+const isGitHubPages = window.location.hostname.includes('github.io') || 
+                     import.meta.env.VITE_GITHUB_PAGES === 'true';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('login');
   const { showToast, ToastContainer } = useToast();
   
-  // Ativar sincronização WebSocket apenas se não for GitHub Pages
+  // Usar sincronização adequada para cada ambiente
   if (!isGitHubPages) {
     useSync();
   }
   const { isConnected } = useSupabaseProducts();
+  
+  // Log para debug no GitHub Pages
+  useEffect(() => {
+    if (isGitHubPages) {
+      console.log('🌐 GitHub Pages detectado - usando Supabase para sincronização');
+      console.log('🔗 Credenciais configuradas:', !!import.meta.env.VITE_SUPABASE_URL);
+    }
+  }, []);
 
   useEffect(() => {
     // Verifica se já está logado ao carregar a página
