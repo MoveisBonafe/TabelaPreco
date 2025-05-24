@@ -209,7 +209,7 @@ window.login = function() {
   const defaultUsers = {
     'admin': { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0, active: true },
     'vendedor': { id: 2, username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0, active: true },
-    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5, active: true }
+    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.2, active: true }
   };
   
   const defaultUser = defaultUsers[username];
@@ -285,16 +285,28 @@ async function loadSystemData() {
 
 // Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
 function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
+  // Garantir que os valores sejam numéricos
+  const safBasePrice = parseFloat(basePrice) || 0;
+  const safeMultiplier = parseFloat(userMultiplier) || 1;
+  
+  console.log('🧮 Cálculo - Preço base:', safBasePrice, 'Multiplicador:', safeMultiplier, 'Preço fixo:', isFixedPrice);
+  
   if (isFixedPrice) {
     // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
     return Object.keys(systemData.priceSettings).reduce((acc, table) => {
-      acc[table] = basePrice; // Mesmo preço para todas as tabelas
+      acc[table] = safBasePrice; // Mesmo preço para todas as tabelas
       return acc;
     }, {});
   } else {
     return Object.keys(systemData.priceSettings).reduce((acc, table) => {
       const increment = systemData.priceSettings[table] / 100;
-      acc[table] = basePrice * userMultiplier * (1 + increment);
+      const finalPrice = safBasePrice * safeMultiplier * (1 + increment);
+      acc[table] = finalPrice;
+      
+      if (table === 'A Vista') {
+        console.log('📊 À Vista - Base:', safBasePrice, '× Mult:', safeMultiplier, '× (1+0%) =', finalPrice);
+      }
+      
       return acc;
     }, {});
   }
@@ -1507,7 +1519,7 @@ function renderApp() {
 
 // Renderizar visão do catálogo (para clientes)
 function renderCatalogView() {
-  const userMultiplier = currentUser.price_multiplier || 1.5; // Cliente tem multiplicador padrão de 1.5
+  const userMultiplier = parseFloat(currentUser.price_multiplier) || 1.0; // Usa multiplicador real do usuário
   
   const productsHtml = systemData.products.map((product, index) => {
     const basePrice = product.base_price || 0;
