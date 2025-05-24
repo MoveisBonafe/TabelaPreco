@@ -387,6 +387,11 @@ window.showEditProductModal = function(id) {
   }
   
   console.log('Produto encontrado para edição:', product);
+  console.log('Dimensões do produto para edição:', {
+    height: product.height,
+    width: product.width, 
+    length: product.length
+  });
   
   // Verificação ultra-segura para parse do JSON das imagens
   selectedImages = [];
@@ -466,15 +471,15 @@ function showProductModal(product = null) {
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Altura (cm)</label>
-            <input type="number" id="product-height" value="${product?.height || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="number" id="product-height" value="${product?.height || product?.altura || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
           </div>
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Largura (cm)</label>
-            <input type="number" id="product-width" value="${product?.width || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="number" id="product-width" value="${product?.width || product?.largura || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
           </div>
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Comprimento (cm)</label>
-            <input type="number" id="product-length" value="${product?.length || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="number" id="product-length" value="${product?.length || product?.comprimento || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
           </div>
         </div>
         
