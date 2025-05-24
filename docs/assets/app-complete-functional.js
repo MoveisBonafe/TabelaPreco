@@ -1996,7 +1996,15 @@ function renderCatalogView() {
     userMultiplier = currentUser.price_multiplier || 1.0;
   }
   
-  const productsHtml = systemData.products.map((product, index) => {
+  // Ordenar produtos por categoria (alfabética) e depois por nome (alfabética)
+  const sortedProducts = [...systemData.products].sort((a, b) => {
+    if (a.category !== b.category) {
+      return (a.category || '').localeCompare(b.category || '', 'pt-BR', { numeric: true });
+    }
+    return (a.name || '').localeCompare(b.name || '', 'pt-BR', { numeric: true });
+  });
+  
+  const productsHtml = sortedProducts.map((product, index) => {
     const basePrice = product.base_price || 0;
     const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price) || {
       'À Vista': 0,
@@ -3054,13 +3062,13 @@ window.showProductModal = function(productIndex) {
             </div>
             <div style="padding: 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30/60/90'] ? (priceTable['30/60/90'] || 0).toFixed(2) : ((product.base_price || 0) * 1.06).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
             </div>
           </div>
           <div style="margin-top: 0.75rem;">
             <div style="padding: 1rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90/120</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30/60/90/120'] ? (priceTable['30/60/90/120'] || 0).toFixed(2) : ((product.base_price || 0) * 1.08).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${(priceTable['30/60/90/120'] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
