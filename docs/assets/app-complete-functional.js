@@ -1181,7 +1181,7 @@ window.importExcel = function() {
                 comprimento: parseFloat((row.comprimento || row.Comprimento || row.length || row.Length || '0').toString().replace(',', '.')),
                 
                 // Campos de texto
-                dimensions: `${row.altura || ''}x${row.largura || ''}x${row.comprimento || ''}`,
+                dimensions: `${row.altura || ''}x${row.largura || ''}x${row.comprimento || ''}`.replace(/^x|x$/g, ''),
                 weight_text: (row.peso || row.weight || row.Peso || row.Weight || '').toString(),
                 weight: parseFloat((row.peso || row.weight || row.Peso || row.Weight || '0').toString().replace(',', '.')),
                 description: row.descricao || row.description || row.Descrição || row.Description || '',
@@ -1191,8 +1191,20 @@ window.importExcel = function() {
               };
 
               console.log('💾 Salvando produto:', productData);
-              const result = await supabase.insert('products', productData);
-              console.log('✅ Resultado da inserção:', result);
+              
+              // Verificar se produto já existe pelo nome
+              const existingProduct = systemData.products.find(p => p.name.toLowerCase() === productData.name.toLowerCase());
+              
+              let result;
+              if (existingProduct) {
+                console.log('🔄 Produto existe, atualizando:', existingProduct.id);
+                result = await supabase.update('products', existingProduct.id, productData);
+              } else {
+                console.log('➕ Produto novo, inserindo');
+                result = await supabase.insert('products', productData);
+              }
+              
+              console.log('✅ Resultado da operação:', result);
               if (result) importedCount++;
             }
           }
