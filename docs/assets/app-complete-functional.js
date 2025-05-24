@@ -2610,7 +2610,101 @@ function applyClientFixes() {
 console.log('✅ Sistema MoveisBonafe completo carregado!');
 renderApp();
 
+// Modal profissional para produto expandido
+window.showProductModal = function(productIndex) {
+  const product = systemData.products[productIndex];
+  if (!product) return;
+  
+  const allImages = product.images ? product.images.filter(img => img && img.trim()) : [];
+  const hasImages = allImages.length > 0;
+  
+  // Calcular preços baseados nas configurações do sistema
+  const priceTable = {};
+  Object.keys(systemData.priceSettings).forEach(tableName => {
+    const percentage = systemData.priceSettings[tableName];
+    const multiplier = 1 + (percentage / 100);
+    priceTable[tableName] = product.base_price * multiplier;
+  });
+  
+  const modal = document.createElement('div');
+  modal.id = 'product-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+    justify-content: center; z-index: 1000; padding: 1rem;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background: white; border-radius: 1rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+      <button onclick="closeProductModal()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; z-index: 10; display: flex; align-items: center; justify-content: center;">×</button>
+      
+      ${hasImages ? `
+        <div style="height: 300px; background: #f8f9fa; border-radius: 1rem 1rem 0 0; overflow: hidden;">
+          <img src="${allImages[0]}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      ` : `
+        <div style="height: 200px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1rem 1rem 0 0; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 3rem;">📷</div>
+      `}
+      
+      <div style="padding: 2rem;">
+        <h2 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 1.5rem; font-weight: 700;">${product.name}</h2>
+        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 1rem;">${product.category || 'Categoria'}</p>
+        
+        ${product.description ? `<p style="margin: 0 0 1.5rem; color: #4b5563; line-height: 1.6;">${product.description}</p>` : ''}
+        
+        <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="margin: 0 0 1rem; color: #1e293b; font-size: 1.1rem; font-weight: 600;">Tabelas de Preços</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+            <div style="padding: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">À Vista</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['A Vista'] ? priceTable['A Vista'].toFixed(2) : (product.base_price || 0).toFixed(2)}</div>
+            </div>
+            <div style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30 dias</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30'] ? priceTable['30'].toFixed(2) : ((product.base_price || 0) * 1.02).toFixed(2)}</div>
+            </div>
+            <div style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30/60'] ? priceTable['30/60'].toFixed(2) : ((product.base_price || 0) * 1.04).toFixed(2)}</div>
+            </div>
+            <div style="padding: 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30/60/90'] ? priceTable['30/60/90'].toFixed(2) : ((product.base_price || 0) * 1.06).toFixed(2)}</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.75rem;">
+            <div style="padding: 1rem; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90/120</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30/60/90/120'] ? priceTable['30/60/90/120'].toFixed(2) : ((product.base_price || 0) * 1.08).toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+};
+
+window.closeProductModal = function() {
+  const modal = document.getElementById('product-modal');
+  if (modal) {
+    modal.remove();
+  }
+};
+
 // Aplicar correções se for cliente
 if (currentUser && currentUser.role === 'customer') {
   applyClientFixes();
+  
+  // Adicionar click aos produtos para abrir modal
+  setTimeout(() => {
+    const productDivs = document.querySelectorAll('[style*="background: white"][style*="border-radius: 0.5rem"][style*="padding: 1rem"]');
+    productDivs.forEach((div, index) => {
+      if (div.innerHTML.includes('À Vista') || div.innerHTML.includes('30 dias')) {
+        div.style.cursor = 'pointer';
+        div.onclick = () => showProductModal(index);
+      }
+    });
+  }, 500);
 }
