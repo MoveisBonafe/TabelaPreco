@@ -18,18 +18,23 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '18'
-        cache: 'npm'
 
-    - name: Install dependencies
-      run: npm ci
+    - name: Clean install dependencies
+      run: |
+        rm -rf node_modules package-lock.json
+        npm install
 
-    - name: Build for GitHub Pages
-      run: npx vite build --config ../vite.config.github.ts
+    - name: Force clean build for GitHub Pages
+      run: |
+        rm -rf dist .vite node_modules/.vite
+        echo "Building with new code..."
+        npx vite build --config ../vite.config.github.ts --force
       working-directory: ./client
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
         VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
         VITE_GITHUB_PAGES: true
+        VITE_BUILD_TIMESTAMP: ${{ github.run_number }}
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3

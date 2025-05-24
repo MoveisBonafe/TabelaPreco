@@ -3,7 +3,6 @@ import { Catalog } from '@/pages/catalog';
 import { Admin } from '@/pages/admin';
 import { LoginModal } from '@/components/modals/login-modal';
 import { useToast } from '@/components/ui/toast';
-
 import { useSupabaseProducts } from '@/hooks/use-supabase-products';
 import { auth } from '@/lib/auth';
 
@@ -14,10 +13,10 @@ function App() {
   const { showToast, ToastContainer } = useToast();
   const { isConnected } = useSupabaseProducts();
   
-  // Log para debug
+  // Log apenas para Supabase
   useEffect(() => {
-    console.log('🌐 Aplicação rodando com Supabase');
-    console.log('🔗 Credenciais configuradas:', !!import.meta.env.VITE_SUPABASE_URL);
+    console.log('🌐 Sistema rodando exclusivamente com Supabase');
+    console.log('🔗 Supabase configurado:', !!import.meta.env.VITE_SUPABASE_URL);
   }, []);
 
   useEffect(() => {
