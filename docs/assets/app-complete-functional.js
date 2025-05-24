@@ -100,10 +100,10 @@ let currentView = 'login';
 let systemData = {
   products: [],
   categories: [
-    { id: 1, name: 'Sala de Estar', icon: '🛋️', color: '#3b82f6' },
-    { id: 2, name: 'Quarto', icon: '🛏️', color: '#10b981' },
-    { id: 3, name: 'Cozinha', icon: '🍽️', color: '#f59e0b' },
-    { id: 4, name: 'Escritório', icon: '💼', color: '#8b5cf6' }
+    { id: 1, name: 'Sala de Estar', icon: '🛋️', color: '#3b82f6', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=200&fit=crop' },
+    { id: 2, name: 'Quarto', icon: '🛏️', color: '#10b981', image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=300&h=200&fit=crop' },
+    { id: 3, name: 'Cozinha', icon: '🍽️', color: '#f59e0b', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop' },
+    { id: 4, name: 'Escritório', icon: '💼', color: '#8b5cf6', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop' }
   ],
   users: [],
   priceSettings: {
@@ -1602,10 +1602,14 @@ function renderCatalogView() {
             ${systemData.categories.map(category => {
               const productCount = systemData.products.filter(p => p.category === category.name).length;
               return `
-                <div style="background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" style="transition: transform 0.2s;">
-                  <div style="font-size: 2rem; margin-bottom: 0.5rem;">${category.icon}</div>
-                  <h4 style="margin: 0 0 0.25rem; color: #1e293b;">${category.name}</h4>
-                  <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">${productCount} produtos</p>
+                <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                  <div style="height: 120px; background-image: url('${category.image}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6;">
+                    <div style="background: rgba(255,255,255,0.9); padding: 0.5rem; border-radius: 50%; font-size: 1.5rem;">${category.icon}</div>
+                  </div>
+                  <div style="padding: 1rem;">
+                    <h4 style="margin: 0 0 0.25rem; color: #1e293b;">${category.name}</h4>
+                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">${productCount} produtos</p>
+                  </div>
                 </div>
               `;
             }).join('')}
@@ -1620,8 +1624,16 @@ function renderCatalogView() {
               ${productsHtml}
             </div>
             
-            <!-- CSS responsivo para mobile -->
+            <!-- CSS responsivo para mobile com preços compactos -->
             <style>
+              /* Ajustes para imagens - sempre caber na área */
+              img[alt] {
+                max-width: 100% !important;
+                max-height: 100% !important;
+                object-fit: contain !important;
+                background: #f8f9fa !important;
+              }
+              
               @media (max-width: 768px) {
                 [style*="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))"] {
                   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
@@ -1640,8 +1652,19 @@ function renderCatalogView() {
                   font-size: 1rem !important;
                 }
                 
-                [style*="padding: 1.5rem"] {
-                  padding: 1rem !important;
+                /* Preços compactos no tablet */
+                .price-tables {
+                  grid-template-columns: repeat(3, 1fr) !important;
+                  gap: 0.25rem !important;
+                  font-size: 0.75rem !important;
+                }
+                
+                .price-tables > div {
+                  padding: 0.375rem !important;
+                }
+                
+                .price-tables > div:last-child {
+                  grid-column: 2 / 3 !important;
                 }
               }
               
@@ -1651,17 +1674,31 @@ function renderCatalogView() {
                   gap: 0.5rem !important;
                 }
                 
-                [style*="height: 180px"] {
+                [style*="height: 180px"], [style*="height: 160px"] {
                   height: 140px !important;
                 }
                 
-                [style*="padding: 0.5rem"] {
-                  padding: 0.375rem !important;
+                /* Preços super compactos no mobile */
+                .price-tables {
+                  grid-template-columns: repeat(5, 1fr) !important;
+                  gap: 0.2rem !important;
+                  font-size: 0.65rem !important;
                 }
                 
-                [style*="grid-template-columns: 1fr 1fr"] {
-                  grid-template-columns: 1fr !important;
-                  gap: 0.25rem !important;
+                .price-tables > div {
+                  padding: 0.25rem 0.1rem !important;
+                }
+                
+                .price-tables > div:last-child {
+                  grid-column: auto !important;
+                }
+                
+                .price-tables [style*="font-size: 0.75rem"] {
+                  font-size: 0.6rem !important;
+                }
+                
+                .price-tables [style*="font-size: 0.9rem"] {
+                  font-size: 0.7rem !important;
                 }
                 
                 [style*="font-size: 0.875rem"] {
