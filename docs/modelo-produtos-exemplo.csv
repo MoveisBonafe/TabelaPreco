@@ -1,6 +1,11 @@
-nome,categoria,preco,dimensoes,peso,descricao,imagem
-Sofá 3 Lugares Premium,Sala de Estar,1200.00,2.10m x 0.90m x 0.85m,45kg,Sofá confortável para sala com tecido premium,https://exemplo.com/sofa.jpg
-Mesa de Jantar 6 Lugares,Sala de Jantar,890.50,1.60m x 0.90m x 0.75m,35kg,Mesa em madeira maciça para 6 pessoas,
-Cama Box Casal,Quarto,750.00,1.88m x 1.38m x 0.60m,55kg,Cama box casal com colchão incluído,
-Guarda-Roupa 3 Portas,Quarto,650.00,1.35m x 0.52m x 1.80m,68kg,Guarda-roupa espaçoso com 3 portas,
-Poltrona Reclinável,Sala de Estar,420.00,0.85m x 0.95m x 1.05m,28kg,Poltrona confortável com sistema reclinável,
+Nome    Categoria       Preco   Altura  Largura Comprimento     Peso    Descricao
+CADEIRA COMUM   Decoração       66,00   90      40      40      5       Cadeira comum para decoração
+CADEIRA ALTA    Decoração       86,00   100     45      45      5,5     Cadeira alta para balcão
+CADEIRA CRIANÇA Decoração       38,00   62      35      45      3       Cadeira especial para crianças
+CADEIRA ALTA ESTOFADA   Decoração       102,00  100     45      45      6       Cadeira alta estofada confortável
+CADEIRA RESTAURANTE     Decoração       95,00   95      40      40      5,5     Cadeira resistente para restaurante
+BANQUETA 0,50   Decoração       38,00   50      30      30      3       Banqueta baixa 50cm
+BANQUETA 0,70   Decoração       48,00   70      30      30      3,5     Banqueta média 70cm
+BELICHE PARIS   Decoração       403,00  164     80/90   190     46      Beliche modelo Paris
+CAMA PARIS SOLTEIRO     Decoração       222,00  94      80/90   190     20      Cama solteiro modelo Paris
+CAMA PARIS CASAL        Decoração       268,00  94      130/140 190     23,5    Cama casal modelo Paris

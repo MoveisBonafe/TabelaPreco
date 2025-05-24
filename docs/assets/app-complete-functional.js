@@ -1158,8 +1158,11 @@ window.importExcel = function() {
                                Object.values(row)[0]; // Primeira coluna como fallback
             
             if (productName && productName.toString().trim()) {
-              const basePrice = parseFloat(row.preco || row.price || row.Preco || row.Price || 
-                                           row.valor || row.Valor || Object.values(row)[2] || 0);
+              // Converter preço com vírgula para ponto
+              const priceString = (row.preco || row.price || row.Preco || row.Price || 
+                                 row.valor || row.Valor || Object.values(row)[2] || '0').toString();
+              const basePrice = parseFloat(priceString.replace(',', '.'));
+              
               const productData = {
                 name: productName.toString().trim(),
                 category: row.categoria || row.category || row.Categoria || row.Category || 
@@ -1171,8 +1174,16 @@ window.importExcel = function() {
                 price_30_60: basePrice * 1.04,
                 price_30_60_90: basePrice * 1.06,
                 price_30_60_90_120: basePrice * 1.08,
-                dimensions: row.dimensoes || row.dimensions || row.Dimensões || row.Dimensions || '',
-                weight_text: row.peso || row.weight || row.Peso || row.Weight || '',
+                
+                // Campos individuais de dimensões
+                altura: parseFloat((row.altura || row.Altura || row.height || row.Height || '0').toString().replace(',', '.')),
+                largura: parseFloat((row.largura || row.Largura || row.width || row.Width || '0').toString().replace(',', '.')),
+                comprimento: parseFloat((row.comprimento || row.Comprimento || row.length || row.Length || '0').toString().replace(',', '.')),
+                
+                // Campos de texto
+                dimensions: `${row.altura || ''}x${row.largura || ''}x${row.comprimento || ''}`,
+                weight_text: (row.peso || row.weight || row.Peso || row.Weight || '').toString(),
+                weight: parseFloat((row.peso || row.weight || row.Peso || row.Weight || '0').toString().replace(',', '.')),
                 description: row.descricao || row.description || row.Descrição || row.Description || '',
                 image: row.imagem || row.image || row.Imagem || row.Image || '',
                 fixed_price: (row.precoFixo || row.fixedPrice || row.PrecoFixo || row.FixedPrice || '').toString().toLowerCase() === 'sim',

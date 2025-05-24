@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Modelo Excel Móveis Bonafé</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h2>Criar Modelo Excel Móveis Bonafé</h2>
+    <button onclick="criarExcel()">Baixar Modelo Excel</button>
+    
+    <script>
+    function criarExcel() {
+        const dados = [
+            ["Nome", "Categoria", "Preco", "Altura", "Largura", "Comprimento", "Peso", "Descricao"],
+            ["CADEIRA COMUM", "Decoração", "66,00", "90", "40", "40", "5", "Cadeira comum para decoração"],
+            ["CADEIRA ALTA", "Decoração", "86,00", "100", "45", "45", "5,5", "Cadeira alta para balcão"],
+            ["CADEIRA CRIANÇA", "Decoração", "38,00", "62", "35", "45", "3", "Cadeira especial para crianças"],
+            ["CADEIRA ALTA ESTOFADA", "Decoração", "102,00", "100", "45", "45", "6", "Cadeira alta estofada confortável"],
+            ["CADEIRA RESTAURANTE", "Decoração", "95,00", "95", "40", "40", "5,5", "Cadeira resistente para restaurante"],
+            ["BANQUETA 0,50", "Decoração", "38,00", "50", "30", "30", "3", "Banqueta baixa 50cm"],
+            ["BANQUETA 0,70", "Decoração", "48,00", "70", "30", "30", "3,5", "Banqueta média 70cm"],
+            ["BELICHE PARIS", "Decoração", "403,00", "164", "80/90", "190", "46", "Beliche modelo Paris"],
+            ["CAMA PARIS SOLTEIRO", "Decoração", "222,00", "94", "80/90", "190", "20", "Cama solteiro modelo Paris"],
+            ["CAMA PARIS CASAL", "Decoração", "268,00", "94", "130/140", "190", "23,5", "Cama casal modelo Paris"]
+        ];
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(dados);
+        XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+        XLSX.writeFile(wb, "modelo-produtos-moveisbonafe.xlsx");
+    }
+    </script>
+</body>
+</html>
