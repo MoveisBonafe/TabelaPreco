@@ -1706,7 +1706,7 @@ function renderApp() {
       <div style="min-height: 100vh; background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%); display: flex; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
         <div style="background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); max-width: 420px; width: 100%; margin: 1rem;">
           <div style="text-align: center; margin-bottom: 2.5rem;">
-            <h1 style="font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #000000 0%, #f59e0b 50%, #d97706 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">MoveisBonafe</h1>
+            <h1 style="font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #8B4513 0%, #DAA520 50%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">Móveis Bonafé</h1>
             <p style="color: #6b7280; margin: 0.5rem 0 0; font-size: 1.1rem;">Catálogo</p>
           </div>
           
