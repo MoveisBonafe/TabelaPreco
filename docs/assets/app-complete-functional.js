@@ -1718,7 +1718,7 @@ function renderApp() {
             <input type="password" id="password" placeholder="Digite sua senha" style="width: 100%; padding: 0.9rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;">
           </div>
           
-          <button onclick="login()" style="width: 100%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); color: white; padding: 0.9rem; border: none; border-radius: 0.75rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.4)'">
+          <button onclick="login()" style="width: 100%; background: linear-gradient(135deg, #DAA520 0%, #FFD700 50%, #FFA500 100%); color: white; padding: 0.9rem; border: none; border-radius: 0.75rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(218, 165, 32, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(218, 165, 32, 0.4)'">
             Entrar
           </button>
         </div>
@@ -1877,21 +1877,19 @@ function renderCatalogView() {
           </div>
         </div>
 
-        <!-- Categorias -->
+        <!-- Categorias - LAYOUT HORIZONTAL COMPACTO -->
         <div style="margin-bottom: 2rem;">
           <h3 style="margin: 0 0 1rem; color: #1e293b;">Categorias</h3>
-          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+          <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem;">
             ${systemData.categories.map(category => {
               const productCount = systemData.products.filter(p => p.category === category.name).length;
               return `
-                <div onclick="filterByCategory('${category.name}')" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                  <div style="height: 120px; background-image: url('${category.image}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6;">
-                    <div style="background: rgba(255,255,255,0.9); padding: 0.5rem; border-radius: 50%; font-size: 1.5rem;">${category.icon}</div>
+                <div onclick="filterByCategory('${category.name}')" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 3px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden; padding: 0.75rem;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                  <div style="height: 60px; background-image: url('${category.image}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6; border-radius: 0.375rem; margin-bottom: 0.5rem;">
+                    <div style="background: rgba(255,255,255,0.9); padding: 0.25rem; border-radius: 50%; font-size: 1.25rem;">${category.icon}</div>
                   </div>
-                  <div style="padding: 1rem;">
-                    <h4 style="margin: 0 0 0.25rem; color: #1e293b;">${category.name}</h4>
-                    <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">${productCount} produtos</p>
-                  </div>
+                  <h4 style="margin: 0; color: #1e293b; font-size: 0.875rem;">${category.name}</h4>
+                  <p style="margin: 0; color: #6b7280; font-size: 0.75rem;">${productCount} produtos</p>
                 </div>
               `;
             }).join('')}
@@ -1920,6 +1918,28 @@ function renderCatalogView() {
                 [style*="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))"] {
                   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
                   gap: 0.75rem !important;
+                }
+                
+                /* Categorias mobile - 3 por linha mais compactas */
+                .categories-grid {
+                  grid-template-columns: repeat(3, 1fr) !important;
+                  gap: 0.5rem !important;
+                }
+                
+                .categories-grid > div {
+                  padding: 0.5rem !important;
+                }
+                
+                .categories-grid h4 {
+                  font-size: 0.75rem !important;
+                }
+                
+                .categories-grid p {
+                  font-size: 0.625rem !important;
+                }
+                
+                .categories-grid [style*="height: 60px"] {
+                  height: 40px !important;
                 }
                 
                 [style*="padding: 1rem"] {
