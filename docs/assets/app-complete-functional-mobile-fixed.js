@@ -414,15 +414,10 @@ function calculatePriceTable(basePrice, userMultiplier, isFixedPrice) {
   };
 }
 
-// Função básica para administração (simplificada)
+// Importar toda a funcionalidade de admin do arquivo original
 function renderAdminView() {
-  document.body.innerHTML = `
-    <div>
-      <h1>Painel Administrativo - ${currentUser.name}</h1>
-      <p>Funcionalidades administrativas em desenvolvimento...</p>
-      <button onclick="logout()">Sair</button>
-    </div>
-  `;
+  // Usar o sistema completo de admin do arquivo original
+  window.location.href = window.location.href.replace('app-complete-functional-mobile-fixed.js', 'app-complete-functional.js');
 }
 
 // Funções de navegação do carrossel
