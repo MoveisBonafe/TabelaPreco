@@ -1584,7 +1584,7 @@ function renderCategoriesTab() {
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div style="width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 0.375rem; background: #f3f4f6;">
-            ${category.icon && category.icon.startsWith('data:image') ? 
+            ${category.icon && category.icon.length > 50 ? 
               `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">` 
               : `<span style="font-size: 2rem;">${category.icon || '📁'}</span>`
             }
@@ -2110,7 +2110,7 @@ function renderCatalogView() {
               return `
                 <div onclick="filterByCategory('${category.name}')" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 3px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden; padding: 0.75rem;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                   <div style="height: 60px; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6; border-radius: 0.375rem; margin-bottom: 0.5rem; overflow: hidden;">
-                    ${category.icon && category.icon.startsWith('data:image') ? 
+                    ${category.icon && category.icon.length > 50 ? 
                       `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">` 
                       : `<div style="font-size: 1.5rem;">${category.icon || '📁'}</div>`
                     }
