@@ -1148,15 +1148,23 @@ window.importExcel = function() {
             console.log('🔍 Processando linha:', row);
             
             if (row.nome || row.name || row.Nome || row.Name) {
+              const basePrice = parseFloat(row.preco || row.price || row.Preco || row.Price || 0);
               const productData = {
                 name: row.nome || row.name || row.Nome || row.Name || '',
                 category: row.categoria || row.category || row.Categoria || row.Category || 'Geral',
-                price: parseFloat(row.preco || row.price || row.Preco || row.Price || 0),
+                base_price: basePrice,
+                final_price: basePrice,
+                price_a_vista: basePrice * 1.0,
+                price_30: basePrice * 1.02,
+                price_30_60: basePrice * 1.04,
+                price_30_60_90: basePrice * 1.06,
+                price_30_60_90_120: basePrice * 1.08,
                 dimensions: row.dimensoes || row.dimensions || row.Dimensões || row.Dimensions || '',
-                weight: row.peso || row.weight || row.Peso || row.Weight || '',
+                weight_text: row.peso || row.weight || row.Peso || row.Weight || '',
                 description: row.descricao || row.description || row.Descrição || row.Description || '',
                 image: row.imagem || row.image || row.Imagem || row.Image || '',
-                isFixedPrice: (row.precoFixo || row.fixedPrice || row.PrecoFixo || row.FixedPrice || '').toString().toLowerCase() === 'sim'
+                fixed_price: (row.precoFixo || row.fixedPrice || row.PrecoFixo || row.FixedPrice || '').toString().toLowerCase() === 'sim',
+                active: true
               };
 
               console.log('💾 Salvando produto:', productData);
