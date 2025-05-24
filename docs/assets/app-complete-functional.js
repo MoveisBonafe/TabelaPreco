@@ -1651,7 +1651,7 @@ function renderCatalogView() {
             ${systemData.categories.map(category => {
               const productCount = systemData.products.filter(p => p.category === category.name).length;
               return `
-                <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div onclick="filterByCategory('${category.name}')" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                   <div style="height: 120px; background-image: url('${category.image}'); background-size: cover; background-position: center; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6;">
                     <div style="background: rgba(255,255,255,0.9); padding: 0.5rem; border-radius: 50%; font-size: 1.5rem;">${category.icon}</div>
                   </div>
@@ -1727,22 +1727,26 @@ function renderCatalogView() {
                   height: 140px !important;
                 }
                 
-                /* Preços super compactos no mobile - TODAS as 5 tabelas */
+                /* Preços super compactos no mobile - TODAS as 5 tabelas FORÇADAS */
                 .price-tables {
                   display: grid !important;
                   grid-template-columns: repeat(5, 1fr) !important;
-                  gap: 0.15rem !important;
-                  font-size: 0.6rem !important;
+                  gap: 0.1rem !important;
+                  font-size: 0.55rem !important;
+                  width: 100% !important;
+                  overflow: hidden !important;
                 }
                 
                 .price-tables > div {
-                  padding: 0.2rem 0.05rem !important;
+                  padding: 0.15rem 0.05rem !important;
                   min-width: 0 !important;
+                  overflow: hidden !important;
+                  text-overflow: ellipsis !important;
                 }
                 
-                .price-tables > div:last-child {
-                  grid-column: auto !important;
-                  grid-row: auto !important;
+                .price-tables > div:nth-child(5) {
+                  grid-column: 5 !important;
+                  grid-row: 1 !important;
                 }
                 
                 .price-tables [style*="font-size: 0.75rem"] {
@@ -2172,6 +2176,48 @@ function updateProductsDisplay(productsToShow) {
       `;
     }
   }
+};
+
+// Função para filtrar por categoria quando clicar no card da categoria
+window.filterByCategory = function(categoryName) {
+  console.log('Filtrando por categoria:', categoryName);
+  
+  // Atualizar o select de categoria
+  const categoryFilter = document.getElementById('category-filter');
+  if (categoryFilter) {
+    categoryFilter.value = categoryName;
+  }
+  
+  // Limpar busca por texto
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    searchInput.value = '';
+  }
+  
+  // Filtrar produtos da categoria
+  const filteredProducts = systemData.products.filter(product => product.category === categoryName);
+  
+  console.log(`Produtos da categoria "${categoryName}":`, filteredProducts.length);
+  updateProductsDisplay(filteredProducts);
+  
+  // Scroll suave para a seção de produtos
+  setTimeout(() => {
+    const productsSection = document.querySelector('h3');
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, 100);
+};
+
+// Função para limpar filtros e mostrar todos os produtos
+window.clearFilters = function() {
+  const searchInput = document.getElementById('search-input');
+  const categoryFilter = document.getElementById('category-filter');
+  
+  if (searchInput) searchInput.value = '';
+  if (categoryFilter) categoryFilter.value = '';
+  
+  updateProductsDisplay(systemData.products);
 };
 
 // Inicializar aplicação
