@@ -776,8 +776,7 @@ async function updateCategory(id) {
   const categoryData = {
     name: document.getElementById('category-name').value,
     icon: document.getElementById('category-icon').value,
-    color: document.getElementById('category-color').value,
-    image: categoryImageData || null
+    color: document.getElementById('category-color').value
   };
   
   const result = await supabase.update('categories', id, categoryData);
@@ -2617,6 +2616,69 @@ function applyClientFixes() {
 // Inicializar aplicação
 console.log('✅ Sistema MoveisBonafe completo carregado!');
 renderApp();
+
+// Aplicar melhorias visuais após carregamento
+setTimeout(() => {
+  // Atualizar título para "Móveis Bonafé Catálogo"
+  const headers = document.querySelectorAll('h1, [style*="font-size: 1.5rem"], [style*="font-size: 2rem"]');
+  headers.forEach(header => {
+    if (header.textContent.includes('MoveisBonafe') || header.textContent.includes('Catálogo')) {
+      header.innerHTML = 'Móveis Bonafé Catálogo';
+      header.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+      header.style.webkitBackgroundClip = 'text';
+      header.style.webkitTextFillColor = 'transparent';
+      header.style.backgroundClip = 'text';
+      header.style.fontWeight = '700';
+    }
+  });
+  
+  // Aplicar cores nas tabelas de preços
+  const priceTables = document.querySelectorAll('[style*="grid-template-columns"]');
+  priceTables.forEach(table => {
+    if (table.innerHTML.includes('À Vista') || table.innerHTML.includes('30 dias')) {
+      const priceBoxes = table.children;
+      if (priceBoxes.length >= 4) {
+        // À Vista - Verde
+        if (priceBoxes[0] && priceBoxes[0].textContent.includes('À Vista')) {
+          priceBoxes[0].style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+          priceBoxes[0].style.color = 'white';
+          priceBoxes[0].style.fontWeight = '700';
+        }
+        // 30 dias - Azul
+        if (priceBoxes[1] && (priceBoxes[1].textContent.includes('30 dias') || priceBoxes[1].textContent.includes('30'))) {
+          priceBoxes[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+          priceBoxes[1].style.color = 'white';
+          priceBoxes[1].style.fontWeight = '700';
+        }
+        // 30/60 - Roxo
+        if (priceBoxes[2] && priceBoxes[2].textContent.includes('30/60')) {
+          priceBoxes[2].style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
+          priceBoxes[2].style.color = 'white';
+          priceBoxes[2].style.fontWeight = '700';
+        }
+        // 30/60/90 - Laranja
+        if (priceBoxes[3] && priceBoxes[3].textContent.includes('30/60/90')) {
+          priceBoxes[3].style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+          priceBoxes[3].style.color = 'white';
+          priceBoxes[3].style.fontWeight = '700';
+        }
+        // 30/60/90/120 - Vermelho
+        if (priceBoxes[4] && priceBoxes[4].textContent.includes('30/60/90/120')) {
+          priceBoxes[4].style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+          priceBoxes[4].style.color = 'white';
+          priceBoxes[4].style.fontWeight = '700';
+        }
+      }
+      
+      // Adicionar click para modal
+      table.style.cursor = 'pointer';
+      table.onclick = function() {
+        const productIndex = Array.from(document.querySelectorAll('[style*="background: white"][style*="border-radius: 0.5rem"]')).indexOf(table.closest('[style*="background: white"]'));
+        showProductModal(productIndex);
+      };
+    }
+  });
+}, 1000);
 
 // Modal profissional para produto expandido
 window.showProductModal = function(productIndex) {
