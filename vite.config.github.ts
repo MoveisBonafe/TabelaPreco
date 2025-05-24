@@ -5,24 +5,20 @@ import path from 'path'
 // Configuração específica para GitHub Pages
 export default defineConfig({
   plugins: [react()],
-  base: '/TabelaPreco/', // Nome do seu repositório
+  base: '/TabelaPreco/',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './client/src'),
+      '@shared': path.resolve(__dirname, './shared'),
       '@assets': path.resolve(__dirname, './attached_assets'),
     },
   },
+  root: path.resolve(__dirname, 'client'),
   build: {
-    outDir: 'dist',
+    outDir: path.resolve(__dirname, 'client/dist'),
     emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'index.html')
-      }
-    }
   },
   define: {
-    // Garantir que as variáveis de ambiente funcionem no GitHub Pages
     'process.env': {}
   }
 })
