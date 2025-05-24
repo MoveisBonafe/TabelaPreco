@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Detectar se as credenciais do Supabase estão disponíveis
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://oozesebwtrbzeelkcmwp.supabase.co';
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 export const hasSupabaseCredentials = !!(supabaseUrl && supabaseAnonKey);
