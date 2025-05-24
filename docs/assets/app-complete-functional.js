@@ -209,7 +209,7 @@ window.login = function() {
   const defaultUsers = {
     'admin': { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0, active: true },
     'vendedor': { id: 2, username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0, active: true },
-    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.2, active: true }
+    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5, active: true }
   };
   
   const defaultUser = defaultUsers[username];
@@ -285,28 +285,16 @@ async function loadSystemData() {
 
 // Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
 function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
-  // Garantir que os valores sejam numéricos
-  const safBasePrice = parseFloat(basePrice) || 0;
-  const safeMultiplier = parseFloat(userMultiplier) || 1;
-  
-  console.log('🧮 Cálculo - Preço base:', safBasePrice, 'Multiplicador:', safeMultiplier, 'Preço fixo:', isFixedPrice);
-  
   if (isFixedPrice) {
     // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
     return Object.keys(systemData.priceSettings).reduce((acc, table) => {
-      acc[table] = safBasePrice; // Mesmo preço para todas as tabelas
+      acc[table] = basePrice; // Mesmo preço para todas as tabelas
       return acc;
     }, {});
   } else {
     return Object.keys(systemData.priceSettings).reduce((acc, table) => {
       const increment = systemData.priceSettings[table] / 100;
-      const finalPrice = safBasePrice * safeMultiplier * (1 + increment);
-      acc[table] = finalPrice;
-      
-      if (table === 'A Vista') {
-        console.log('📊 À Vista - Base:', safBasePrice, '× Mult:', safeMultiplier, '× (1+0%) =', finalPrice);
-      }
-      
+      acc[table] = basePrice * userMultiplier * (1 + increment);
       return acc;
     }, {});
   }
@@ -1519,7 +1507,7 @@ function renderApp() {
 
 // Renderizar visão do catálogo (para clientes)
 function renderCatalogView() {
-  const userMultiplier = parseFloat(currentUser.price_multiplier) || 1.0; // Usa multiplicador real do usuário
+  const userMultiplier = currentUser.price_multiplier || 1.5; // Cliente tem multiplicador padrão de 1.5
   
   const productsHtml = systemData.products.map((product, index) => {
     const basePrice = product.base_price || 0;
@@ -1739,40 +1727,22 @@ function renderCatalogView() {
                   height: 140px !important;
                 }
                 
-                /* Preços super compactos no mobile - TODAS as 5 tabelas visíveis */
-                [style*="grid-template-columns: 1fr 1fr"] {
+                /* Preços super compactos no mobile - TODAS as 5 tabelas */
+                .price-tables {
                   display: grid !important;
                   grid-template-columns: repeat(5, 1fr) !important;
-                  gap: 0.1rem !important;
+                  gap: 0.15rem !important;
                   font-size: 0.6rem !important;
                 }
                 
-                [style*="grid-template-columns: 1fr 1fr"] > div {
+                .price-tables > div {
                   padding: 0.2rem 0.05rem !important;
                   min-width: 0 !important;
                 }
                 
-                [style*="grid-column: 1 / -1"] {
+                .price-tables > div:last-child {
                   grid-column: auto !important;
                   grid-row: auto !important;
-                }
-                
-                /* Força exibição de todos os preços */
-                .price-tables,
-                .price-tables-mobile,
-                [class*="price"] {
-                  display: grid !important;
-                  grid-template-columns: repeat(5, 1fr) !important;
-                  gap: 0.1rem !important;
-                }
-                
-                /* Ajusta texto para caber */
-                [style*="font-size: 0.75rem"] {
-                  font-size: 0.55rem !important;
-                }
-                
-                [style*="font-size: 0.9rem"] {
-                  font-size: 0.65rem !important;
                 }
                 
                 .price-tables [style*="font-size: 0.75rem"] {
