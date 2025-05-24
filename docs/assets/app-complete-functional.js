@@ -1147,7 +1147,8 @@ function renderProductsTab() {
     }
     
     return `
-      <tr style="border-bottom: 1px solid #e5e7eb;">
+      <!-- Layout Desktop -->
+      <tr class="desktop-row" style="border-bottom: 1px solid #e5e7eb;">
         <td style="padding: 1rem;">
           ${firstImage ? 
             `<img src="${firstImage}" alt="${product.name}" style="width: 60px; height: 60px; object-fit: contain; border-radius: 0.375rem; background: #f8f9fa;">` :
@@ -1173,6 +1174,53 @@ function renderProductsTab() {
           </button>
         </td>
       </tr>
+      
+      <!-- Layout Mobile Card -->
+      <div class="mobile-card" style="display: none; background: white; margin-bottom: 1rem; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e5e7eb;">
+        <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+          ${firstImage ? 
+            `<img src="${firstImage}" alt="${product.name}" style="width: 60px; height: 60px; object-fit: contain; border-radius: 0.375rem; background: #f8f9fa; flex-shrink: 0;">` :
+            `<div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; color: #6b7280; flex-shrink: 0;">📷</div>`
+          }
+          <div style="flex: 1;">
+            <div style="font-weight: 600; color: #1e293b; margin-bottom: 0.25rem;">${product.name}</div>
+            <div style="font-size: 0.875rem; color: #6b7280;">${product.category || 'N/A'}</div>
+            ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #f59e0b;">🔒 Preço Fixo</div>' : ''}
+          </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1rem; font-size: 0.875rem;">
+          <div style="padding: 0.5rem; background: #f0fdf4; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.75rem;">À Vista</div>
+            <div style="color: #10b981; font-weight: 600;">R$ ${priceTable['A Vista'].toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.75rem;">30</div>
+            <div style="color: #3b82f6; font-weight: 600;">R$ ${priceTable['30'].toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.75rem;">30/60</div>
+            <div style="color: #3b82f6; font-weight: 600;">R$ ${priceTable['30/60'].toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.75rem;">30/60/90</div>
+            <div style="color: #3b82f6; font-weight: 600;">R$ ${priceTable['30/60/90'].toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center; grid-column: 1 / -1;">
+            <div style="color: #6b7280; font-size: 0.75rem;">30/60/90/120</div>
+            <div style="color: #3b82f6; font-weight: 600;">R$ ${priceTable['30/60/90/120'].toFixed(2)}</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="showEditProductModal(${product.id})" style="flex: 1; padding: 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem;">
+            Editar
+          </button>
+          <button onclick="deleteProduct(${product.id})" style="flex: 1; padding: 0.5rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.875rem;">
+            Excluir
+          </button>
+        </div>
+      </div>
     `;
   }).join('');
 
@@ -1184,7 +1232,8 @@ function renderProductsTab() {
       </button>
     </div>
     
-    <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; overflow: hidden;">
+    <!-- Desktop Table -->
+    <div class="desktop-table" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; overflow: hidden;">
       <table style="width: 100%; border-collapse: collapse;">
         <thead style="background: #f9fafb;">
           <tr>
@@ -1199,9 +1248,14 @@ function renderProductsTab() {
           </tr>
         </thead>
         <tbody>
-          ${productsHtml || '<tr><td colspan="8" style="padding: 2rem; text-align: center; color: #6b7280;">Nenhum produto cadastrado</td></tr>'}
+          ${systemData.products.length > 0 ? productsHtml : '<tr><td colspan="8" style="padding: 2rem; text-align: center; color: #6b7280;">Nenhum produto cadastrado</td></tr>'}
         </tbody>
       </table>
+    </div>
+    
+    <!-- Mobile Cards -->
+    <div class="mobile-cards" style="display: none;">
+      ${systemData.products.length > 0 ? productsHtml : '<div style="padding: 2rem; text-align: center; color: #6b7280;">Nenhum produto cadastrado</div>'}
     </div>
   `;
 }
@@ -1931,23 +1985,43 @@ function renderAdminView() {
           padding: 1rem;
         }
         
-        /* Ajustes para tabelas em mobile */
+        /* Ajustes para tabelas em mobile - SEM scroll horizontal */
         table {
-          font-size: 0.875rem;
-          overflow-x: auto;
-          display: block;
-          white-space: nowrap;
+          font-size: 0.75rem;
+          width: 100%;
+          table-layout: fixed;
         }
         
         th, td {
-          padding: 0.5rem !important;
-          min-width: 80px;
+          padding: 0.25rem !important;
+          word-wrap: break-word;
+          overflow-wrap: break-word;
         }
         
-        /* Container da tabela com scroll horizontal */
-        .table-container {
-          overflow-x: auto;
-          -webkit-overflow-scrolling: touch;
+        /* Esconder tabela desktop e mostrar cards mobile */
+        .desktop-table {
+          display: none !important;
+        }
+        
+        .mobile-cards {
+          display: block !important;
+        }
+        
+        .desktop-row {
+          display: none !important;
+        }
+        
+        .mobile-card {
+          display: block !important;
+        }
+        
+        /* Força quebra de linha em vez de scroll */
+        * {
+          overflow-x: visible !important;
+        }
+        
+        body {
+          overflow-x: hidden !important;
         }
         
         /* Botões menores em mobile */
