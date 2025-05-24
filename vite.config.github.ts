@@ -17,8 +17,16 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, 'client/dist'),
     emptyOutDir: true,
+    rollupOptions: {
+      output: {
+        entryFileNames: `assets/app-[hash].js`,
+        chunkFileNames: `assets/chunk-[hash].js`,
+        assetFileNames: `assets/asset-[hash].[ext]`
+      }
+    }
   },
   define: {
-    'process.env': {}
+    'process.env': {},
+    'import.meta.env.VITE_FORCE_NEW_BUILD': JSON.stringify(Date.now())
   }
 })

@@ -15,8 +15,10 @@ function App() {
   
   // Log apenas para Supabase
   useEffect(() => {
-    console.log('🌐 Sistema rodando exclusivamente com Supabase');
+    console.log('🎉 CÓDIGO NOVO FUNCIONANDO! Sistema rodando exclusivamente com Supabase');
     console.log('🔗 Supabase configurado:', !!import.meta.env.VITE_SUPABASE_URL);
+    console.log('⚡ Build timestamp:', import.meta.env.VITE_FORCE_NEW_BUILD);
+    console.log('🚀 SEM WEBSOCKET - Apenas Supabase puro!');
   }, []);
 
   useEffect(() => {
