@@ -5,7 +5,7 @@ console.log('⚡ Build timestamp: ' + Date.now());
 console.log('🚀 SEM WEBSOCKET - Apenas Supabase puro!');
 
 // Criar interface EXATAMENTE igual ao Replit
-document.body.innerHTML = `
+document.body.innerHTML = \`
 <div id="root" style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
   <!-- Header igual ao Replit -->
   <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
@@ -135,7 +135,7 @@ document.body.innerHTML = `
     </div>
   </div>
 </div>
-`;
+\`;
 
 // Função para trocar de abas igual ao Replit
 window.showTab = function(tabName) {
