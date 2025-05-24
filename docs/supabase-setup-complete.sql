@@ -26,7 +26,6 @@ CREATE TABLE IF NOT EXISTS categories (
   name VARCHAR(100) NOT NULL UNIQUE,
   icon VARCHAR(10) DEFAULT '📦',
   color VARCHAR(7) DEFAULT '#3b82f6',
-  image TEXT,
   active BOOLEAN DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
@@ -79,15 +78,14 @@ ON CONFLICT (table_name) DO UPDATE SET
   percentage = EXCLUDED.percentage;
 
 -- Categorias padrão
-INSERT INTO categories (name, icon, color, image) VALUES
-('Sala de Estar', '🛋️', '#3b82f6', 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=200&fit=crop'),
-('Quarto', '🛏️', '#10b981', 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=300&h=200&fit=crop'),
-('Cozinha', '🍽️', '#f59e0b', 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop'),
-('Escritório', '💼', '#8b5cf6', 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop')
+INSERT INTO categories (name, icon, color) VALUES
+('Sala de Estar', '🛋️', '#3b82f6'),
+('Quarto', '🛏️', '#10b981'),
+('Cozinha', '🍽️', '#f59e0b'),
+('Escritório', '💼', '#8b5cf6')
 ON CONFLICT (name) DO UPDATE SET
   icon = EXCLUDED.icon,
-  color = EXCLUDED.color,
-  image = EXCLUDED.image;
+  color = EXCLUDED.color;
 
 -- 6. Habilitar RLS (Row Level Security) - Opcional para segurança
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
