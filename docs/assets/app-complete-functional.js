@@ -677,6 +677,12 @@ function showCategoryModal(category = null) {
           <input type="color" id="category-color" value="${category?.color || '#3b82f6'}" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
         </div>
         
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Imagem da Categoria (URL)</label>
+          <input type="url" id="category-image" value="${category?.image || ''}" placeholder="https://exemplo.com/imagem.jpg" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+          <p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">Cole uma URL de imagem para representar esta categoria</p>
+        </div>
+        
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
           <button type="button" onclick="closeModal()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
             Cancelar
@@ -705,7 +711,8 @@ async function saveCategory() {
   const categoryData = {
     name: document.getElementById('category-name').value,
     icon: document.getElementById('category-icon').value,
-    color: document.getElementById('category-color').value
+    color: document.getElementById('category-color').value,
+    image: document.getElementById('category-image').value || null
   };
   
   const result = await supabase.insert('categories', categoryData);
@@ -721,7 +728,8 @@ async function updateCategory(id) {
   const categoryData = {
     name: document.getElementById('category-name').value,
     icon: document.getElementById('category-icon').value,
-    color: document.getElementById('category-color').value
+    color: document.getElementById('category-color').value,
+    image: document.getElementById('category-image').value || null
   };
   
   const result = await supabase.update('categories', id, categoryData);
@@ -1089,7 +1097,7 @@ function renderProductsTab() {
       <tr style="border-bottom: 1px solid #e5e7eb;">
         <td style="padding: 1rem;">
           ${firstImage ? 
-            `<img src="${firstImage}" alt="${product.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 0.375rem;">` :
+            `<img src="${firstImage}" alt="${product.name}" style="width: 60px; height: 60px; object-fit: contain; border-radius: 0.375rem; background: #f8f9fa;">` :
             `<div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; color: #6b7280;">📷</div>`
           }
         </td>
@@ -1678,19 +1686,22 @@ function renderCatalogView() {
                   height: 140px !important;
                 }
                 
-                /* Preços super compactos no mobile */
+                /* Preços super compactos no mobile - TODAS as 5 tabelas */
                 .price-tables {
+                  display: grid !important;
                   grid-template-columns: repeat(5, 1fr) !important;
-                  gap: 0.2rem !important;
-                  font-size: 0.65rem !important;
+                  gap: 0.15rem !important;
+                  font-size: 0.6rem !important;
                 }
                 
                 .price-tables > div {
-                  padding: 0.25rem 0.1rem !important;
+                  padding: 0.2rem 0.05rem !important;
+                  min-width: 0 !important;
                 }
                 
                 .price-tables > div:last-child {
                   grid-column: auto !important;
+                  grid-row: auto !important;
                 }
                 
                 .price-tables [style*="font-size: 0.75rem"] {
@@ -1826,10 +1837,20 @@ function renderAdminView() {
         /* Ajustes para tabelas em mobile */
         table {
           font-size: 0.875rem;
+          overflow-x: auto;
+          display: block;
+          white-space: nowrap;
         }
         
         th, td {
           padding: 0.5rem !important;
+          min-width: 80px;
+        }
+        
+        /* Container da tabela com scroll horizontal */
+        .table-container {
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
         }
         
         /* Botões menores em mobile */
