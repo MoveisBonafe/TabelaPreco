@@ -1847,6 +1847,7 @@ function renderCatalogView() {
       <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <h1 style="margin: 0; font-size: 1.25rem; background: linear-gradient(135deg, #8B4513 0%, #DAA520 50%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">Móveis Bonafé Catálogo</h1>
             <span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Cliente - ${currentUser.name}</span>
           </div>
           <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
@@ -2673,7 +2674,7 @@ window.showProductModal = function(productIndex) {
             </div>
           </div>
           <div style="margin-top: 0.75rem;">
-            <div style="padding: 1rem; background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%); border-radius: 0.5rem; text-align: center; color: white;">
+            <div style="padding: 1rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90/120</div>
               <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30/60/90/120'] ? priceTable['30/60/90/120'].toFixed(2) : ((product.base_price || 0) * 1.08).toFixed(2)}</div>
             </div>
@@ -2697,13 +2698,62 @@ window.closeProductModal = function() {
 if (currentUser && currentUser.role === 'customer') {
   applyClientFixes();
   
-  // Adicionar click aos produtos para abrir modal
+  // Adicionar click aos produtos para abrir modal e corrigir cores das tabelas
   setTimeout(() => {
     const productDivs = document.querySelectorAll('[style*="background: white"][style*="border-radius: 0.5rem"][style*="padding: 1rem"]');
     productDivs.forEach((div, index) => {
       if (div.innerHTML.includes('À Vista') || div.innerHTML.includes('30 dias')) {
         div.style.cursor = 'pointer';
         div.onclick = () => showProductModal(index);
+        
+        // Corrigir cores das tabelas de preços
+        const priceDivs = div.querySelectorAll('[style*="padding: 0.5rem"]');
+        if (priceDivs.length >= 4) {
+          // À Vista - Verde
+          if (priceDivs[0] && priceDivs[0].innerHTML.includes('À Vista')) {
+            priceDivs[0].style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            priceDivs[0].style.color = 'white';
+            const title = priceDivs[0].querySelector('div:first-child');
+            if (title) title.style.fontWeight = '700';
+          }
+          // 30 dias - Azul
+          if (priceDivs[1] && priceDivs[1].innerHTML.includes('30 dias')) {
+            priceDivs[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
+            priceDivs[1].style.color = 'white';
+            const title = priceDivs[1].querySelector('div:first-child');
+            if (title) title.style.fontWeight = '700';
+          }
+          // 30/60 - Roxo
+          if (priceDivs[2] && priceDivs[2].innerHTML.includes('30/60')) {
+            priceDivs[2].style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
+            priceDivs[2].style.color = 'white';
+            const title = priceDivs[2].querySelector('div:first-child');
+            if (title) title.style.fontWeight = '700';
+          }
+          // 30/60/90 - Laranja
+          if (priceDivs[3] && priceDivs[3].innerHTML.includes('30/60/90')) {
+            priceDivs[3].style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+            priceDivs[3].style.color = 'white';
+            const title = priceDivs[3].querySelector('div:first-child');
+            if (title) title.style.fontWeight = '700';
+          }
+        }
+        
+        // Adicionar 5ª tabela se não existir
+        const priceContainer = div.querySelector('[style*="grid-template-columns: 1fr 1fr"]');
+        if (priceContainer && !div.innerHTML.includes('30/60/90/120')) {
+          priceContainer.style.gridTemplateColumns = 'repeat(5, 1fr)';
+          priceContainer.style.gap = '0.5rem';
+          priceContainer.style.fontSize = '0.75rem';
+          
+          const newDiv = document.createElement('div');
+          newDiv.style.cssText = 'padding: 0.5rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.375rem; text-align: center; color: white;';
+          newDiv.innerHTML = `
+            <div style="font-weight: 700;">30/60/90/120</div>
+            <div style="font-weight: 600; font-size: 0.9rem;">R$ 000,00</div>
+          `;
+          priceContainer.appendChild(newDiv);
+        }
       }
     });
   }, 500);
