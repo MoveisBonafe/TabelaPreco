@@ -273,10 +273,18 @@ async function loadSystemData() {
     const users = await supabase.query('auth_users');
     if (users) systemData.users = users;
     
+    // Carregar configurações de preços do Supabase
+    const configs = await supabase.query('system_config', '?select=*&id=eq.1');
+    if (configs && configs.length > 0 && configs[0].price_settings) {
+      systemData.priceSettings = configs[0].price_settings;
+      console.log('✅ Configurações de preços carregadas do Supabase:', Object.keys(systemData.priceSettings));
+    }
+    
     console.log('✅ Dados carregados:', {
       produtos: systemData.products.length,
       categorias: systemData.categories.length,
-      usuarios: systemData.users.length
+      usuarios: systemData.users.length,
+      tabelasPreco: Object.keys(systemData.priceSettings).length
     });
   } catch (error) {
     console.error('Erro ao carregar dados:', error);
@@ -1037,7 +1045,22 @@ async function savePriceTable() {
     return;
   }
   
+  // Atualizar dados locais
   systemData.priceSettings[tableName] = percentage;
+  
+  // Salvar no Supabase
+  try {
+    const configData = {
+      id: 1,
+      price_settings: systemData.priceSettings,
+      updated_at: new Date().toISOString()
+    };
+    
+    await supabase.query('system_config', '', 'upsert', configData);
+    console.log('✅ Tabela de preços salva no Supabase');
+  } catch (error) {
+    console.log('⚠️ Erro ao salvar no Supabase, mantendo localmente:', error);
+  }
   
   // Fechar modal específico
   const modal = document.getElementById('price-table-modal');
@@ -1051,7 +1074,22 @@ async function savePriceTable() {
 async function updatePriceTable(tableName) {
   const percentage = parseFloat(document.getElementById('table-percentage').value) || 0;
   
+  // Atualizar dados locais
   systemData.priceSettings[tableName] = percentage;
+  
+  // Salvar no Supabase
+  try {
+    const configData = {
+      id: 1,
+      price_settings: systemData.priceSettings,
+      updated_at: new Date().toISOString()
+    };
+    
+    await supabase.query('system_config', '', 'upsert', configData);
+    console.log('✅ Tabela de preços atualizada no Supabase');
+  } catch (error) {
+    console.log('⚠️ Erro ao salvar no Supabase, mantendo localmente:', error);
+  }
   
   // Fechar modal específico
   const modal = document.getElementById('price-table-modal');
@@ -1062,7 +1100,7 @@ async function updatePriceTable(tableName) {
 }
 
 // Excluir tabela de preços
-window.deletePriceTable = function(tableName) {
+window.deletePriceTable = async function(tableName) {
   const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
   
   if (isDefault) {
@@ -1071,7 +1109,23 @@ window.deletePriceTable = function(tableName) {
   }
   
   if (confirm(`Tem certeza que deseja excluir a tabela "${tableName}"?`)) {
+    // Remover dos dados locais
     delete systemData.priceSettings[tableName];
+    
+    // Salvar no Supabase
+    try {
+      const configData = {
+        id: 1,
+        price_settings: systemData.priceSettings,
+        updated_at: new Date().toISOString()
+      };
+      
+      await supabase.query('system_config', '', 'upsert', configData);
+      console.log('✅ Tabela de preços excluída do Supabase');
+    } catch (error) {
+      console.log('⚠️ Erro ao salvar no Supabase, mantendo localmente:', error);
+    }
+    
     renderTab('precos');
     alert(`Tabela "${tableName}" excluída com sucesso!`);
   }
