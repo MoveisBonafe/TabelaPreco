@@ -2494,7 +2494,7 @@ function fixClientPriceTables() {
           const lastDiv = grid.lastElementChild;
           if (lastDiv) {
             const newDiv = document.createElement('div');
-            newDiv.style.cssText = 'padding: 0.4rem; background: #fef2f2; border-radius: 0.25rem; text-align: center;';
+            newDiv.style.cssText = 'padding: 0.4rem; background: #ffffff; border-radius: 0.25rem; text-align: center; border: 1px solid #e5e7eb;';
             newDiv.innerHTML = `
               <div style="color: #6b7280; font-size: 0.7rem;">30/60/90/120</div>
               <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">R$</div>
@@ -2522,16 +2522,18 @@ function fixCategoryLayout() {
   if (currentUser && currentUser.role === 'customer') {
     const categoryGrid = document.querySelector('[style*="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"]');
     if (categoryGrid) {
-      // Layout de 3 colunas fixas, responsivo para mobile
-      categoryGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-      categoryGrid.style.gap = '0.75rem';
-      categoryGrid.style.maxWidth = '100%';
-      
-      // Responsivo para mobile
-      if (window.innerWidth < 768) {
-        categoryGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+      // Desktop: todas as categorias em uma linha
+      if (window.innerWidth >= 768) {
+        const categoryCount = systemData.categories.length;
+        categoryGrid.style.gridTemplateColumns = `repeat(${categoryCount}, 1fr)`;
+        categoryGrid.style.gap = '1rem';
+      } 
+      // Mobile: 3 categorias por linha
+      else {
+        categoryGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
         categoryGrid.style.gap = '0.5rem';
       }
+      categoryGrid.style.maxWidth = '100%';
     }
     
     // Ajustar cards das categorias - COMPACTOS COMO NA IMAGEM
