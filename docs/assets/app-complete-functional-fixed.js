@@ -112,8 +112,8 @@ let selectedImages = [];
 
 // Variáveis para controle do carrossel
 let carouselStates = {};
-let touchStartX = 0;
-let touchStartY = 0;
+var touchStartX = 0;
+var touchStartY = 0;
 let categoryImageData = '';
 
 // Funções do carrossel de imagens
