@@ -119,7 +119,7 @@ let systemData = {
 let selectedImages = [];
 
 // Função de login
-window.login = async function() {
+window.login = function() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
   
@@ -128,62 +128,61 @@ window.login = async function() {
     return;
   }
 
-  console.log('🔍 Verificando credenciais...');
+  console.log('🔍 Verificando credenciais para:', username);
   
+  // Credenciais padrão sempre disponíveis
+  const defaultUsers = {
+    'admin': { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0, active: true },
+    'vendedor': { id: 2, username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0, active: true },
+    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5, active: true }
+  };
+  
+  const defaultUser = defaultUsers[username];
+  if (defaultUser && defaultUser.password === password) {
+    currentUser = defaultUser;
+    console.log('✅ Login realizado:', currentUser.name, 'Tipo:', currentUser.role);
+    
+    // Define a view baseada no tipo de usuário
+    if (currentUser.role === 'customer') {
+      currentView = 'catalog';
+    } else {
+      currentView = 'admin';
+    }
+    
+    // Carrega dados e renderiza
+    loadSystemData().then(() => {
+      renderApp();
+    }).catch(() => {
+      // Se falhar, renderiza mesmo assim
+      renderApp();
+    });
+    
+    return;
+  }
+  
+  // Se não é usuário padrão, tenta Supabase (assíncrono em background)
+  trySupabaseLogin(username, password);
+};
+
+// Função auxiliar para tentar login no Supabase
+async function trySupabaseLogin(username, password) {
   try {
-    // Primeiro tenta buscar no Supabase
     const users = await supabase.query('auth_users', `?username=eq.${username}&password_hash=eq.${password}&active=eq.true`);
     
     if (users && users.length > 0) {
       currentUser = users[0];
-      console.log('✅ Login realizado via Supabase:', currentUser.name, 'Tipo:', currentUser.role);
-      currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
-      await loadSystemData();
-      renderApp();
-      return;
-    }
-    
-    // Se não encontrou no Supabase, tenta credenciais padrão
-    const defaultUsers = {
-      'admin': { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0 },
-      'vendedor': { username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0 },
-      'cliente': { username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5 }
-    };
-    
-    const defaultUser = defaultUsers[username];
-    if (defaultUser && defaultUser.password === password) {
-      currentUser = defaultUser;
-      console.log('✅ Login realizado com credenciais padrão:', currentUser.name, 'Tipo:', currentUser.role);
-      currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
-      await loadSystemData();
-      renderApp();
-      return;
-    }
-    
-    alert('Usuário ou senha incorretos!');
-    
-  } catch (error) {
-    console.error('Erro no login:', error);
-    
-    // Fallback para credenciais padrão em caso de erro
-    const defaultUsers = {
-      'admin': { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0 },
-      'vendedor': { username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0 },
-      'cliente': { username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5 }
-    };
-    
-    const defaultUser = defaultUsers[username];
-    if (defaultUser && defaultUser.password === password) {
-      currentUser = defaultUser;
-      console.log('✅ Login realizado com credenciais padrão (fallback):', currentUser.name, 'Tipo:', currentUser.role);
+      console.log('✅ Login Supabase realizado:', currentUser.name, 'Tipo:', currentUser.role);
       currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
       await loadSystemData();
       renderApp();
     } else {
-      alert('Erro ao conectar. Verifique sua conexão.');
+      alert('Usuário ou senha incorretos!');
     }
+  } catch (error) {
+    console.error('Erro no login Supabase:', error);
+    alert('Usuário ou senha incorretos!');
   }
-};
+}
 
 // Carregar dados do sistema
 async function loadSystemData() {
