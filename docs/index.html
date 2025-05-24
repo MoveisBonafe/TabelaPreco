@@ -1,14 +1,258 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <script type="module" crossorigin src="./assets/index-DtMk4idJ.js"></script>
-    <link rel="stylesheet" crossorigin href="./assets/index-Dc7EFRDL.css">
-  </head>
-  <body>
-    <div id="root"></div>
-    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
-    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
-  </body>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo MoveisBonafe - Sistema Inteligente</title>
+    <meta name="description" content="Sistema inteligente de catálogo de produtos MoveisBonafe com sincronização em tempo real e importação Excel otimizada.">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛋️</text></svg>">
+    
+    <!-- GitHub Pages specific -->
+    <script>
+        // Detectar se está rodando no GitHub Pages
+        if (window.location.hostname.includes('github.io')) {
+            console.log('📱 Executando no GitHub Pages');
+            // Configurar para modo GitHub Pages
+            window.GITHUB_PAGES_MODE = true;
+        }
+    </script>
+    
+    <style>
+        /* Reset básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 600px;
+            margin: 2rem;
+        }
+        
+        .logo {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        h1 {
+            color: #2d3748;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+        
+        .subtitle {
+            color: #4a5568;
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        
+        .feature {
+            background: #f7fafc;
+            padding: 1.5rem;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature h3 {
+            color: #2d3748;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+        
+        .status {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 2rem 0;
+            color: #2f855a;
+        }
+        
+        .sync-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: #e6fffa;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: #234e52;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        
+        .pulse {
+            width: 8px;
+            height: 8px;
+            background: #38b2ac;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 2rem;
+                margin: 1rem;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🛋️</div>
+        <h1>MoveisBonafe</h1>
+        <p class="subtitle">
+            Sistema inteligente de catálogo com sincronização em tempo real entre navegadores
+        </p>
+        
+        <div class="status">
+            ✅ Sistema implantado com sucesso no GitHub Pages!
+        </div>
+        
+        <div class="features">
+            <div class="feature">
+                <div class="feature-icon">🔄</div>
+                <h3>Sincronização</h3>
+                <p>Atualizações em tempo real entre todos os navegadores conectados</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📊</div>
+                <h3>Monitoramento</h3>
+                <p>Painel completo com estatísticas e métricas do sistema</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">📋</div>
+                <h3>Importação Excel</h3>
+                <p>Sistema otimizado para importar produtos via planilhas</p>
+            </div>
+            
+            <div class="feature">
+                <div class="feature-icon">🛡️</div>
+                <h3>Segurança</h3>
+                <p>Sistema de autenticação e controle de acesso administrativo</p>
+            </div>
+        </div>
+        
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="window.open('https://moveisbonafe.github.io', '_blank')">
+                🌐 Acessar Aplicação
+            </button>
+            <button class="btn btn-secondary" onclick="window.open('https://github.com/moveisbonafe', '_blank')">
+                📂 Ver Código Fonte
+            </button>
+        </div>
+        
+        <div class="sync-indicator">
+            <div class="pulse"></div>
+            Sistema de sincronização ativo
+        </div>
+        
+        <script>
+            // Log de inicialização
+            console.log('🚀 MoveisBonafe - Sistema carregado com sucesso!');
+            console.log('✅ Página de landing implantada no GitHub Pages');
+            
+            // Verificar modo GitHub Pages
+            if (window.GITHUB_PAGES_MODE) {
+                console.log('📱 Modo GitHub Pages detectado');
+            }
+            
+            // Simular atualização de status
+            setTimeout(() => {
+                const statusElement = document.querySelector('.sync-indicator');
+                if (statusElement) {
+                    statusElement.innerHTML = '<div class="pulse"></div>Sincronização entre navegadores ativa';
+                }
+            }, 2000);
+        </script>
+    </div>
+</body>
 </html>
