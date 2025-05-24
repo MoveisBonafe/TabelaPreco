@@ -2497,7 +2497,8 @@ function fixClientPriceTables() {
             newDiv.style.cssText = 'padding: 0.4rem; background: #fef2f2; border-radius: 0.25rem; text-align: center;';
             newDiv.innerHTML = `
               <div style="color: #6b7280; font-size: 0.7rem;">30/60/90/120</div>
-              <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">R$ ${(parseFloat(lastDiv.querySelector('div:last-child').textContent.replace('R$ ', '')) * 1.02).toFixed(2)}</div>
+              <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">R$</div>
+              <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">${(parseFloat(lastDiv.querySelector('div:last-child').textContent.replace('R$ ', '')) * 1.02).toFixed(2)}</div>
             `;
             grid.appendChild(newDiv);
           }
@@ -2521,17 +2522,29 @@ function fixCategoryLayout() {
   if (currentUser && currentUser.role === 'customer') {
     const categoryGrid = document.querySelector('[style*="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"]');
     if (categoryGrid) {
-      categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+      categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+      categoryGrid.style.gap = '0.75rem';
     }
     
-    // Ajustar padding e tamanho das categorias
+    // Ajustar padding e tamanho das categorias - COMPACTO
     const categoryCards = document.querySelectorAll('[onclick*="filterByCategory"]');
     categoryCards.forEach(card => {
-      card.style.padding = '0.75rem';
+      card.style.padding = '0.5rem';
+      card.style.minHeight = 'auto';
+      card.style.height = 'auto';
+      
       const icon = card.querySelector('div[style*="font-size: 2rem"]');
-      if (icon) icon.style.fontSize = '1.5rem';
+      if (icon) {
+        icon.style.fontSize = '1.2rem';
+        icon.style.marginBottom = '0.25rem';
+      }
+      
       const title = card.querySelector('h4');
-      if (title) title.style.fontSize = '0.85rem';
+      if (title) {
+        title.style.fontSize = '0.75rem';
+        title.style.margin = '0';
+        title.style.lineHeight = '1.2';
+      }
     });
   }
 }
