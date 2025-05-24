@@ -232,7 +232,18 @@ window.showEditProductModal = function(id) {
   const product = systemData.products.find(p => p.id === id);
   if (!product) return;
   
-  selectedImages = product.images ? JSON.parse(product.images) : [];
+  // Verificação segura para parse do JSON das imagens
+  try {
+    if (product.images && product.images !== 'null' && product.images !== '') {
+      selectedImages = JSON.parse(product.images);
+    } else {
+      selectedImages = [];
+    }
+  } catch (error) {
+    console.log('Erro ao fazer parse das imagens, usando array vazio:', error);
+    selectedImages = [];
+  }
+  
   showProductModal(product);
 };
 
@@ -884,11 +895,15 @@ function renderProductsTab() {
     const basePrice = product.base_price || 0;
     const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
     
-    // Pegar primeira imagem
+    // Pegar primeira imagem com verificação segura
     let firstImage = '';
     try {
-      const images = product.images ? JSON.parse(product.images) : [];
-      firstImage = images[0] || product.image_url;
+      if (product.images && product.images !== 'null' && product.images !== '') {
+        const images = JSON.parse(product.images);
+        firstImage = images[0] || product.image_url;
+      } else {
+        firstImage = product.image_url;
+      }
     } catch (e) {
       firstImage = product.image_url;
     }
@@ -1284,11 +1299,15 @@ function renderCatalogView() {
     const basePrice = product.base_price || 0;
     const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
     
-    // Pegar primeira imagem
+    // Pegar primeira imagem com verificação segura
     let firstImage = '';
     try {
-      const images = product.images ? JSON.parse(product.images) : [];
-      firstImage = images[0] || product.image_url;
+      if (product.images && product.images !== 'null' && product.images !== '') {
+        const images = JSON.parse(product.images);
+        firstImage = images[0] || product.image_url;
+      } else {
+        firstImage = product.image_url;
+      }
     } catch (e) {
       firstImage = product.image_url;
     }
