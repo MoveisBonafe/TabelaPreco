@@ -13,11 +13,13 @@ export function useSync() {
 
   const connect = useCallback(() => {
     // Detectar se está no GitHub Pages
-    const isGitHubPages = window.location.hostname.includes('github.io');
+    const isGitHubPages = window.location.hostname.includes('github.io') || 
+                         import.meta.env.VITE_GITHUB_PAGES === 'true';
     
     if (isGitHubPages) {
       // No GitHub Pages, usar apenas Supabase (sem WebSocket)
-      console.log('🔄 Sistema configurado para usar Supabase via HTTP (sincronização manual)');
+      console.log('🌐 GitHub Pages detectado - usando sincronização via Supabase');
+      console.log('✅ Sistema pronto para funcionar com banco de dados na nuvem');
       return;
     }
 
