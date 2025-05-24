@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
+import { Product } from '@shared/schema';
 import { Navbar } from '@/components/layout/navbar';
 import { ProductGrid } from '@/components/products/product-grid';
 import { ProductList } from '@/components/products/product-list';
@@ -7,46 +8,23 @@ import { ProductCompact } from '@/components/products/product-compact';
 import { ProductModal } from '@/components/modals/product-modal';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useSupabaseProducts, Product as SupabaseProduct } from '@/hooks/use-supabase-products';
-import { Product } from '@shared/schema';
+import { useProducts } from '@/hooks/use-products';
+import { useCategories } from '@/hooks/use-categories';
 
 interface CatalogProps {
   onShowAdminLogin: () => void;
 }
 
-// Convert Supabase product to component-compatible product
-const convertSupabaseProduct = (supabaseProduct: SupabaseProduct): Product => ({
-  id: supabaseProduct.id.toString(),
-  name: supabaseProduct.name,
-  description: supabaseProduct.description,
-  category: supabaseProduct.category,
-  basePrice: supabaseProduct.base_price,
-  discount: supabaseProduct.discount,
-  finalPrice: supabaseProduct.final_price,
-  priceAVista: supabaseProduct.price_a_vista,
-  price30: supabaseProduct.price_30,
-  price30_60: supabaseProduct.price_30_60,
-  price30_60_90: supabaseProduct.price_30_60_90,
-  price30_60_90_120: supabaseProduct.price_30_60_90_120,
-  image: supabaseProduct.image,
-  images: supabaseProduct.images,
-  specifications: supabaseProduct.specifications,
-  active: supabaseProduct.active,
-  fixedPrice: supabaseProduct.fixed_price,
-  createdAt: new Date(supabaseProduct.created_at),
-});
-
 export function Catalog({ onShowAdminLogin }: CatalogProps) {
-  const { products: supabaseProducts, categories, isLoading } = useSupabaseProducts();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const { products } = useProducts();
+  const { categories } = useCategories();
+  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'compact'>('grid');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sortBy, setSortBy] = useState('name');
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
 
-  // Convert Supabase products to component-compatible format
-  const products = supabaseProducts.map(convertSupabaseProduct);
   const activeProducts = products.filter(p => p.active);
 
   const filteredProducts = activeProducts
@@ -86,6 +64,7 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar
+        onShowAdminLogin={onShowAdminLogin}
         viewMode={viewMode}
         onToggleViewMode={toggleViewMode}
       />
@@ -141,10 +120,15 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
             products={filteredProducts}
             onViewDetails={handleViewProduct}
           />
-        ) : (
+        ) : viewMode === 'list' ? (
           <ProductList
             products={filteredProducts}
             onViewDetails={handleViewProduct}
+          />
+        ) : (
+          <ProductCompact
+            products={filteredProducts}
+            onProductClick={handleViewProduct}
           />
         )}
       </div>
