@@ -2,8 +2,8 @@
 // Arquivo: docs/assets/app-complete-functional-fixed.js
 
 // Configuração do Supabase
-const SUPABASE_URL = 'https://jjjjojfjklahpfcrkekp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpqampvamZqa2xhaHBmY3JrZWtwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc0MjE5NjcsImV4cCI6MjA2Mjk5Nzk2N30.D5V3p6DSQW0TE1rBo5MtmSFbGzrJGHqj4A7XGrKKvw8';
+const SUPABASE_URL = 'https://oozesebwtrbzeelkcmwp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwOTUyMDQsImV4cCI6MjA2MzY3MTIwNH0.YkVlz4IWe6HagJmGPMF4s6NvIHKMGFaVgkWwHn7-Vs0';
 
 // Cliente Supabase simplificado para HTTP
 class SupabaseClient {
