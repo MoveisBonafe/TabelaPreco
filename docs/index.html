@@ -3,256 +3,860 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo MoveisBonafe - Sistema Inteligente</title>
-    <meta name="description" content="Sistema inteligente de catálogo de produtos MoveisBonafe com sincronização em tempo real e importação Excel otimizada.">
+    <title>MoveisBonafe - Catálogo de Produtos</title>
+    <meta name="description" content="Sistema de gestão de produtos MoveisBonafe com importação Excel e sincronização.">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛋️</text></svg>">
     
-    <!-- GitHub Pages specific -->
-    <script>
-        // Detectar se está rodando no GitHub Pages
-        if (window.location.hostname.includes('github.io')) {
-            console.log('📱 Executando no GitHub Pages');
-            // Configurar para modo GitHub Pages
-            window.GITHUB_PAGES_MODE = true;
-        }
-    </script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React e dependências -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- SheetJS para Excel -->
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
-        /* Reset básico */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        .logo-gradient {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .container {
-            background: white;
-            border-radius: 20px;
-            padding: 3rem;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 600px;
-            margin: 2rem;
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         
-        .logo {
-            font-size: 4rem;
-            margin-bottom: 1rem;
+        .card-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
         
-        h1 {
-            color: #2d3748;
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
         }
         
-        .subtitle {
-            color: #4a5568;
-            font-size: 1.2rem;
-            margin-bottom: 2rem;
-            line-height: 1.6;
+        .price-highlight {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin: 2rem 0;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .feature {
-            background: #f7fafc;
-            padding: 1.5rem;
-            border-radius: 12px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .feature h3 {
-            color: #2d3748;
-            font-size: 1.1rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .feature p {
-            color: #718096;
-            font-size: 0.9rem;
-        }
-        
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 2rem;
-        }
-        
-        .btn {
-            padding: 1rem 2rem;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: #e2e8f0;
-            color: #4a5568;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-        }
-        
-        .status {
-            background: #f0fff4;
-            border: 1px solid #9ae6b4;
-            border-radius: 8px;
-            padding: 1rem;
-            margin: 2rem 0;
-            color: #2f855a;
-        }
-        
-        .sync-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: #e6fffa;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            color: #234e52;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-        }
-        
-        .pulse {
-            width: 8px;
-            height: 8px;
-            background: #38b2ac;
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
-        
-        @media (max-width: 768px) {
-            .container {
-                padding: 2rem;
-                margin: 1rem;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
-            
-            .btn-group {
-                flex-direction: column;
-            }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">🛋️</div>
-        <h1>MoveisBonafe</h1>
-        <p class="subtitle">
-            Sistema inteligente de catálogo com sincronização em tempo real entre navegadores
-        </p>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
         
-        <div class="status">
-            ✅ Sistema implantado com sucesso no GitHub Pages!
-        </div>
-        
-        <div class="features">
-            <div class="feature">
-                <div class="feature-icon">🔄</div>
-                <h3>Sincronização</h3>
-                <p>Atualizações em tempo real entre todos os navegadores conectados</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">📊</div>
-                <h3>Monitoramento</h3>
-                <p>Painel completo com estatísticas e métricas do sistema</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">📋</div>
-                <h3>Importação Excel</h3>
-                <p>Sistema otimizado para importar produtos via planilhas</p>
-            </div>
-            
-            <div class="feature">
-                <div class="feature-icon">🛡️</div>
-                <h3>Segurança</h3>
-                <p>Sistema de autenticação e controle de acesso administrativo</p>
-            </div>
-        </div>
-        
-        <div class="btn-group">
-            <button class="btn btn-primary" onclick="window.open('https://moveisbonafe.github.io', '_blank')">
-                🌐 Acessar Aplicação
-            </button>
-            <button class="btn btn-secondary" onclick="window.open('https://github.com/moveisbonafe', '_blank')">
-                📂 Ver Código Fonte
-            </button>
-        </div>
-        
-        <div class="sync-indicator">
-            <div class="pulse"></div>
-            Sistema de sincronização ativo
-        </div>
-        
-        <script>
-            // Log de inicialização
-            console.log('🚀 MoveisBonafe - Sistema carregado com sucesso!');
-            console.log('✅ Página de landing implantada no GitHub Pages');
-            
-            // Verificar modo GitHub Pages
-            if (window.GITHUB_PAGES_MODE) {
-                console.log('📱 Modo GitHub Pages detectado');
-            }
-            
-            // Simular atualização de status
-            setTimeout(() => {
-                const statusElement = document.querySelector('.sync-indicator');
-                if (statusElement) {
-                    statusElement.innerHTML = '<div class="pulse"></div>Sincronização entre navegadores ativa';
+        // Sistema de armazenamento local
+        const storage = {
+            getProducts: () => {
+                try {
+                    const data = localStorage.getItem('moveisbonafe_products');
+                    return data ? JSON.parse(data) : [];
+                } catch (error) {
+                    console.error('Erro ao carregar produtos:', error);
+                    return [];
                 }
-            }, 2000);
-        </script>
-    </div>
+            },
+            
+            saveProducts: (products) => {
+                try {
+                    localStorage.setItem('moveisbonafe_products', JSON.stringify(products));
+                    console.log('📱 Produtos salvos no localStorage (GitHub Pages)');
+                } catch (error) {
+                    console.error('Erro ao salvar produtos:', error);
+                }
+            },
+            
+            getCategories: () => {
+                try {
+                    const data = localStorage.getItem('moveisbonafe_categories');
+                    return data ? JSON.parse(data) : [
+                        { id: '1', name: 'Sofás', description: 'Sofás e estofados', icon: '🛋️', color: '#667eea', active: true },
+                        { id: '2', name: 'Mesas', description: 'Mesas de centro e jantar', icon: '🪑', color: '#764ba2', active: true },
+                        { id: '3', name: 'Cadeiras', description: 'Cadeiras e assentos', icon: '💺', color: '#f093fb', active: true },
+                        { id: '4', name: 'Decoração', description: 'Itens decorativos', icon: '🏺', color: '#f5576c', active: true }
+                    ];
+                } catch (error) {
+                    console.error('Erro ao carregar categorias:', error);
+                    return [];
+                }
+            },
+            
+            saveCategories: (categories) => {
+                try {
+                    localStorage.setItem('moveisbonafe_categories', JSON.stringify(categories));
+                } catch (error) {
+                    console.error('Erro ao salvar categorias:', error);
+                }
+            }
+        };
+        
+        // Componente principal
+        function App() {
+            const [currentView, setCurrentView] = useState('catalog');
+            const [products, setProducts] = useState([]);
+            const [categories, setCategories] = useState([]);
+            const [isAdmin, setIsAdmin] = useState(false);
+            const [showLoginModal, setShowLoginModal] = useState(false);
+            const [selectedCategory, setSelectedCategory] = useState('');
+            const [searchTerm, setSearchTerm] = useState('');
+            
+            useEffect(() => {
+                console.log('📱 Carregando produtos do localStorage (GitHub Pages)...');
+                const loadedProducts = storage.getProducts();
+                const loadedCategories = storage.getCategories();
+                setProducts(loadedProducts);
+                setCategories(loadedCategories);
+                console.log(`✅ ${loadedProducts.length} produtos carregados do localStorage`);
+                
+                // Verificar se já está logado
+                const adminStatus = localStorage.getItem('moveisbonafe_admin');
+                if (adminStatus === 'true') {
+                    setIsAdmin(true);
+                }
+            }, []);
+            
+            const handleLogin = (username, password) => {
+                if (username === 'admin' && password === 'moveisbonafe2024') {
+                    setIsAdmin(true);
+                    localStorage.setItem('moveisbonafe_admin', 'true');
+                    setShowLoginModal(false);
+                    setCurrentView('admin');
+                    return true;
+                }
+                return false;
+            };
+            
+            const handleLogout = () => {
+                setIsAdmin(false);
+                localStorage.removeItem('moveisbonafe_admin');
+                setCurrentView('catalog');
+            };
+            
+            const addProduct = (product) => {
+                const newProduct = {
+                    ...product,
+                    id: Date.now().toString(),
+                    createdAt: new Date().toISOString()
+                };
+                const updatedProducts = [...products, newProduct];
+                setProducts(updatedProducts);
+                storage.saveProducts(updatedProducts);
+            };
+            
+            const updateProduct = (id, updatedProduct) => {
+                const updatedProducts = products.map(p => 
+                    p.id === id ? { ...p, ...updatedProduct } : p
+                );
+                setProducts(updatedProducts);
+                storage.saveProducts(updatedProducts);
+            };
+            
+            const deleteProduct = (id) => {
+                const updatedProducts = products.filter(p => p.id !== id);
+                setProducts(updatedProducts);
+                storage.saveProducts(updatedProducts);
+            };
+            
+            const filteredProducts = products.filter(product => {
+                const matchesCategory = !selectedCategory || product.category === selectedCategory;
+                const matchesSearch = !searchTerm || 
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    product.description.toLowerCase().includes(searchTerm.toLowerCase());
+                return matchesCategory && matchesSearch && product.active;
+            });
+            
+            return (
+                <div className="min-h-screen bg-gray-50">
+                    <Navbar 
+                        isAdmin={isAdmin}
+                        onLogin={() => setShowLoginModal(true)}
+                        onLogout={handleLogout}
+                        onViewChange={setCurrentView}
+                        currentView={currentView}
+                    />
+                    
+                    {currentView === 'catalog' && (
+                        <Catalog 
+                            products={filteredProducts}
+                            categories={categories}
+                            selectedCategory={selectedCategory}
+                            onCategoryChange={setSelectedCategory}
+                            searchTerm={searchTerm}
+                            onSearchChange={setSearchTerm}
+                        />
+                    )}
+                    
+                    {currentView === 'admin' && isAdmin && (
+                        <AdminPanel 
+                            products={products}
+                            categories={categories}
+                            onAddProduct={addProduct}
+                            onUpdateProduct={updateProduct}
+                            onDeleteProduct={deleteProduct}
+                        />
+                    )}
+                    
+                    {showLoginModal && (
+                        <LoginModal 
+                            onLogin={handleLogin}
+                            onClose={() => setShowLoginModal(false)}
+                        />
+                    )}
+                </div>
+            );
+        }
+        
+        // Componente Navbar
+        function Navbar({ isAdmin, onLogin, onLogout, onViewChange, currentView }) {
+            return (
+                <nav className="bg-white shadow-sm border-b">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex justify-between h-16">
+                            <div className="flex items-center">
+                                <span className="text-2xl font-bold logo-gradient">🛋️ MoveisBonafe</span>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4">
+                                <button
+                                    onClick={() => onViewChange('catalog')}
+                                    className={`px-3 py-2 rounded-md text-sm font-medium ${
+                                        currentView === 'catalog' 
+                                            ? 'bg-blue-100 text-blue-700' 
+                                            : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                                >
+                                    Catálogo
+                                </button>
+                                
+                                {isAdmin ? (
+                                    <>
+                                        <button
+                                            onClick={() => onViewChange('admin')}
+                                            className={`px-3 py-2 rounded-md text-sm font-medium ${
+                                                currentView === 'admin' 
+                                                    ? 'bg-blue-100 text-blue-700' 
+                                                    : 'text-gray-500 hover:text-gray-700'
+                                            }`}
+                                        >
+                                            Administração
+                                        </button>
+                                        <button
+                                            onClick={onLogout}
+                                            className="px-4 py-2 text-sm text-red-600 hover:text-red-800"
+                                        >
+                                            Sair
+                                        </button>
+                                    </>
+                                ) : (
+                                    <button
+                                        onClick={onLogin}
+                                        className="px-4 py-2 btn-gradient text-white text-sm rounded-md hover:opacity-90"
+                                    >
+                                        Admin
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+        }
+        
+        // Componente Catalog
+        function Catalog({ products, categories, selectedCategory, onCategoryChange, searchTerm, onSearchChange }) {
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <div className="mb-8">
+                        <h1 className="text-3xl font-bold text-gray-900 mb-4">Catálogo de Produtos</h1>
+                        
+                        {/* Filtros */}
+                        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                            <div className="flex-1">
+                                <input
+                                    type="text"
+                                    placeholder="Buscar produtos..."
+                                    value={searchTerm}
+                                    onChange={(e) => onSearchChange(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
+                            </div>
+                            
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => onCategoryChange(e.target.value)}
+                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            >
+                                <option value="">Todas as categorias</option>
+                                {categories.map(category => (
+                                    <option key={category.id} value={category.name}>
+                                        {category.icon} {category.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+                    
+                    {/* Grid de produtos */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                        {products.length === 0 ? (
+                            <div className="col-span-full text-center py-12">
+                                <div className="text-6xl mb-4">📦</div>
+                                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum produto encontrado</h3>
+                                <p className="text-gray-500">Faça login como administrador para adicionar produtos.</p>
+                            </div>
+                        ) : (
+                            products.map(product => (
+                                <ProductCard key={product.id} product={product} />
+                            ))
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        
+        // Componente ProductCard
+        function ProductCard({ product }) {
+            const formatPrice = (price) => {
+                return new Intl.NumberFormat('pt-BR', {
+                    style: 'currency',
+                    currency: 'BRL'
+                }).format(price);
+            };
+            
+            return (
+                <div className="bg-white rounded-lg card-shadow overflow-hidden animate-fadeIn hover:shadow-lg transition-shadow">
+                    <div className="aspect-w-16 aspect-h-9 bg-gray-200">
+                        {product.image ? (
+                            <img src={product.image} alt={product.name} className="w-full h-48 object-cover" />
+                        ) : (
+                            <div className="w-full h-48 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center">
+                                <span className="text-4xl">🛋️</span>
+                            </div>
+                        )}
+                    </div>
+                    
+                    <div className="p-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{product.name}</h3>
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                        
+                        <div className="flex items-center justify-between mb-3">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                {product.category}
+                            </span>
+                        </div>
+                        
+                        <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                                <span className="text-sm text-gray-500">À vista:</span>
+                                <span className="font-bold price-highlight text-lg">
+                                    {formatPrice(product.priceAVista)}
+                                </span>
+                            </div>
+                            
+                            {product.price30 && (
+                                <div className="text-xs text-gray-500">
+                                    <div>30 dias: {formatPrice(product.price30)}</div>
+                                    {product.price30_60 && <div>30/60 dias: {formatPrice(product.price30_60)}</div>}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Componente AdminPanel
+        function AdminPanel({ products, categories, onAddProduct, onUpdateProduct, onDeleteProduct }) {
+            const [activeTab, setActiveTab] = useState('products');
+            const [showProductModal, setShowProductModal] = useState(false);
+            const [editingProduct, setEditingProduct] = useState(null);
+            const fileInputRef = useRef(null);
+            
+            const handleImportExcel = (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const sheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[sheetName];
+                        const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                        
+                        jsonData.forEach(row => {
+                            if (row.Nome && row.Categoria && row.PrecoAVista) {
+                                const product = {
+                                    name: row.Nome,
+                                    description: row.Descricao || '',
+                                    category: row.Categoria,
+                                    priceAVista: parseFloat(row.PrecoAVista) || 0,
+                                    price30: parseFloat(row.Preco30) || 0,
+                                    price30_60: parseFloat(row.Preco30_60) || 0,
+                                    price30_60_90: parseFloat(row.Preco30_60_90) || 0,
+                                    price30_60_90_120: parseFloat(row.Preco30_60_90_120) || 0,
+                                    image: row.Imagem || '',
+                                    active: true
+                                };
+                                onAddProduct(product);
+                            }
+                        });
+                        
+                        alert(`${jsonData.length} produtos importados com sucesso!`);
+                    } catch (error) {
+                        console.error('Erro ao importar Excel:', error);
+                        alert('Erro ao importar arquivo Excel. Verifique o formato.');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            };
+            
+            const exportToExcel = () => {
+                const ws = XLSX.utils.json_to_sheet(products.map(p => ({
+                    Nome: p.name,
+                    Descricao: p.description,
+                    Categoria: p.category,
+                    PrecoAVista: p.priceAVista,
+                    Preco30: p.price30,
+                    Preco30_60: p.price30_60,
+                    Preco30_60_90: p.price30_60_90,
+                    Preco30_60_90_120: p.price30_60_90_120,
+                    Imagem: p.image,
+                    Ativo: p.active
+                })));
+                
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+                XLSX.writeFile(wb, `moveisbonafe-produtos-${new Date().toISOString().split('T')[0]}.xlsx`);
+            };
+            
+            return (
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-8">Painel Administrativo</h1>
+                    
+                    {/* Tabs */}
+                    <div className="border-b border-gray-200 mb-8">
+                        <nav className="-mb-px flex space-x-8">
+                            <button
+                                onClick={() => setActiveTab('products')}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeTab === 'products'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                Produtos ({products.length})
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('excel')}
+                                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                                    activeTab === 'excel'
+                                        ? 'border-blue-500 text-blue-600'
+                                        : 'border-transparent text-gray-500 hover:text-gray-700'
+                                }`}
+                            >
+                                Importar/Exportar Excel
+                            </button>
+                        </nav>
+                    </div>
+                    
+                    {activeTab === 'products' && (
+                        <div>
+                            <div className="mb-6">
+                                <button
+                                    onClick={() => setShowProductModal(true)}
+                                    className="btn-gradient text-white px-4 py-2 rounded-lg hover:opacity-90"
+                                >
+                                    + Adicionar Produto
+                                </button>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg card-shadow overflow-hidden">
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead className="bg-gray-50">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Produto
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Categoria
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Preço à Vista
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Status
+                                            </th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                                Ações
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="bg-white divide-y divide-gray-200">
+                                        {products.map(product => (
+                                            <tr key={product.id}>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <div>
+                                                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
+                                                        <div className="text-sm text-gray-500">{product.description}</div>
+                                                    </div>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    {product.category}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                                    R$ {product.priceAVista?.toFixed(2)}
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap">
+                                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                                        product.active 
+                                                            ? 'bg-green-100 text-green-800' 
+                                                            : 'bg-red-100 text-red-800'
+                                                    }`}>
+                                                        {product.active ? 'Ativo' : 'Inativo'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                                    <button
+                                                        onClick={() => {
+                                                            setEditingProduct(product);
+                                                            setShowProductModal(true);
+                                                        }}
+                                                        className="text-blue-600 hover:text-blue-900 mr-3"
+                                                    >
+                                                        Editar
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            if (confirm('Tem certeza que deseja excluir este produto?')) {
+                                                                onDeleteProduct(product.id);
+                                                            }
+                                                        }}
+                                                        className="text-red-600 hover:text-red-900"
+                                                    >
+                                                        Excluir
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {activeTab === 'excel' && (
+                        <div className="space-y-6">
+                            <div className="bg-white rounded-lg card-shadow p-6">
+                                <h3 className="text-lg font-medium mb-4">Importar Produtos do Excel</h3>
+                                <div className="space-y-4">
+                                    <input
+                                        ref={fileInputRef}
+                                        type="file"
+                                        accept=".xlsx,.xls"
+                                        onChange={handleImportExcel}
+                                        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                    />
+                                    <p className="text-sm text-gray-500">
+                                        Formato esperado: Nome, Descricao, Categoria, PrecoAVista, Preco30, Preco30_60, etc.
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <div className="bg-white rounded-lg card-shadow p-6">
+                                <h3 className="text-lg font-medium mb-4">Exportar Produtos</h3>
+                                <button
+                                    onClick={exportToExcel}
+                                    className="btn-gradient text-white px-4 py-2 rounded-lg hover:opacity-90"
+                                >
+                                    📊 Exportar para Excel
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    
+                    {showProductModal && (
+                        <ProductModal
+                            product={editingProduct}
+                            categories={categories}
+                            onSave={(product) => {
+                                if (editingProduct) {
+                                    onUpdateProduct(editingProduct.id, product);
+                                } else {
+                                    onAddProduct(product);
+                                }
+                                setShowProductModal(false);
+                                setEditingProduct(null);
+                            }}
+                            onClose={() => {
+                                setShowProductModal(false);
+                                setEditingProduct(null);
+                            }}
+                        />
+                    )}
+                </div>
+            );
+        }
+        
+        // Componente ProductModal
+        function ProductModal({ product, categories, onSave, onClose }) {
+            const [formData, setFormData] = useState({
+                name: product?.name || '',
+                description: product?.description || '',
+                category: product?.category || '',
+                priceAVista: product?.priceAVista || 0,
+                price30: product?.price30 || 0,
+                price30_60: product?.price30_60 || 0,
+                price30_60_90: product?.price30_60_90 || 0,
+                price30_60_90_120: product?.price30_60_90_120 || 0,
+                image: product?.image || '',
+                active: product?.active ?? true
+            });
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                onSave(formData);
+            };
+            
+            const handleChange = (field, value) => {
+                setFormData(prev => ({ ...prev, [field]: value }));
+            };
+            
+            return (
+                <div className="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="p-6">
+                            <h2 className="text-xl font-bold mb-4">
+                                {product ? 'Editar Produto' : 'Adicionar Produto'}
+                            </h2>
+                            
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Nome do Produto
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={formData.name}
+                                        onChange={(e) => handleChange('name', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Descrição
+                                    </label>
+                                    <textarea
+                                        value={formData.description}
+                                        onChange={(e) => handleChange('description', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        rows={3}
+                                    />
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        Categoria
+                                    </label>
+                                    <select
+                                        value={formData.category}
+                                        onChange={(e) => handleChange('category', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        required
+                                    >
+                                        <option value="">Selecione uma categoria</option>
+                                        {categories.map(category => (
+                                            <option key={category.id} value={category.name}>
+                                                {category.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Preço à Vista (R$)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.priceAVista}
+                                            onChange={(e) => handleChange('priceAVista', parseFloat(e.target.value) || 0)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                            required
+                                        />
+                                    </div>
+                                    
+                                    <div>
+                                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                                            Preço 30 dias (R$)
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            value={formData.price30}
+                                            onChange={(e) => handleChange('price30', parseFloat(e.target.value) || 0)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        />
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                                        URL da Imagem
+                                    </label>
+                                    <input
+                                        type="url"
+                                        value={formData.image}
+                                        onChange={(e) => handleChange('image', e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                        placeholder="https://exemplo.com/imagem.jpg"
+                                    />
+                                </div>
+                                
+                                <div className="flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        id="active"
+                                        checked={formData.active}
+                                        onChange={(e) => handleChange('active', e.target.checked)}
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                    />
+                                    <label htmlFor="active" className="ml-2 block text-sm text-gray-900">
+                                        Produto ativo
+                                    </label>
+                                </div>
+                                
+                                <div className="flex justify-end space-x-3 pt-4">
+                                    <button
+                                        type="button"
+                                        onClick={onClose}
+                                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                    >
+                                        Cancelar
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="px-4 py-2 btn-gradient text-white text-sm rounded-md hover:opacity-90"
+                                    >
+                                        {product ? 'Atualizar' : 'Criar'} Produto
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Componente LoginModal
+        function LoginModal({ onLogin, onClose }) {
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (onLogin(username, password)) {
+                    setError('');
+                } else {
+                    setError('Credenciais inválidas');
+                }
+            };
+            
+            return (
+                <div className="fixed inset-0 modal-backdrop flex items-center justify-center p-4 z-50">
+                    <div className="bg-white rounded-lg max-w-md w-full p-6">
+                        <h2 className="text-xl font-bold mb-4">Login Administrativo</h2>
+                        
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Usuário
+                                </label>
+                                <input
+                                    type="text"
+                                    value={username}
+                                    onChange={(e) => setUsername(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="admin"
+                                    required
+                                />
+                            </div>
+                            
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Senha
+                                </label>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => setPassword(e.target.value)}
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    placeholder="moveisbonafe2024"
+                                    required
+                                />
+                            </div>
+                            
+                            {error && (
+                                <div className="text-red-600 text-sm">{error}</div>
+                            )}
+                            
+                            <div className="flex justify-end space-x-3">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                                >
+                                    Cancelar
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-4 py-2 btn-gradient text-white text-sm rounded-md hover:opacity-90"
+                                >
+                                    Entrar
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div className="mt-4 text-xs text-gray-500">
+                            <p><strong>Credenciais padrão:</strong></p>
+                            <p>Usuário: admin</p>
+                            <p>Senha: moveisbonafe2024</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        
+        // Renderizar aplicação
+        ReactDOM.render(<App />, document.getElementById('root'));
+        
+        // Log de inicialização
+        console.log('🚀 MoveisBonafe carregado com sucesso!');
+        console.log('✅ Sistema funcionando no GitHub Pages');
+    </script>
 </body>
 </html>
