@@ -1151,6 +1151,7 @@ window.importExcel = function() {
           let importedCount = 0;
           for (const row of jsonData) {
             console.log('🔍 Processando linha:', row);
+            console.log('📏 Dimensões do Excel - altura:', row.altura, 'largura:', row.largura, 'comprimento:', row.comprimento);
             
             // Detectar nome do produto de forma mais flexível
             const productName = row.nome || row.name || row.Nome || row.Name || 
@@ -1175,10 +1176,10 @@ window.importExcel = function() {
                 price_30_60_90: basePrice * 1.06,
                 price_30_60_90_120: basePrice * 1.08,
                 
-                // Campos individuais de dimensões
-                altura: parseFloat((row.altura || row.Altura || row.height || row.Height || '0').toString().replace(',', '.')),
-                largura: parseFloat((row.largura || row.Largura || row.width || row.Width || '0').toString().replace(',', '.')),
-                comprimento: parseFloat((row.comprimento || row.Comprimento || row.length || row.Length || '0').toString().replace(',', '.')),
+                // Campos individuais de dimensões - detectar múltiplas variações
+                altura: parseFloat((row.altura || row.Altura || row.ALTURA || row.height || row.Height || '0').toString().replace(',', '.')),
+                largura: parseFloat((row.largura || row.Largura || row.LARGURA || row.width || row.Width || '0').toString().replace(',', '.')),
+                comprimento: parseFloat((row.comprimento || row.Comprimento || row.COMPRIMENTO || row.length || row.Length || '0').toString().replace(',', '.')),
                 
                 // Campos de texto
                 dimensions: `${row.altura || ''}x${row.largura || ''}x${row.comprimento || ''}`.replace(/^x|x$/g, ''),
@@ -1190,14 +1191,17 @@ window.importExcel = function() {
                 active: true
               };
 
-              console.log('💾 Salvando produto:', productData);
+              console.log('💾 Dados do produto processados:', productData);
+              console.log('🔍 Altura:', productData.altura, 'Largura:', productData.largura, 'Comprimento:', productData.comprimento);
               
               // Verificar se produto já existe pelo nome
               const existingProduct = systemData.products.find(p => p.name.toLowerCase() === productData.name.toLowerCase());
               
               let result;
               if (existingProduct) {
-                console.log('🔄 Produto existe, atualizando:', existingProduct.id);
+                console.log('🔄 Produto existe, atualizando ID:', existingProduct.id);
+                console.log('📊 Dados originais:', {altura: existingProduct.altura, largura: existingProduct.largura, comprimento: existingProduct.comprimento});
+                console.log('📊 Novos dados:', {altura: productData.altura, largura: productData.largura, comprimento: productData.comprimento});
                 result = await supabase.update('products', existingProduct.id, productData);
               } else {
                 console.log('➕ Produto novo, inserindo');
