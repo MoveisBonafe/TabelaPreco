@@ -11,7 +11,7 @@ import { BackupSystem } from '@/components/admin/backup-system';
 import { MonitoringTab } from '@/components/admin/monitoring-tab';
 import { ProductModal } from '@/components/modals/product-modal';
 import { ProductFormModal } from '@/components/modals/product-form-modal';
-import { useProducts } from '@/hooks/use-products';
+import { useFirebaseProducts } from '@/hooks/use-firebase-products';
 import { useCategories } from '@/hooks/use-categories';
 import { useToast } from '@/components/ui/toast';
 import { auth } from '@/lib/auth';
@@ -22,7 +22,7 @@ interface AdminProps {
 }
 
 export function Admin({ onLogout, onShowPublicView }: AdminProps) {
-  const { products, createProduct, updateProduct, deleteProduct } = useProducts();
+  const { products, createProduct, updateProduct, deleteProduct, bulkImportProducts } = useFirebaseProducts();
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
   const { showToast, ToastContainer } = useToast();
   const [activeTab, setActiveTab] = useState('products');
