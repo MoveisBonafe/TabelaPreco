@@ -28,7 +28,7 @@ jobs:
       run: |
         rm -rf dist .vite node_modules/.vite
         echo "Building with new code..."
-        npx vite build --config ../vite.config.github.ts --force
+        npx vite build --config ../vite.config.github.ts
       working-directory: ./client
       env:
         VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
