@@ -67,9 +67,16 @@ class SupabaseClient {
         },
         body: JSON.stringify(data)
       });
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Erro no update:', response.status, errorText);
+        alert(`Erro ao atualizar: ${response.status} - ${errorText}`);
+        return null;
+      }
       return await response.json();
     } catch (error) {
       console.error('Erro ao atualizar:', error);
+      alert(`Erro de conexão: ${error.message}`);
       return null;
     }
   }
