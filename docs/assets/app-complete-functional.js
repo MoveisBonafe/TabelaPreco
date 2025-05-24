@@ -1356,8 +1356,8 @@ window.restoreBackup = function() {
   input.click();
 };
 
-// Função de importação Excel FUNCIONAL
-window.importExcelProducts = async function() {
+// Função de importação Excel REMOVIDA - usando apenas a função principal
+window.importExcelProducts_DISABLED = async function() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.xlsx,.xls';
