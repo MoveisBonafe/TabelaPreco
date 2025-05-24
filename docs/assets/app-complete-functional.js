@@ -777,32 +777,34 @@ window.importExcel = function() {
 
 window.exportExcel = function() {
   const data = systemData.products.map(p => ({
-    Nome: p.name,
-    Categoria: p.category,
-    Preço: p.base_price,
-    Altura: p.height,
-    Largura: p.width,
-    Comprimento: p.length,
-    Peso: p.weight
+    Nome: p.name || '',
+    Categoria: p.category || '',
+    Preco: p.base_price || 0,
+    Altura: p.height || 0,
+    Largura: p.width || 0,
+    Comprimento: p.length || 0,
+    Peso: p.weight || 0,
+    Descricao: p.description || ''
   }));
   
   console.log('Exportando produtos:', data);
   
-  // Criar CSV simples
-  const csv = [
-    'Nome,Categoria,Preço,Altura,Largura,Comprimento,Peso',
-    ...data.map(row => Object.values(row).join(','))
+  // Criar CSV com separação por TAB para melhor compatibilidade com Excel
+  const headers = ['Nome', 'Categoria', 'Preco', 'Altura', 'Largura', 'Comprimento', 'Peso', 'Descricao'];
+  const csvContent = [
+    headers.join('\t'),
+    ...data.map(row => headers.map(header => `"${row[header]}"`).join('\t'))
   ].join('\n');
   
-  const blob = new Blob([csv], { type: 'text/csv' });
+  const blob = new Blob([csvContent], { type: 'text/tab-separated-values;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `produtos-moveisbonafe-${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `produtos-moveisbonafe-${new Date().toISOString().split('T')[0]}.tsv`;
   a.click();
   URL.revokeObjectURL(url);
   
-  alert(`${data.length} produtos exportados para CSV!`);
+  alert(`${data.length} produtos exportados para Excel!`);
 };
 
 // FUNÇÕES DE BACKUP
@@ -1008,16 +1010,16 @@ function renderCategoriesTab() {
 
 // Renderizar aba de preços
 function renderPricesTab() {
-  const totalProducts = systemData.products.length;
-  const avgPrice = totalProducts > 0 ? (systemData.products.reduce((sum, p) => sum + (p.base_price || 0), 0) / totalProducts) : 0;
+  // Ordem correta das tabelas com À Vista primeiro
+  const orderedTables = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'];
   
   return `
     <h2 style="margin: 0 0 1.5rem; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Preços</h2>
     
-    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb; margin-bottom: 2rem;">
+    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb;">
       <h3 style="margin: 0 0 1rem; color: #1e293b;">Configurar Percentuais das Tabelas</h3>
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-        ${Object.keys(systemData.priceSettings).map(table => `
+        ${orderedTables.map(table => `
           <div style="padding: 1rem; background: ${table === 'A Vista' ? '#f0fdf4' : '#eff6ff'}; border-radius: 0.5rem; border-left: 4px solid ${table === 'A Vista' ? '#10b981' : '#3b82f6'};">
             <h4 style="margin: 0 0 0.5rem; color: #1e293b;">${table}</h4>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
@@ -1028,23 +1030,6 @@ function renderPricesTab() {
             </div>
           </div>
         `).join('')}
-      </div>
-    </div>
-    
-    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb;">
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
-        <div style="padding: 1rem; background: #f0f9ff; border-radius: 0.5rem; border-left: 4px solid #3b82f6;">
-          <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Produtos Cadastrados</h4>
-          <p style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #3b82f6;">${totalProducts}</p>
-        </div>
-        <div style="padding: 1rem; background: #f0fdf4; border-radius: 0.5rem; border-left: 4px solid #10b981;">
-          <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Preço Médio</h4>
-          <p style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #10b981;">R$ ${avgPrice.toFixed(2)}</p>
-        </div>
-        <div style="padding: 1rem; background: #fefce8; border-radius: 0.5rem; border-left: 4px solid #f59e0b;">
-          <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Categorias</h4>
-          <p style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #f59e0b;">${systemData.categories.length}</p>
-        </div>
       </div>
     </div>
   `;
@@ -1138,25 +1123,30 @@ function renderExcelTab() {
           <tr>
             <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Nome</th>
             <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Categoria</th>
-            <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Preço</th>
+            <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Preco</th>
             <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Altura</th>
             <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Largura</th>
             <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Comprimento</th>
             <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Peso</th>
+            <th style="padding: 0.75rem; text-align: left; border: 1px solid #e5e7eb;">Descricao</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">Sofá 3 Lugares</td>
+            <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">Sofa 3 Lugares</td>
             <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">Sala de Estar</td>
             <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">1200.00</td>
             <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">85</td>
             <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">200</td>
             <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">90</td>
             <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">45.5</td>
+            <td style="padding: 0.75rem; border: 1px solid #e5e7eb;">Sofa confortavel para sala</td>
           </tr>
         </tbody>
       </table>
+      <p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem;">
+        <strong>Importante:</strong> Use separação por TAB (colunas) para melhor compatibilidade com Excel. Evite acentos nos cabeçalhos.
+      </p>
     </div>
   `;
 }
