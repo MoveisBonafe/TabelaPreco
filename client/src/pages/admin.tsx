@@ -8,7 +8,6 @@ import { PricingTab } from '@/components/admin/pricing-tab';
 import { UsersTab } from '@/components/admin/users-tab';
 import { ExcelImportExport } from '@/components/admin/excel-import-export';
 import { BackupSystem } from '@/components/admin/backup-system';
-import { DatabaseMonitoring } from '@/components/admin/database-monitoring';
 import { ProductModal } from '@/components/modals/product-modal';
 import { ProductFormModal } from '@/components/modals/product-form-modal';
 import { useProducts } from '@/hooks/use-products';
@@ -173,10 +172,6 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
 
         {activeTab === 'backup' && (
           <BackupSystem />
-        )}
-
-        {activeTab === 'database' && (
-          <DatabaseMonitoring />
         )}
       </div>
 
