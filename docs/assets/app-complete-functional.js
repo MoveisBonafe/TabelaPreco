@@ -758,9 +758,8 @@ function showCategoryModal(category = null) {
 async function saveCategory() {
   const categoryData = {
     name: document.getElementById('category-name').value,
-    icon: document.getElementById('category-icon').value,
-    color: document.getElementById('category-color').value,
-    image: categoryImageData || null
+    icon: categoryImageData || document.getElementById('category-icon').value,
+    color: document.getElementById('category-color').value
   };
   
   const result = await supabase.insert('categories', categoryData);
@@ -775,7 +774,7 @@ async function saveCategory() {
 async function updateCategory(id) {
   const categoryData = {
     name: document.getElementById('category-name').value,
-    icon: document.getElementById('category-icon').value,
+    icon: categoryImageData || document.getElementById('category-icon').value,
     color: document.getElementById('category-color').value
   };
   
@@ -1244,6 +1243,41 @@ window.restoreBackup = function() {
   input.click();
 };
 
+// Função de importação Excel
+window.importExcelProducts = function() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.xlsx,.xls';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      alert(`Arquivo ${file.name} selecionado! Funcionalidade de importação será implementada em breve.`);
+      console.log('Arquivo Excel selecionado:', file.name);
+      
+      // Aqui será implementada a lógica de leitura do Excel
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          // Usar a biblioteca SheetJS para processar o Excel
+          const data = new Uint8Array(e.target.result);
+          const workbook = XLSX.read(data, {type: 'array'});
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet);
+          
+          console.log('Dados do Excel processados:', jsonData);
+          alert(`Excel processado com sucesso! ${jsonData.length} produtos encontrados. Importação será implementada na próxima versão.`);
+        } catch (error) {
+          console.error('Erro ao processar Excel:', error);
+          alert('Erro ao processar arquivo Excel!');
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    }
+  };
+  input.click();
+};
+
 // Fechar modal
 window.closeModal = function() {
   const modals = ['product-modal', 'category-modal', 'user-modal'];
@@ -1336,9 +1370,14 @@ function renderProductsTab() {
   return `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
       <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Produtos</h2>
-      <button onclick="showAddProductModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-        + Novo Produto
-      </button>
+      <div style="display: flex; gap: 0.5rem;">
+        <button onclick="importExcelProducts()" style="padding: 0.5rem 1rem; background: #10b981; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+          📊 Importar Excel
+        </button>
+        <button onclick="showAddProductModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+          + Novo Produto
+        </button>
+      </div>
     </div>
     
     <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; overflow: hidden;">
