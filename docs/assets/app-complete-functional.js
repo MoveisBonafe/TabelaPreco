@@ -708,8 +708,8 @@ function showCategoryModal(category = null) {
         </div>
         
         <div>
-          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Ícone (Emoji)</label>
-          <input type="text" id="category-icon" value="${category?.icon || ''}" placeholder="Ex: 🛋️" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Ícone (Emoji) - Opcional se usar imagem</label>
+          <input type="text" id="category-icon" value="${category?.icon || ''}" placeholder="Ex: 🛋️ (ou faça upload de imagem abaixo)" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
         </div>
         
         <div>
@@ -756,9 +756,10 @@ function showCategoryModal(category = null) {
 }
 
 async function saveCategory() {
+  const iconValue = document.getElementById('category-icon').value;
   const categoryData = {
     name: document.getElementById('category-name').value,
-    icon: categoryImageData || document.getElementById('category-icon').value,
+    icon: iconValue || (categoryImageData ? '🖼️' : '📁'),
     color: document.getElementById('category-color').value
   };
   
@@ -772,9 +773,10 @@ async function saveCategory() {
 }
 
 async function updateCategory(id) {
+  const iconValue = document.getElementById('category-icon').value;
   const categoryData = {
     name: document.getElementById('category-name').value,
-    icon: categoryImageData || document.getElementById('category-icon').value,
+    icon: iconValue || (categoryImageData ? '🖼️' : '📁'),
     color: document.getElementById('category-color').value
   };
   
