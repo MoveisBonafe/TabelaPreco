@@ -1269,9 +1269,142 @@ function renderApp() {
         </div>
       </div>
     `;
+  } else if (currentView === 'catalog') {
+    renderCatalogView();
   } else if (currentView === 'admin') {
     renderAdminView();
   }
+}
+
+// Renderizar visão do catálogo (para clientes)
+function renderCatalogView() {
+  const userMultiplier = currentUser.price_multiplier || 1.5; // Cliente tem multiplicador padrão de 1.5
+  
+  const productsHtml = systemData.products.map(product => {
+    const basePrice = product.base_price || 0;
+    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
+    
+    // Pegar primeira imagem
+    let firstImage = '';
+    try {
+      const images = product.images ? JSON.parse(product.images) : [];
+      firstImage = images[0] || product.image_url;
+    } catch (e) {
+      firstImage = product.image_url;
+    }
+    
+    return `
+      <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; padding: 1.5rem; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <div style="text-align: center; margin-bottom: 1rem;">
+          ${firstImage ? 
+            `<img src="${firstImage}" alt="${product.name}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 0.375rem;">` :
+            `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 3rem;">📷</div>`
+          }
+        </div>
+        
+        <h3 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 1.1rem; font-weight: 600;">${product.name}</h3>
+        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">${product.category || 'Categoria'}</p>
+        
+        <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
+            <div style="padding: 0.5rem; background: #f0fdf4; border-radius: 0.25rem; text-align: center;">
+              <div style="color: #6b7280;">À Vista</div>
+              <div style="color: #10b981; font-weight: 600;">R$ ${priceTable['A Vista'].toFixed(2)}</div>
+            </div>
+            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+              <div style="color: #6b7280;">30 dias</div>
+              <div style="color: #3b82f6; font-weight: 600;">R$ ${priceTable['30'].toFixed(2)}</div>
+            </div>
+            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+              <div style="color: #6b7280;">30/60</div>
+              <div style="color: #3b82f6; font-weight: 600;">R$ ${priceTable['30/60'].toFixed(2)}</div>
+            </div>
+            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+              <div style="color: #6b7280;">30/60/90</div>
+              <div style="color: #3b82f6; font-weight: 600;">R$ ${priceTable['30/60/90'].toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+        
+        ${product.description ? `<p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ''}
+        
+        ${product.fixed_price ? '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #fef3c7; color: #92400e; border-radius: 0.25rem; font-size: 0.75rem; text-align: center;">🔒 Preço Fixo</div>' : ''}
+      </div>
+    `;
+  }).join('');
+
+  document.body.innerHTML = `
+    <div style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
+      <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">📋</div>
+            <h1 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Catálogo MoveisBonafe</h1>
+            <span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Cliente - ${currentUser.name}</span>
+          </div>
+          <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+            Sair
+          </button>
+        </div>
+      </header>
+      
+      <main style="padding: 1.5rem; max-width: 1200px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+          <h2 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 2rem;">Nossos Produtos</h2>
+          <p style="margin: 0; color: #6b7280;">Explore nossa coleção completa de móveis com preços especiais para você</p>
+        </div>
+        
+        <!-- Filtros -->
+        <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+            <input type="text" placeholder="Buscar produtos..." style="flex: 1; min-width: 250px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+            <select style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: white;">
+              <option>Todas as categorias</option>
+              ${systemData.categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('')}
+            </select>
+          </div>
+        </div>
+
+        <!-- Categorias -->
+        <div style="margin-bottom: 2rem;">
+          <h3 style="margin: 0 0 1rem; color: #1e293b;">Categorias</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;">
+            ${systemData.categories.map(category => {
+              const productCount = systemData.products.filter(p => p.category === category.name).length;
+              return `
+                <div style="background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color}; text-align: center; cursor: pointer;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'" style="transition: transform 0.2s;">
+                  <div style="font-size: 2rem; margin-bottom: 0.5rem;">${category.icon}</div>
+                  <h4 style="margin: 0 0 0.25rem; color: #1e293b;">${category.name}</h4>
+                  <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">${productCount} produtos</p>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        </div>
+
+        <!-- Produtos -->
+        <div>
+          <h3 style="margin: 0 0 1rem; color: #1e293b;">Produtos Disponíveis</h3>
+          ${systemData.products.length > 0 ? `
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem;">
+              ${productsHtml}
+            </div>
+          ` : `
+            <div style="background: white; padding: 3rem; border-radius: 0.5rem; text-align: center; border: 2px dashed #d1d5db;">
+              <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📦</div>
+              <h3 style="margin: 0 0 0.5rem; color: #6b7280;">Nenhum produto disponível</h3>
+              <p style="margin: 0; color: #6b7280;">Novos produtos serão adicionados em breve!</p>
+            </div>
+          `}
+        </div>
+      </main>
+      
+      <!-- Footer -->
+      <footer style="background: white; border-top: 1px solid #e5e7eb; padding: 2rem 1.5rem; margin-top: 3rem; text-align: center;">
+        <p style="margin: 0; color: #6b7280;">© 2024 MoveisBonafe - Móveis de qualidade com os melhores preços</p>
+      </footer>
+    </div>
+  `;
 }
 
 // Renderizar visão admin
