@@ -524,12 +524,12 @@ function renderCatalogView() {
       .category-select { padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: white; }
       
       .categories-section { margin-bottom: 2rem; }
-      .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(161px, 1fr)); gap: 0.5rem; }
-      .category-card { background: white; padding: 0.5rem; border-radius: 0.375rem; border: 1px solid #e5e7eb; text-align: center; cursor: pointer; transition: transform 0.2s; width: 161px; height: 57px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+      .categories-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; }
+      .category-card { background: white; padding: 1rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; text-align: center; cursor: pointer; transition: transform 0.2s; }
       .category-card:hover { transform: translateY(-2px); }
-      .category-icon { font-size: 1.2rem; margin: 0; }
-      .category-name { margin: 0; color: #1e293b; font-size: 0.75rem; font-weight: 500; }
-      .category-count { margin: 0; color: #6b7280; font-size: 0.65rem; }
+      .category-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+      .category-name { margin: 0 0 0.25rem; color: #1e293b; }
+      .category-count { margin: 0; color: #6b7280; font-size: 0.875rem; }
       
       .products-section h3 { margin: 0 0 1rem; color: #1e293b; }
       #products-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
@@ -540,7 +540,7 @@ function renderCatalogView() {
       .carousel-container { position: relative; margin-bottom: 1rem; overflow: hidden; border-radius: 0.375rem; background: #f8f9fa; }
       .carousel-track { display: flex; transition: transform 0.3s ease; }
       .carousel-slide { min-width: 100%; position: relative; }
-      .carousel-img { width: 100%; height: 200px; object-fit: cover; border-radius: 0.375rem; display: block; }
+      .carousel-img { width: 100%; height: 200px; object-fit: cover; border-radius: 0.375rem; }
       .carousel-btn { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1rem; }
       .carousel-prev { left: 0.5rem; }
       .carousel-next { right: 0.5rem; }
@@ -732,12 +732,6 @@ function renderCatalogView() {
                   <div class="carousel-dot ${imgIndex === 0 ? 'active' : ''}" onclick="goToSlide('${carouselId}', ${imgIndex})"></div>
                 `).join('')}
               </div>
-              
-              <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;" 
-                   ontouchstart="handleTouchStart(event, '${carouselId}', ${allImages.length})" 
-                   ontouchmove="handleTouchMove(event)" 
-                   ontouchend="handleTouchEnd(event, '${carouselId}', ${allImages.length})">
-              </div>
             ` : ''}
           </div>
           
@@ -747,11 +741,7 @@ function renderCatalogView() {
           ${product.description ? `<p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ''}
           
           <div class="price-grid">
-            ${Object.entries(priceTable).sort((a, b) => {
-              if (a[0] === 'A Vista') return -1;
-              if (b[0] === 'A Vista') return 1;
-              return 0;
-            }).map(([table, price]) => `
+            ${Object.entries(priceTable).map(([table, price]) => `
               <div class="price-item" style="border-color: ${priceColors[table] || '#6b7280'};">
                 <p class="price-label">${table}</p>
                 <p class="price-value">R$ ${price.toFixed(2)}</p>
@@ -799,44 +789,6 @@ window.goToSlide = function(carouselId, slideIndex) {
   indicators.forEach((dot, index) => {
     dot.classList.toggle('active', index === newIndex);
   });
-};
-
-// Funções de touch/swipe para mobile
-let touchStartX = 0;
-let touchStartY = 0;
-
-window.handleTouchStart = function(event, carouselId, totalImages) {
-  const touch = event.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-};
-
-window.handleTouchMove = function(event) {
-  event.preventDefault(); // Previne scroll da página
-};
-
-window.handleTouchEnd = function(event, carouselId, totalImages) {
-  const touch = event.changedTouches[0];
-  const touchEndX = touch.clientX;
-  const touchEndY = touch.clientY;
-  
-  const diffX = touchStartX - touchEndX;
-  const diffY = touchStartY - touchEndY;
-  
-  // Se o movimento horizontal for maior que o vertical (swipe horizontal)
-  if (Math.abs(diffX) > Math.abs(diffY)) {
-    const threshold = 50; // Distância mínima para considerar swipe
-    
-    if (Math.abs(diffX) > threshold) {
-      if (diffX > 0) {
-        // Swipe para esquerda - próxima imagem
-        moveCarousel(carouselId, 1);
-      } else {
-        // Swipe para direita - imagem anterior
-        moveCarousel(carouselId, -1);
-      }
-    }
-  }
 };
 
 // Renderizar aba de preços
