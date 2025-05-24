@@ -3,6 +3,7 @@ import { Catalog } from '@/pages/catalog';
 import { Admin } from '@/pages/admin';
 import { LoginModal } from '@/components/modals/login-modal';
 import { useToast } from '@/components/ui/toast';
+import { useSync } from '@/hooks/use-sync';
 import { auth } from '@/lib/auth';
 
 type View = 'login' | 'catalog' | 'admin';
@@ -10,6 +11,9 @@ type View = 'login' | 'catalog' | 'admin';
 function App() {
   const [currentView, setCurrentView] = useState<View>('login');
   const { showToast, ToastContainer } = useToast();
+  
+  // Ativar sincronização entre navegadores
+  useSync();
 
   useEffect(() => {
     // Verifica se já está logado ao carregar a página
