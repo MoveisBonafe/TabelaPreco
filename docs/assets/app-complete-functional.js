@@ -1142,16 +1142,28 @@ window.importExcel = function() {
           const worksheet = workbook.Sheets[firstSheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
           console.log('📄 Dados JSON extraídos:', jsonData);
+          
+          // Detectar automaticamente as colunas do arquivo
+          const firstRow = jsonData[0] || {};
+          const columns = Object.keys(firstRow);
+          console.log('🔍 Colunas detectadas:', columns);
 
           let importedCount = 0;
           for (const row of jsonData) {
             console.log('🔍 Processando linha:', row);
             
-            if (row.nome || row.name || row.Nome || row.Name) {
-              const basePrice = parseFloat(row.preco || row.price || row.Preco || row.Price || 0);
+            // Detectar nome do produto de forma mais flexível
+            const productName = row.nome || row.name || row.Nome || row.Name || 
+                               row.produto || row.Produto || row.product || row.Product ||
+                               Object.values(row)[0]; // Primeira coluna como fallback
+            
+            if (productName && productName.toString().trim()) {
+              const basePrice = parseFloat(row.preco || row.price || row.Preco || row.Price || 
+                                           row.valor || row.Valor || Object.values(row)[2] || 0);
               const productData = {
-                name: row.nome || row.name || row.Nome || row.Name || '',
-                category: row.categoria || row.category || row.Categoria || row.Category || 'Geral',
+                name: productName.toString().trim(),
+                category: row.categoria || row.category || row.Categoria || row.Category || 
+                         row.tipo || row.Tipo || Object.values(row)[1] || 'Geral',
                 base_price: basePrice,
                 final_price: basePrice,
                 price_a_vista: basePrice * 1.0,
