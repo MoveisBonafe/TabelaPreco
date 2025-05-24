@@ -3,7 +3,6 @@ import { Catalog } from '@/pages/catalog';
 import { Admin } from '@/pages/admin';
 import { LoginModal } from '@/components/modals/login-modal';
 import { useToast } from '@/components/ui/toast';
-
 import { useSupabaseProducts } from '@/hooks/use-supabase-products';
 import { auth } from '@/lib/auth';
 
@@ -16,8 +15,8 @@ function App() {
   
   // Log para debug
   useEffect(() => {
-    console.log('🌐 Aplicação rodando com Supabase');
-    console.log('🔗 Credenciais configuradas:', !!import.meta.env.VITE_SUPABASE_URL);
+    console.log('🌐 GitHub Pages - usando apenas Supabase');
+    console.log('🔗 Supabase configurado:', !!import.meta.env.VITE_SUPABASE_URL);
   }, []);
 
   useEffect(() => {
@@ -27,14 +26,9 @@ function App() {
     } else {
       setCurrentView('login');
     }
+  }, []);
 
-    // Notificar sobre status da sincronização
-    if (isConnected) {
-      console.log('🔄 Sincronização ativada entre navegadores');
-    }
-  }, [isConnected]);
-
-  const handleAdminLogin = (username: string, password: string) => {
+  const handleLogin = (username: string, password: string) => {
     if (auth.login(username, password)) {
       setCurrentView('admin');
       showToast('Login realizado com sucesso!');
@@ -45,19 +39,15 @@ function App() {
 
   const handleLogout = () => {
     auth.logout();
-    setCurrentView('catalog');
+    setCurrentView('login');
     showToast('Logout realizado com sucesso!');
   };
 
-  const handleShowLogin = () => {
-    setCurrentView('login');
-  };
-
-  const handleShowCatalog = () => {
+  const handleGoToCatalog = () => {
     setCurrentView('catalog');
   };
 
-  const handleShowAdmin = () => {
+  const handleGoToAdmin = () => {
     if (auth.isAuthenticated()) {
       setCurrentView('admin');
     } else {
@@ -66,27 +56,38 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       {currentView === 'login' && (
         <LoginModal
-          onAdminLogin={handleAdminLogin}
-          onPublicView={handleShowCatalog}
           isVisible={true}
+          onLogin={handleLogin}
+          onClose={() => setCurrentView('catalog')}
         />
       )}
 
       {currentView === 'catalog' && (
-        <Catalog onShowAdminLogin={handleShowLogin} />
+        <Catalog 
+          onGoToAdmin={handleGoToAdmin}
+        />
       )}
 
       {currentView === 'admin' && (
         <Admin 
           onLogout={handleLogout}
-          onShowPublicView={handleShowCatalog}
+          onGoToCatalog={handleGoToCatalog}
         />
       )}
 
       <ToastContainer />
+      
+      {/* Status de conexão para debug */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <div className={`px-3 py-1 rounded-full text-xs ${
+          isConnected ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        }`}>
+          {isConnected ? '🟢 Supabase' : '🔴 Desconectado'}
+        </div>
+      </div>
     </div>
   );
 }
