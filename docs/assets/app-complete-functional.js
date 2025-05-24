@@ -757,18 +757,28 @@ function showCategoryModal(category = null) {
 
 async function saveCategory() {
   const iconValue = document.getElementById('category-icon').value;
+  console.log('🔍 Salvando categoria - categoryImageData:', categoryImageData ? 'IMAGEM PRESENTE' : 'SEM IMAGEM');
+  console.log('🔍 iconValue:', iconValue);
+  
   const categoryData = {
     name: document.getElementById('category-name').value,
     icon: categoryImageData || iconValue || '📁',
     color: document.getElementById('category-color').value
   };
   
+  console.log('🔍 Dados da categoria a serem salvos:', categoryData);
+  
   const result = await supabase.insert('categories', categoryData);
   if (result) {
+    console.log('✅ Categoria salva com sucesso!');
+    categoryImageData = ''; // Limpar após salvar
     closeModal();
     await loadSystemData();
     renderTab('categorias');
     alert('Categoria adicionada!');
+  } else {
+    console.log('❌ Erro ao salvar categoria');
+    alert('Erro ao salvar categoria. Tente novamente.');
   }
 }
 
