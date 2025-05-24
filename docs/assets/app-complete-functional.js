@@ -1499,7 +1499,15 @@ function renderTab(tabName) {
 
 // Renderizar aba de produtos
 function renderProductsTab() {
-  const productsHtml = systemData.products.map(product => {
+  // Ordenar produtos por nome (alfabética) e depois por categoria
+  const sortedProducts = [...systemData.products].sort((a, b) => {
+    if (a.category !== b.category) {
+      return (a.category || '').localeCompare(b.category || '', 'pt-BR', { numeric: true });
+    }
+    return (a.name || '').localeCompare(b.name || '', 'pt-BR', { numeric: true });
+  });
+  
+  const productsHtml = sortedProducts.map(product => {
     const userMultiplier = currentUser.price_multiplier || 1.0;
     const basePrice = product.base_price || 0;
     const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price) || {
@@ -1590,7 +1598,12 @@ function renderProductsTab() {
 
 // Renderizar aba de categorias
 function renderCategoriesTab() {
-  const categoriesHtml = systemData.categories.map(category => `
+  // Ordenar categorias por nome (alfabética)
+  const sortedCategories = [...systemData.categories].sort((a, b) => {
+    return (a.name || '').localeCompare(b.name || '', 'pt-BR', { numeric: true });
+  });
+  
+  const categoriesHtml = sortedCategories.map(category => `
     <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color};">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 1rem;">
