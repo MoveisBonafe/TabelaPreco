@@ -86,7 +86,6 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar
-        onShowAdminLogin={onShowAdminLogin}
         viewMode={viewMode}
         onToggleViewMode={toggleViewMode}
       />
@@ -142,15 +141,10 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
             products={filteredProducts}
             onViewDetails={handleViewProduct}
           />
-        ) : viewMode === 'list' ? (
+        ) : (
           <ProductList
             products={filteredProducts}
             onViewDetails={handleViewProduct}
-          />
-        ) : (
-          <ProductCompact
-            products={filteredProducts}
-            onProductClick={handleViewProduct}
           />
         )}
       </div>
