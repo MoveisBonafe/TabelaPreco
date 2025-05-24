@@ -1703,38 +1703,24 @@ function renderMonitoringTab() {
 function renderApp() {
   if (currentView === 'login') {
     document.body.innerHTML = `
-      <div style="min-height: 100vh; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); display: flex; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
-        <div style="background: white; padding: 3rem; border-radius: 1rem; box-shadow: 0 20px 25px rgba(0,0,0,0.2); max-width: 400px; width: 100%; margin: 1rem;">
-          <div style="text-align: center; margin-bottom: 2rem;">
-            <div style="width: 60px; height: 60px; background: #3b82f6; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin: 0 auto 1rem;">📋</div>
-            <h1 style="margin: 0; font-size: 1.5rem; color: #1e293b;">MoveisBonafe</h1>
-            <p style="margin: 0.5rem 0 0; color: #6b7280;">Sistema completo de gestão</p>
+      <div style="min-height: 100vh; background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%); display: flex; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
+        <div style="background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); max-width: 420px; width: 100%; margin: 1rem;">
+          <div style="text-align: center; margin-bottom: 2.5rem;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #000000 0%, #f59e0b 50%, #d97706 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">MoveisBonafe</h1>
+            <p style="color: #6b7280; margin: 0.5rem 0 0; font-size: 1.1rem;">Catálogo</p>
           </div>
           
-          <form style="display: grid; gap: 1rem;">
-            <div>
-              <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 500;">Usuário</label>
-              <input type="text" id="username" placeholder="Digite seu usuário" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box;">
-            </div>
-            
-            <div>
-              <label style="display: block; margin-bottom: 0.5rem; color: #374151; font-weight: 500;">Senha</label>
-              <input type="password" id="password" placeholder="Digite sua senha" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.5rem; font-size: 1rem; box-sizing: border-box;">
-            </div>
-            
-            <button type="button" onclick="console.log('🔥 Botão clicado!'); login();" style="width: 100%; padding: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.5rem; font-size: 1rem; font-weight: 600; cursor: pointer;">
-              Entrar
-            </button>
-          </form>
-          
-          <div style="padding: 1rem; background: #f9fafb; border-radius: 0.5rem; border: 1px solid #e5e7eb; margin-top: 1rem;">
-            <h4 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 0.875rem;">Contas de teste:</h4>
-            <p style="margin: 0; color: #6b7280; font-size: 0.75rem; line-height: 1.4;">
-              <strong>Admin:</strong> admin / admin123<br>
-              <strong>Vendedor:</strong> vendedor / venda123<br>
-              <strong>Cliente:</strong> cliente / cliente123
-            </p>
+          <div style="margin-bottom: 1.2rem;">
+            <input type="text" id="username" placeholder="Nome de usuário" style="width: 100%; padding: 0.9rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;">
           </div>
+          
+          <div style="margin-bottom: 2rem;">
+            <input type="password" id="password" placeholder="Digite sua senha" style="width: 100%; padding: 0.9rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;">
+          </div>
+          
+          <button onclick="login()" style="width: 100%; background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #b45309 100%); color: white; padding: 0.9rem; border: none; border-radius: 0.75rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(245, 158, 11, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(245, 158, 11, 0.4)'">
+            Entrar
+          </button>
         </div>
       </div>
     `;
