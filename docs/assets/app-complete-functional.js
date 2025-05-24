@@ -1,7 +1,7 @@
 // MoveisBonafe - Sistema completo e funcional
 console.log('🎉 Sistema MoveisBonafe completo carregando...');
 
-// Configuração do Supabase
+// Configuração do Supabase - Credenciais corretas
 const SUPABASE_URL = 'https://oozesebwtrbzeelkcmwp.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDk2MzAsImV4cCI6MjA2MzU4NTYzMH0.yL6FHKbig8Uqn-e4gZzXbuBm3YuB5gmCeowRD96n7OY';
 
