@@ -122,6 +122,7 @@ let selectedImages = [];
 let carouselStates = {};
 let touchStartX = 0;
 let touchStartY = 0;
+let categoryImageData = '';
 
 // Funções do carrossel de imagens
 window.nextImage = function(carouselId, totalImages) {
@@ -282,12 +283,12 @@ async function loadSystemData() {
   }
 }
 
-// Calcular preços com incrementos das tabelas
+// Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
 function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
   if (isFixedPrice) {
+    // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
     return Object.keys(systemData.priceSettings).reduce((acc, table) => {
-      const increment = systemData.priceSettings[table] / 100;
-      acc[table] = basePrice * (1 + increment);
+      acc[table] = basePrice; // Mesmo preço para todas as tabelas
       return acc;
     }, {});
   } else {
@@ -296,6 +297,34 @@ function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false
       acc[table] = basePrice * userMultiplier * (1 + increment);
       return acc;
     }, {});
+  }
+}
+
+// Funções para upload de imagem de categoria
+window.addCategoryImageUrl = function() {
+  const url = document.getElementById('category-image').value.trim();
+  if (url) {
+    categoryImageData = url;
+    updateCategoryImagePreview();
+  }
+};
+
+window.handleCategoryFileUpload = function(event) {
+  const file = event.target.files[0];
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      categoryImageData = e.target.result;
+      updateCategoryImagePreview();
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+function updateCategoryImagePreview() {
+  const preview = document.getElementById('category-image-preview');
+  if (preview && categoryImageData) {
+    preview.innerHTML = `<img src="${categoryImageData}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 0.375rem;">`;
   }
 }
 
@@ -636,12 +665,16 @@ window.deleteProduct = async function(id) {
 
 // FUNÇÕES DE CATEGORIAS
 window.showAddCategoryModal = function() {
+  categoryImageData = '';
   showCategoryModal();
 };
 
 window.showEditCategoryModal = function(id) {
   const category = systemData.categories.find(c => c.id === id);
-  if (category) showCategoryModal(category);
+  if (category) {
+    categoryImageData = category.image || '';
+    showCategoryModal(category);
+  }
 };
 
 function showCategoryModal(category = null) {
@@ -678,9 +711,17 @@ function showCategoryModal(category = null) {
         </div>
         
         <div>
-          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Imagem da Categoria (URL)</label>
-          <input type="url" id="category-image" value="${category?.image || ''}" placeholder="https://exemplo.com/imagem.jpg" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
-          <p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">Cole uma URL de imagem para representar esta categoria</p>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Imagem da Categoria</label>
+          <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+            <input type="url" id="category-image" value="${category?.image || ''}" placeholder="https://exemplo.com/imagem.jpg" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <button type="button" onclick="addCategoryImageUrl()" style="padding: 0.75rem 1rem; background: #10b981; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
+              Usar URL
+            </button>
+          </div>
+          <input type="file" id="category-image-file" accept="image/*" onchange="handleCategoryFileUpload(event)" style="margin-bottom: 1rem;">
+          <div id="category-image-preview" style="margin-top: 1rem;">
+            ${category?.image ? `<img src="${category.image}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 0.375rem;">` : ''}
+          </div>
         </div>
         
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
@@ -712,7 +753,7 @@ async function saveCategory() {
     name: document.getElementById('category-name').value,
     icon: document.getElementById('category-icon').value,
     color: document.getElementById('category-color').value,
-    image: document.getElementById('category-image').value || null
+    image: categoryImageData || null
   };
   
   const result = await supabase.insert('categories', categoryData);
@@ -729,7 +770,7 @@ async function updateCategory(id) {
     name: document.getElementById('category-name').value,
     icon: document.getElementById('category-icon').value,
     color: document.getElementById('category-color').value,
-    image: document.getElementById('category-image').value || null
+    image: categoryImageData || null
   };
   
   const result = await supabase.update('categories', id, categoryData);
@@ -1799,7 +1840,33 @@ function renderAdminView() {
       }
       
       .admin-main {
-        padding: 1.5rem;
+        padding: 1rem 1.5rem;
+        height: calc(100vh - 140px);
+        overflow-y: auto;
+      }
+      
+      /* Otimizações verticais para admin */
+      .admin-section {
+        margin-bottom: 1rem;
+      }
+      
+      .admin-card {
+        padding: 1rem;
+        margin-bottom: 1rem;
+      }
+      
+      .admin-table-container {
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+        border: 1px solid #e5e7eb;
+        border-radius: 0.5rem;
+      }
+      
+      .admin-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1rem;
       }
       
       @media (max-width: 768px) {
