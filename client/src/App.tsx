@@ -9,15 +9,26 @@ import { auth } from '@/lib/auth';
 
 type View = 'login' | 'catalog' | 'admin';
 
+// Detectar se está rodando no GitHub Pages
+const isGitHubPages = window.location.hostname.includes('github.io');
+
 function App() {
-  const [currentView, setCurrentView] = useState<View>('login');
+  const [currentView, setCurrentView] = useState<View>(isGitHubPages ? 'catalog' : 'login');
   const { showToast, ToastContainer } = useToast();
   
-  // Ativar sincronização entre navegadores e Supabase
-  useSync();
+  // Só ativar sincronização se não for GitHub Pages
+  if (!isGitHubPages) {
+    useSync();
+  }
   const { isConnected } = useSupabaseProducts();
 
   useEffect(() => {
+    // Se for GitHub Pages, sempre mostrar catálogo
+    if (isGitHubPages) {
+      setCurrentView('catalog');
+      return;
+    }
+
     // Verifica se já está logado ao carregar a página
     if (auth.isAuthenticated()) {
       setCurrentView('admin');

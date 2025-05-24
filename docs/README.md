@@ -1,31 +1,24 @@
-# MoveisBonafe - Deploy GitHub Pages
+# MoveisBonafe - Catálogo GitHub Pages
 
-## 🚀 Deploy Realizado
+## 📋 Versão GitHub Pages
 
-O sistema MoveisBonafe está configurado para GitHub Pages na URL:
-**https://moveisbonafe.github.io/TabelaPreco/**
+Esta é a versão otimizada para GitHub Pages do catálogo MoveisBonafe.
 
-### ✅ Funcionalidades Implementadas
+### ✅ Funcionalidades incluídas:
+- Catálogo público de produtos
+- Interface responsiva e moderna
+- Dados carregados diretamente do Supabase
+- Sistema de busca e filtros
+- Visualização por categorias
+- Design profissional para clientes
 
-- **Sincronização entre navegadores** com WebSocket em tempo real
-- **Aba de Monitoramento** no painel administrativo
-- **Sistema original mantido** - layout preservado
-- **Gestão completa de produtos** com importação Excel
+### ❌ Removido para GitHub Pages:
+- Painel administrativo (backend necessário)
+- WebSocket (servidor necessário)
+- Sistema de login/autenticação
 
-### 🔧 Configuração GitHub Pages
+### 🚀 Deploy automático:
+O sistema está configurado para deploy automático no GitHub Pages quando você fizer push para a branch main.
 
-1. Acesse as configurações do repositório
-2. Vá em **Pages** 
-3. Configure:
-   - Source: **Deploy from a branch**
-   - Branch: **main**
-   - Folder: **/docs**
-
-### 📋 Credenciais de Acesso
-
-- **Usuário**: admin
-- **Senha**: moveisbonafe2024
-
----
-
-Sistema pronto para uso! 🛋️
+### 🔧 Configuração:
+As credenciais do Supabase já estão configuradas no sistema.
