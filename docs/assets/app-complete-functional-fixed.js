@@ -1002,17 +1002,124 @@ function renderTab(tabName) {
   }
 }
 
-// Renderizar view admin (simplificado)
+// Renderizar view admin COMPLETA
 function renderAdminView() {
   document.body.innerHTML = `
-    <div>
-      <h1>Admin Panel - ${currentUser.name}</h1>
-      <div id="admin-content">
-        ${renderPricesTab()}
-      </div>
-      <button onclick="logout()">Sair</button>
+    <div style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
+      <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div style="width: 32px; height: 32px; background: #3b82f6; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">📋</div>
+            <h1 style="margin: 0; font-size: 1.25rem; color: #1e293b;">Admin Panel</h1>
+            <span style="padding: 0.25rem 0.5rem; background: #dc2626; color: white; border-radius: 0.25rem; font-size: 0.75rem;">${currentUser.name}</span>
+          </div>
+          <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+            Sair
+          </button>
+        </div>
+      </header>
+
+      <nav style="background: white; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem; overflow-x: auto;">
+        <div style="display: flex; gap: 0; min-width: max-content;">
+          <button onclick="showTab('produtos')" id="tab-produtos" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid #3b82f6; color: #3b82f6; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+            📦 Produtos
+          </button>
+          <button onclick="showTab('categorias')" id="tab-categorias" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+            📁 Categorias
+          </button>
+          <button onclick="showTab('precos')" id="tab-precos" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+            💰 Preços
+          </button>
+          <button onclick="showTab('usuarios')" id="tab-usuarios" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+            👥 Usuários
+          </button>
+          <button onclick="showTab('excel')" id="tab-excel" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+            📊 Excel
+          </button>
+          <button onclick="showTab('backup')" id="tab-backup" style="padding: 1rem 1.5rem; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 0.5rem; white-space: nowrap;">
+            💾 Backup
+          </button>
+        </div>
+      </nav>
+
+      <main style="padding: 1.5rem;">
+        <div id="content-produtos">${renderProductsTab()}</div>
+        <div id="content-categorias" style="display: none;"></div>
+        <div id="content-precos" style="display: none;"></div>
+        <div id="content-usuarios" style="display: none;"></div>
+        <div id="content-excel" style="display: none;"></div>
+        <div id="content-backup" style="display: none;"></div>
+      </main>
     </div>
   `;
+}
+
+// Função para mostrar abas
+window.showTab = function(tabName) {
+  // Esconder todas as abas
+  const allTabs = ['produtos', 'categorias', 'precos', 'usuarios', 'excel', 'backup'];
+  allTabs.forEach(tab => {
+    const content = document.getElementById(`content-${tab}`);
+    const tabButton = document.getElementById(`tab-${tab}`);
+    if (content) content.style.display = 'none';
+    if (tabButton) {
+      tabButton.style.borderBottomColor = 'transparent';
+      tabButton.style.color = '#6b7280';
+    }
+  });
+
+  // Mostrar aba selecionada
+  const activeContent = document.getElementById(`content-${tabName}`);
+  const activeTab = document.getElementById(`tab-${tabName}`);
+  if (activeContent) {
+    activeContent.style.display = 'block';
+    // Carregar conteúdo da aba se necessário
+    switch(tabName) {
+      case 'produtos':
+        activeContent.innerHTML = renderProductsTab();
+        break;
+      case 'categorias':
+        activeContent.innerHTML = renderCategoriesTab();
+        break;
+      case 'precos':
+        activeContent.innerHTML = renderPricesTab();
+        break;
+      case 'usuarios':
+        activeContent.innerHTML = renderUsersTab();
+        break;
+      case 'excel':
+        activeContent.innerHTML = renderExcelTab();
+        break;
+      case 'backup':
+        activeContent.innerHTML = renderBackupTab();
+        break;
+    }
+  }
+  if (activeTab) {
+    activeTab.style.borderBottomColor = '#3b82f6';
+    activeTab.style.color = '#3b82f6';
+  }
+};
+
+// Função básica para abas não implementadas
+function renderCategoriesTab() {
+  return '<div style="padding: 2rem; text-align: center; color: #6b7280;"><h3>🚧 Categorias</h3><p>Em desenvolvimento</p></div>';
+}
+
+function renderUsersTab() {
+  return '<div style="padding: 2rem; text-align: center; color: #6b7280;"><h3>🚧 Usuários</h3><p>Em desenvolvimento</p></div>';
+}
+
+function renderExcelTab() {
+  return '<div style="padding: 2rem; text-align: center; color: #6b7280;"><h3>🚧 Excel</h3><p>Em desenvolvimento</p></div>';
+}
+
+function renderBackupTab() {
+  return '<div style="padding: 2rem; text-align: center; color: #6b7280;"><h3>🚧 Backup</h3><p>Em desenvolvimento</p></div>';
+}
+
+function renderProductsTab() {
+  return '<div style="padding: 2rem; text-align: center; color: #6b7280;"><h3>🚧 Produtos</h3><p>Em desenvolvimento</p></div>';
 }
 
 // Inicializar aplicação
