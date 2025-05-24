@@ -112,8 +112,8 @@ let selectedImages = [];
 
 // Variáveis para controle do carrossel
 let carouselStates = {};
-var touchStartX = 0;
-var touchStartY = 0;
+window.touchStartX = 0;
+window.touchStartY = 0;
 let categoryImageData = '';
 
 // Funções do carrossel de imagens
@@ -151,8 +151,8 @@ function updateCarousel(carouselId, totalImages) {
 
 // Funções de touch para mobile
 window.handleTouchStart = function(event, carouselId, totalImages) {
-  touchStartX = event.touches[0].clientX;
-  touchStartY = event.touches[0].clientY;
+  window.touchStartX = event.touches[0].clientX;
+  window.touchStartY = event.touches[0].clientY;
 };
 
 window.handleTouchMove = function(event) {
@@ -179,8 +179,8 @@ window.handleTouchEnd = function(event, carouselId, totalImages) {
     }
   }
   
-  touchStartX = 0;
-  touchStartY = 0;
+  window.touchStartX = 0;
+  window.touchStartY = 0;
 };
 
 // Função de login
@@ -805,8 +805,8 @@ window.goToSlide = function(carouselId, slideIndex) {
 
 window.handleTouchStart = function(event, carouselId, totalImages) {
   const touch = event.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
+  window.touchStartX = touch.clientX;
+  window.touchStartY = touch.clientY;
 };
 
 window.handleTouchMove = function(event) {
@@ -818,8 +818,8 @@ window.handleTouchEnd = function(event, carouselId, totalImages) {
   const touchEndX = touch.clientX;
   const touchEndY = touch.clientY;
   
-  const diffX = touchStartX - touchEndX;
-  const diffY = touchStartY - touchEndY;
+  const diffX = window.touchStartX - touchEndX;
+  const diffY = window.touchStartY - touchEndY;
   
   // Se o movimento horizontal for maior que o vertical (swipe horizontal)
   if (Math.abs(diffX) > Math.abs(diffY)) {
