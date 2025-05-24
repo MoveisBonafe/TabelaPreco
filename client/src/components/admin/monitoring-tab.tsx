@@ -12,9 +12,11 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
-  Clock
+  Clock,
+  Cloud
 } from 'lucide-react';
 import { useSync } from '@/hooks/use-sync';
+import { useSupabaseProducts } from '@/hooks/use-supabase-products';
 
 interface MonitoringStats {
   totalProducts: number;
@@ -34,11 +36,20 @@ interface MonitoringStats {
 
 export function MonitoringTab() {
   const { isConnected, reconnect } = useSync();
+  const { products, categories, isConnected: supabaseConnected, isLoading: supabaseLoading } = useSupabaseProducts();
   
   const { data: stats, isLoading, refetch } = useQuery<MonitoringStats>({
     queryKey: ['/api/monitoring/stats'],
     refetchInterval: 5000, // Atualizar a cada 5 segundos
   });
+
+  // Calcular estatísticas em tempo real do Supabase
+  const supabaseStats = {
+    totalProducts: products.length,
+    totalCategories: categories.length,
+    activeProducts: products.filter(p => p.active).length,
+    inactiveProducts: products.filter(p => !p.active).length,
+  };
 
   const formatUptime = (uptimeInSeconds: number) => {
     const hours = Math.floor(uptimeInSeconds / 3600);
@@ -68,18 +79,35 @@ export function MonitoringTab() {
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            {isConnected ? (
+            {supabaseConnected ? (
               <>
-                <Wifi className="h-5 w-5 text-green-600" />
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
-                  Sincronizado
+                <Cloud className="h-5 w-5 text-blue-600" />
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                  Supabase Online
                 </Badge>
               </>
             ) : (
               <>
                 <WifiOff className="h-5 w-5 text-red-600" />
                 <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
-                  Desconectado
+                  Supabase Offline
+                </Badge>
+              </>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {isConnected ? (
+              <>
+                <Wifi className="h-5 w-5 text-green-600" />
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+                  WebSocket Online
+                </Badge>
+              </>
+            ) : (
+              <>
+                <WifiOff className="h-5 w-5 text-orange-600" />
+                <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+                  WebSocket Offline
                 </Badge>
                 <Button 
                   variant="outline" 
@@ -113,9 +141,9 @@ export function MonitoringTab() {
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalProducts || 0}</div>
+            <div className="text-2xl font-bold">{supabaseStats.totalProducts}</div>
             <p className="text-xs text-muted-foreground">
-              {stats?.activeProducts || 0} ativos, {stats?.inactiveProducts || 0} inativos
+              {supabaseStats.activeProducts} ativos, {supabaseStats.inactiveProducts} inativos
             </p>
           </CardContent>
         </Card>
@@ -126,7 +154,7 @@ export function MonitoringTab() {
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalCategories || 0}</div>
+            <div className="text-2xl font-bold">{supabaseStats.totalCategories}</div>
             <p className="text-xs text-muted-foreground">
               Categorias cadastradas
             </p>
@@ -185,14 +213,26 @@ export function MonitoringTab() {
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Sincronização</span>
-              {isConnected ? (
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
-                  Ativa
+              <span className="text-sm font-medium">Supabase</span>
+              {supabaseConnected ? (
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+                  Conectado
                 </Badge>
               ) : (
                 <Badge variant="outline" className="bg-red-50 text-red-700 border-red-300">
-                  Inativa
+                  Desconectado
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">WebSocket</span>
+              {isConnected ? (
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+                  Ativo
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+                  Inativo
                 </Badge>
               )}
             </div>

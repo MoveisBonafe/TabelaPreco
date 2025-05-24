@@ -4,6 +4,7 @@ import { Admin } from '@/pages/admin';
 import { LoginModal } from '@/components/modals/login-modal';
 import { useToast } from '@/components/ui/toast';
 import { useSync } from '@/hooks/use-sync';
+import { useSupabaseProducts } from '@/hooks/use-supabase-products';
 import { auth } from '@/lib/auth';
 
 type View = 'login' | 'catalog' | 'admin';
@@ -12,8 +13,9 @@ function App() {
   const [currentView, setCurrentView] = useState<View>('login');
   const { showToast, ToastContainer } = useToast();
   
-  // Ativar sincronização entre navegadores
+  // Ativar sincronização entre navegadores e Supabase
   useSync();
+  const { isConnected } = useSupabaseProducts();
 
   useEffect(() => {
     // Verifica se já está logado ao carregar a página
@@ -22,7 +24,12 @@ function App() {
     } else {
       setCurrentView('login');
     }
-  }, []);
+
+    // Notificar sobre status da sincronização
+    if (isConnected) {
+      console.log('🔄 Sincronização ativada entre navegadores');
+    }
+  }, [isConnected]);
 
   const handleAdminLogin = (username: string, password: string) => {
     if (auth.login(username, password)) {
