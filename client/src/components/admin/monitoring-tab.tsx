@@ -17,6 +17,8 @@ import {
 } from 'lucide-react';
 import { useSync } from '@/hooks/use-sync';
 import { useSupabaseProducts } from '@/hooks/use-supabase-products';
+import { isGitHubPages } from '@/lib/github-pages-adapter';
+import { hasSupabaseCredentials, supabase } from '@/lib/supabase';
 
 interface MonitoringStats {
   totalProducts: number;
@@ -38,9 +40,13 @@ export function MonitoringTab() {
   const { isConnected, reconnect } = useSync();
   const { products, categories, isConnected: supabaseConnected, isLoading: supabaseLoading } = useSupabaseProducts();
   
+  // Detectar ambiente automaticamente
+  const isGitHubPagesEnv = isGitHubPages();
+  
   const { data: stats, isLoading, refetch } = useQuery<MonitoringStats>({
     queryKey: ['/api/monitoring/stats'],
-    refetchInterval: 5000, // Atualizar a cada 5 segundos
+    refetchInterval: isGitHubPagesEnv ? false : 5000, // Não fazer polling no GitHub Pages
+    enabled: !isGitHubPagesEnv, // Desabilitar no GitHub Pages
   });
 
   // Calcular estatísticas em tempo real do Supabase
@@ -95,41 +101,50 @@ export function MonitoringTab() {
               </>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            {isConnected ? (
-              <>
-                <Wifi className="h-5 w-5 text-green-600" />
-                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
-                  WebSocket Online
-                </Badge>
-              </>
-            ) : (
-              <>
-                <WifiOff className="h-5 w-5 text-orange-600" />
-                <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
-                  WebSocket Offline
-                </Badge>
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={reconnect}
-                  className="ml-2"
-                >
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  Reconectar
-                </Button>
-              </>
-            )}
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => refetch()}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-            Atualizar
-          </Button>
+          {!isGitHubPagesEnv && (
+            <div className="flex items-center gap-2">
+              {isConnected ? (
+                <>
+                  <Wifi className="h-5 w-5 text-green-600" />
+                  <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300">
+                    WebSocket Online
+                  </Badge>
+                </>
+              ) : (
+                <>
+                  <WifiOff className="h-5 w-5 text-orange-600" />
+                  <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-300">
+                    WebSocket Offline
+                  </Badge>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={reconnect}
+                    className="ml-2"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-1" />
+                    Reconectar
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
+          {!isGitHubPagesEnv && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetch()}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
+              Atualizar
+            </Button>
+          )}
+          {isGitHubPagesEnv && (
+            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
+              GitHub Pages
+            </Badge>
+          )}
         </div>
       </div>
 
