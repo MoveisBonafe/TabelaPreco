@@ -15,9 +15,9 @@
     <script>
         const { useState, useEffect } = React;
         
-        // Sistema de autenticação
+        // Sistema de autenticação - usando credenciais existentes
         const auth = {
-            login: (u, p) => u === 'admin' && p === 'admin123',
+            login: (u, p) => u === 'MoveisBonafe' && p === 'Bonafe1108',
             isAuthenticated: () => !!sessionStorage.getItem('user'),
             logout: () => sessionStorage.removeItem('user')
         };
@@ -142,7 +142,7 @@
                     React.createElement('div', {
                         key: 'demo',
                         className: 'mt-4 p-3 bg-blue-50 rounded text-sm text-blue-700'
-                    }, 'Demo: admin / admin123'),
+                    }, 'Use suas credenciais: MoveisBonafe / Bonafe1108'),
                     message && React.createElement('div', {
                         key: 'error',
                         className: 'mt-2 p-2 bg-red-50 text-red-700 rounded text-sm'
@@ -425,6 +425,344 @@
             ]);
         }
 
+        // Sistema de abas para o painel admin
+        function AdminPanel({ onLogout }) {
+            const [activeTab, setActiveTab] = useState('monitoring');
+
+            const tabs = [
+                { id: 'monitoring', label: 'Monitoramento', icon: '📊' },
+                { id: 'products', label: 'Produtos', icon: '📦' },
+                { id: 'categories', label: 'Categorias', icon: '🏷️' },
+                { id: 'excel', label: 'Excel', icon: '📊' },
+                { id: 'backup', label: 'Backup', icon: '💾' }
+            ];
+
+            return React.createElement('div', { className: 'min-h-screen bg-gray-50' }, [
+                // Navbar
+                React.createElement('nav', { 
+                    key: 'nav', 
+                    className: 'bg-white shadow-sm border-b' 
+                }, 
+                    React.createElement('div', { 
+                        className: 'max-w-7xl mx-auto px-4 h-16 flex justify-between items-center' 
+                    }, [
+                        React.createElement('h1', { 
+                            key: 'title', 
+                            className: 'text-xl font-semibold' 
+                        }, 'Painel Administrativo - Móveis Bonafé'),
+                        React.createElement('button', {
+                            key: 'logout',
+                            onClick: onLogout,
+                            className: 'px-4 py-2 border rounded-md hover:bg-gray-50'
+                        }, '👤 Sair')
+                    ])
+                ),
+
+                // Tabs
+                React.createElement('div', { 
+                    key: 'tabs', 
+                    className: 'bg-white border-b' 
+                }, 
+                    React.createElement('div', { 
+                        className: 'max-w-7xl mx-auto px-4' 
+                    }, 
+                        React.createElement('div', { 
+                            className: 'flex space-x-8 overflow-x-auto' 
+                        }, 
+                            tabs.map(tab => 
+                                React.createElement('button', {
+                                    key: tab.id,
+                                    onClick: () => setActiveTab(tab.id),
+                                    className: 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors ' + 
+                                        (activeTab === tab.id ? 
+                                            'border-blue-600 text-blue-600' : 
+                                            'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300')
+                                }, [
+                                    React.createElement('span', { key: 'icon', className: 'mr-2' }, tab.icon),
+                                    tab.label
+                                ])
+                            )
+                        )
+                    )
+                ),
+
+                // Tab Content
+                React.createElement('div', { key: 'content' }, [
+                    activeTab === 'monitoring' && React.createElement('div', { 
+                        key: 'monitoring-content',
+                        className: 'max-w-7xl mx-auto p-6 space-y-6'
+                    }, [
+                        // Monitoring Dashboard Content
+                        React.createElement(MonitoringContent, { key: 'monitoring' })
+                    ]),
+
+                    activeTab !== 'monitoring' && React.createElement('div', { 
+                        key: 'other-content',
+                        className: 'max-w-7xl mx-auto p-6'
+                    }, [
+                        React.createElement('div', { 
+                            className: 'bg-white p-8 rounded-lg shadow-sm text-center' 
+                        }, [
+                            React.createElement('h3', { 
+                                className: 'text-xl font-semibold mb-2' 
+                            }, 'Aba em Desenvolvimento'),
+                            React.createElement('p', { 
+                                className: 'text-gray-600' 
+                            }, 'Esta funcionalidade será implementada em breve.')
+                        ])
+                    ])
+                ])
+            ]);
+        }
+
+        // Conteúdo do monitoramento separado
+        function MonitoringContent() {
+            const [stats, setStats] = useState(null);
+            const [autoRefresh, setAutoRefresh] = useState(true);
+            const [syncing, setSyncing] = useState(false);
+            const [checking, setChecking] = useState(false);
+            const [toast, setToast] = useState('');
+
+            const updateStats = () => {
+                const products = syncManager.getProducts();
+                const categories = syncManager.getCategories();
+                const uptime = Math.floor((Date.now() - parseInt(sessionStorage.getItem('start') || Date.now())) / 60000);
+                
+                setStats({
+                    products: products.length,
+                    categories: categories.length,
+                    uptime: uptime + 'm',
+                    browserSupport: syncManager.getBrowserSupport(),
+                    lastSync: localStorage.getItem('catalog_last_sync') || 'Nunca'
+                });
+            };
+
+            useEffect(() => {
+                sessionStorage.setItem('start', Date.now().toString());
+                updateStats();
+                
+                if (autoRefresh) {
+                    const interval = setInterval(updateStats, 30000);
+                    return () => clearInterval(interval);
+                }
+            }, [autoRefresh]);
+
+            const handleSync = async () => {
+                setSyncing(true);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                syncManager.sync();
+                updateStats();
+                setToast('Sincronização concluída!');
+                setTimeout(() => setToast(''), 3000);
+                setSyncing(false);
+            };
+
+            const handleCheck = async () => {
+                setChecking(true);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                const result = syncManager.checkIntegrity();
+                updateStats();
+                setToast(result.issues.length > 0 ? 
+                    result.issues.length + ' problema(s) encontrado(s)' : 
+                    'Dados íntegros!'
+                );
+                setTimeout(() => setToast(''), 3000);
+                setChecking(false);
+            };
+
+            return [
+                // Header
+                React.createElement('div', { 
+                    key: 'header', 
+                    className: 'flex justify-between items-center' 
+                }, [
+                    React.createElement('div', { key: 'title' }, [
+                        React.createElement('h2', { 
+                            className: 'text-2xl font-bold' 
+                        }, 'Sistema de Sincronização'),
+                        React.createElement('p', { 
+                            className: 'text-gray-600' 
+                        }, 'Monitoramento em tempo real entre navegadores')
+                    ]),
+                    React.createElement('div', { 
+                        key: 'actions', 
+                        className: 'flex gap-2' 
+                    }, [
+                        React.createElement('button', {
+                            key: 'refresh',
+                            onClick: updateStats,
+                            className: 'px-4 py-2 border rounded-md hover:bg-gray-50'
+                        }, '🔄 Atualizar'),
+                        React.createElement('button', {
+                            key: 'auto',
+                            onClick: () => setAutoRefresh(!autoRefresh),
+                            className: 'px-4 py-2 rounded-md ' + (autoRefresh ? 
+                                'bg-green-100 text-green-800' : 'border hover:bg-gray-50')
+                        }, '⚡ Auto ' + (autoRefresh ? 'ON' : 'OFF'))
+                    ])
+                ]),
+
+                // Status Cards
+                React.createElement('div', { 
+                    key: 'cards', 
+                    className: 'grid grid-cols-1 md:grid-cols-4 gap-6' 
+                }, [
+                    React.createElement('div', { 
+                        key: 'sync', 
+                        className: 'bg-white p-6 rounded-lg shadow-sm' 
+                    }, [
+                        React.createElement('h3', { 
+                            className: 'text-sm text-gray-600 mb-2' 
+                        }, 'Status da Sincronização'),
+                        React.createElement('div', { className: 'flex items-center gap-2' }, [
+                            React.createElement('span', { className: 'text-2xl' }, '🌐'),
+                            React.createElement('div', {}, [
+                                React.createElement('span', { 
+                                    className: 'px-2 py-1 bg-green-100 text-green-800 rounded text-xs' 
+                                }, 'Sincronizado'),
+                                React.createElement('p', { 
+                                    className: 'text-xs text-gray-500 mt-1' 
+                                }, 'Uptime: ' + (stats?.uptime || '0m'))
+                            ])
+                        ])
+                    ]),
+
+                    React.createElement('div', { 
+                        key: 'products', 
+                        className: 'bg-white p-6 rounded-lg shadow-sm' 
+                    }, [
+                        React.createElement('h3', { 
+                            className: 'text-sm text-gray-600 mb-2' 
+                        }, 'Total de Produtos'),
+                        React.createElement('div', { className: 'flex items-center gap-2' }, [
+                            React.createElement('span', { className: 'text-2xl' }, '📦'),
+                            React.createElement('div', {}, [
+                                React.createElement('p', { 
+                                    className: 'text-2xl font-bold' 
+                                }, stats?.products || 0),
+                                React.createElement('p', { 
+                                    className: 'text-xs text-gray-500' 
+                                }, 'cadastrados')
+                            ])
+                        ])
+                    ]),
+
+                    React.createElement('div', { 
+                        key: 'categories', 
+                        className: 'bg-white p-6 rounded-lg shadow-sm' 
+                    }, [
+                        React.createElement('h3', { 
+                            className: 'text-sm text-gray-600 mb-2' 
+                        }, 'Total de Categorias'),
+                        React.createElement('div', { className: 'flex items-center gap-2' }, [
+                            React.createElement('span', { className: 'text-2xl' }, '🏷️'),
+                            React.createElement('div', {}, [
+                                React.createElement('p', { 
+                                    className: 'text-2xl font-bold' 
+                                }, stats?.categories || 0),
+                                React.createElement('p', { 
+                                    className: 'text-xs text-gray-500' 
+                                }, 'ativas')
+                            ])
+                        ])
+                    ]),
+
+                    React.createElement('div', { 
+                        key: 'browser', 
+                        className: 'bg-white p-6 rounded-lg shadow-sm' 
+                    }, [
+                        React.createElement('h3', { 
+                            className: 'text-sm text-gray-600 mb-2' 
+                        }, 'Compatibilidade'),
+                        React.createElement('div', { className: 'flex items-center gap-2' }, [
+                            React.createElement('span', { className: 'text-2xl' }, '⚡'),
+                            React.createElement('div', {}, [
+                                React.createElement('p', { 
+                                    className: 'text-lg font-bold' 
+                                }, (stats?.browserSupport || 0) + '%'),
+                                React.createElement('p', { 
+                                    className: 'text-xs text-gray-500' 
+                                }, 'do navegador')
+                            ])
+                        ])
+                    ])
+                ]),
+
+                // Actions Panel
+                React.createElement('div', { 
+                    key: 'actions-panel', 
+                    className: 'bg-white p-6 rounded-lg shadow-sm' 
+                }, [
+                    React.createElement('h3', { 
+                        className: 'text-lg font-semibold mb-4' 
+                    }, '🔄 Sincronização em Tempo Real'),
+                    React.createElement('div', { 
+                        className: 'grid grid-cols-1 lg:grid-cols-2 gap-6' 
+                    }, [
+                        React.createElement('div', { key: 'info' }, [
+                            React.createElement('div', { 
+                                className: 'space-y-3 text-sm' 
+                            }, [
+                                React.createElement('div', { 
+                                    className: 'flex justify-between' 
+                                }, [
+                                    React.createElement('span', {}, 'Última Sincronização:'),
+                                    React.createElement('span', { 
+                                        className: 'text-gray-600' 
+                                    }, stats?.lastSync === 'Nunca' ? 'Nunca' : 
+                                        new Date(stats?.lastSync || '').toLocaleString('pt-BR'))
+                                ]),
+                                React.createElement('div', { 
+                                    className: 'flex justify-between' 
+                                }, [
+                                    React.createElement('span', {}, 'Estratégia:'),
+                                    React.createElement('span', { 
+                                        className: 'px-2 py-1 bg-gray-100 rounded text-xs' 
+                                    }, 'localStorage + BroadcastChannel')
+                                ]),
+                                React.createElement('div', { 
+                                    className: 'flex justify-between' 
+                                }, [
+                                    React.createElement('span', {}, 'Status:'),
+                                    React.createElement('span', { 
+                                        className: 'px-2 py-1 bg-green-100 text-green-800 rounded text-xs' 
+                                    }, 'Ativo')
+                                ])
+                            ])
+                        ]),
+                        React.createElement('div', { 
+                            key: 'buttons', 
+                            className: 'space-y-3' 
+                        }, [
+                            React.createElement('button', {
+                                onClick: handleSync,
+                                disabled: syncing,
+                                className: 'w-full bg-blue-600 text-white p-3 rounded-md hover:bg-blue-700 disabled:opacity-50'
+                            }, (syncing ? '🔄 ' : '🔄 ') + 'Forçar Sincronização'),
+                            React.createElement('button', {
+                                onClick: handleCheck,
+                                disabled: checking,
+                                className: 'w-full border border-gray-300 p-3 rounded-md hover:bg-gray-50 disabled:opacity-50'
+                            }, (checking ? '🔄 ' : '✅ ') + 'Verificar Integridade')
+                        ])
+                    ])
+                ]),
+
+                // Toast
+                toast && React.createElement('div', {
+                    key: 'toast',
+                    className: 'fixed top-4 right-4 bg-white border border-green-200 p-4 rounded-lg shadow-lg'
+                }, [
+                    React.createElement('div', { 
+                        className: 'flex items-center gap-2' 
+                    }, [
+                        React.createElement('span', {}, '✅'),
+                        React.createElement('span', {}, toast)
+                    ])
+                ])
+            ];
+        }
+
         // App Principal
         function App() {
             const [view, setView] = useState('login');
@@ -451,7 +789,7 @@
                 });
             }
 
-            return React.createElement(MonitoringDashboard, { 
+            return React.createElement(AdminPanel, { 
                 onLogout: handleLogout
             });
         }
