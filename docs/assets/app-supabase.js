@@ -4,7 +4,7 @@ console.log('🔗 Supabase configurado: true');
 console.log('⚡ Build timestamp: ' + Date.now());
 console.log('🚀 SEM WEBSOCKET - Apenas Supabase puro!');
 
-// Criar uma página completa que funcione no GitHub Pages
+// Criar uma página completa que funcione no GitHub  Pages
 document.body.innerHTML = `
 <div id="root">
   <div style="max-width: 1200px; margin: 0 auto; padding: 20px; font-family: Arial, sans-serif;">
