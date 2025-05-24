@@ -1,9 +1,9 @@
 // Sistema MoveisBonafe - Versão Corrigida para GitHub Pages
 // Arquivo: docs/assets/app-complete-functional-fixed.js
 
-// Configuração do Supabase
+// Configuração do Supabase - Credenciais corretas
 const SUPABASE_URL = 'https://oozesebwtrbzeelkcmwp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwOTUyMDQsImV4cCI6MjA2MzY3MTIwNH0.YkVlz4IWe6HagJmGPMF4s6NvIHKMGFaVgkWwHn7-Vs0';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDk2MzAsImV4cCI6MjA2MzU4NTYzMH0.yL6FHKbig8Uqn-e4gZzXbuBm3YuB5gmCeowRD96n7OY';
 
 // Cliente Supabase simplificado para HTTP
 class SupabaseClient {
