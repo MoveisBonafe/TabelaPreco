@@ -1039,7 +1039,10 @@ async function savePriceTable() {
   
   systemData.priceSettings[tableName] = percentage;
   
-  closeModal();
+  // Fechar modal específico
+  const modal = document.getElementById('price-table-modal');
+  if (modal) modal.remove();
+  
   renderTab('precos');
   alert(`Tabela "${tableName}" criada com ${percentage}% de acréscimo!`);
 }
@@ -1050,7 +1053,10 @@ async function updatePriceTable(tableName) {
   
   systemData.priceSettings[tableName] = percentage;
   
-  closeModal();
+  // Fechar modal específico
+  const modal = document.getElementById('price-table-modal');
+  if (modal) modal.remove();
+  
   renderTab('precos');
   alert(`Tabela "${tableName}" atualizada para ${percentage}%!`);
 }
