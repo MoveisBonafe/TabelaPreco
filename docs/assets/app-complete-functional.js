@@ -1245,36 +1245,98 @@ window.restoreBackup = function() {
   input.click();
 };
 
-// Função de importação Excel
-window.importExcelProducts = function() {
+// Função de importação Excel FUNCIONAL
+window.importExcelProducts = async function() {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = '.xlsx,.xls';
-  input.onchange = function(e) {
+  input.onchange = async function(e) {
     const file = e.target.files[0];
     if (file) {
-      alert(`Arquivo ${file.name} selecionado! Funcionalidade de importação será implementada em breve.`);
-      console.log('Arquivo Excel selecionado:', file.name);
-      
-      // Aqui será implementada a lógica de leitura do Excel
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          // Usar a biblioteca SheetJS para processar o Excel
-          const data = new Uint8Array(e.target.result);
-          const workbook = XLSX.read(data, {type: 'array'});
-          const sheetName = workbook.SheetNames[0];
-          const worksheet = workbook.Sheets[sheetName];
-          const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          
-          console.log('Dados do Excel processados:', jsonData);
-          alert(`Excel processado com sucesso! ${jsonData.length} produtos encontrados. Importação será implementada na próxima versão.`);
-        } catch (error) {
-          console.error('Erro ao processar Excel:', error);
-          alert('Erro ao processar arquivo Excel!');
-        }
-      };
-      reader.readAsArrayBuffer(file);
+      try {
+        console.log('📊 Processando arquivo Excel:', file.name);
+        
+        const reader = new FileReader();
+        reader.onload = async function(e) {
+          try {
+            // Processar Excel com SheetJS
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, {type: 'array'});
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const jsonData = XLSX.utils.sheet_to_json(worksheet);
+            
+            console.log('📋 Dados do Excel processados:', jsonData);
+            
+            if (jsonData.length === 0) {
+              alert('❌ Nenhum produto encontrado no arquivo Excel!');
+              return;
+            }
+            
+            // Confirmar importação
+            const confirmImport = confirm(`📊 Encontrados ${jsonData.length} produtos no Excel.\n\nDeseja importar todos os produtos para o sistema?`);
+            
+            if (confirmImport) {
+              let successCount = 0;
+              let errorCount = 0;
+              
+              // Processar cada produto do Excel
+              for (const excelRow of jsonData) {
+                try {
+                  // Mapear campos do Excel para o formato do sistema
+                  const productData = {
+                    name: excelRow.Nome || excelRow.name || 'Produto sem nome',
+                    category: excelRow.Categoria || excelRow.category || 'Sem categoria',
+                    base_price: parseFloat(excelRow['Preço Base'] || excelRow.base_price || excelRow.preco || 0),
+                    height: parseInt(excelRow.Altura || excelRow.height || 0),
+                    width: parseInt(excelRow.Largura || excelRow.width || 0),
+                    length: parseInt(excelRow.Comprimento || excelRow.length || 0),
+                    weight: parseFloat(excelRow.Peso || excelRow.weight || 0),
+                    description: excelRow.Descricao || excelRow.description || '',
+                    fixed_price: false,
+                    image_url: excelRow['URL Imagem'] || excelRow.image_url || '',
+                    images: '[]'
+                  };
+                  
+                  // Validar dados básicos
+                  if (productData.name && productData.base_price > 0) {
+                    const result = await supabase.insert('products', productData);
+                    if (result) {
+                      successCount++;
+                      console.log(`✅ Produto importado: ${productData.name}`);
+                    } else {
+                      errorCount++;
+                      console.log(`❌ Erro ao importar: ${productData.name}`);
+                    }
+                  } else {
+                    errorCount++;
+                    console.log(`❌ Dados inválidos para produto: ${productData.name}`);
+                  }
+                } catch (error) {
+                  errorCount++;
+                  console.error('❌ Erro ao processar produto:', error);
+                }
+              }
+              
+              // Recarregar dados e atualizar interface
+              await loadSystemData();
+              renderTab('produtos');
+              
+              // Mostrar resultado da importação
+              alert(`🎉 Importação concluída!\n\n✅ Produtos importados: ${successCount}\n❌ Erros: ${errorCount}\n\nTotal processado: ${jsonData.length}`);
+            }
+            
+          } catch (error) {
+            console.error('❌ Erro ao processar Excel:', error);
+            alert('❌ Erro ao processar arquivo Excel! Verifique se o formato está correto.');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+        
+      } catch (error) {
+        console.error('❌ Erro ao ler arquivo:', error);
+        alert('❌ Erro ao ler arquivo Excel!');
+      }
     }
   };
   input.click();
