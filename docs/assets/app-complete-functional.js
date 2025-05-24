@@ -2517,33 +2517,76 @@ function fixClientPriceTables() {
   }
 }
 
-// Função para ajustar categorias
+// Função para ajustar categorias - LAYOUT HORIZONTAL COMPACTO
 function fixCategoryLayout() {
   if (currentUser && currentUser.role === 'customer') {
     const categoryGrid = document.querySelector('[style*="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"]');
     if (categoryGrid) {
-      categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(100px, 1fr))';
+      // Layout de 3 colunas fixas, responsivo para mobile
+      categoryGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
       categoryGrid.style.gap = '0.75rem';
+      categoryGrid.style.maxWidth = '100%';
+      
+      // Responsivo para mobile
+      if (window.innerWidth < 768) {
+        categoryGrid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+        categoryGrid.style.gap = '0.5rem';
+      }
     }
     
-    // Ajustar padding e tamanho das categorias - COMPACTO
+    // Ajustar cards das categorias - COMPACTOS COMO NA IMAGEM
     const categoryCards = document.querySelectorAll('[onclick*="filterByCategory"]');
     categoryCards.forEach(card => {
-      card.style.padding = '0.5rem';
-      card.style.minHeight = 'auto';
-      card.style.height = 'auto';
+      card.style.padding = '1rem';
+      card.style.minHeight = '120px';
+      card.style.display = 'flex';
+      card.style.flexDirection = 'column';
+      card.style.alignItems = 'center';
+      card.style.justifyContent = 'center';
+      card.style.background = '#f8f9fa';
+      card.style.border = '1px solid #e5e7eb';
+      card.style.borderRadius = '0.5rem';
+      card.style.transition = 'all 0.2s';
       
-      const icon = card.querySelector('div[style*="font-size: 2rem"]');
+      // Hover effect
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+      });
+      
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+        this.style.boxShadow = 'none';
+      });
+      
+      // Ícone maior como na imagem
+      const icon = card.querySelector('div[style*="font-size: 2rem"]') || card.querySelector('div[style*="font-size: 1.5rem"]') || card.querySelector('div[style*="font-size: 1.2rem"]');
       if (icon) {
-        icon.style.fontSize = '1.2rem';
-        icon.style.marginBottom = '0.25rem';
+        icon.style.fontSize = '2.5rem';
+        icon.style.marginBottom = '0.5rem';
+        icon.style.display = 'block';
       }
       
+      // Título compacto
       const title = card.querySelector('h4');
       if (title) {
-        title.style.fontSize = '0.75rem';
+        title.style.fontSize = '0.9rem';
+        title.style.fontWeight = '600';
+        title.style.color = '#1e293b';
         title.style.margin = '0';
+        title.style.textAlign = 'center';
         title.style.lineHeight = '1.2';
+      }
+      
+      // Adicionar contador de produtos se não existir
+      if (!card.querySelector('[style*="color: #6b7280"]')) {
+        const productCount = systemData.products.filter(p => p.category === title.textContent).length;
+        const countDiv = document.createElement('div');
+        countDiv.style.fontSize = '0.75rem';
+        countDiv.style.color = '#6b7280';
+        countDiv.style.marginTop = '0.25rem';
+        countDiv.textContent = `${productCount} produtos`;
+        card.appendChild(countDiv);
       }
     });
   }
