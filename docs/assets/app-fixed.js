@@ -135,7 +135,7 @@ document.body.innerHTML = `
     </div>
   </div>
 </div>
-\`;
+`;
 
 // Função para trocar de abas igual ao Replit
 window.showTab = function(tabName) {
