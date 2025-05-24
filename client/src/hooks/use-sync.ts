@@ -12,6 +12,15 @@ export function useSync() {
   const queryClient = useQueryClient();
 
   const connect = useCallback(() => {
+    // Detectar se está no GitHub Pages
+    const isGitHubPages = window.location.hostname.includes('github.io');
+    
+    if (isGitHubPages) {
+      // No GitHub Pages, usar apenas Supabase (sem WebSocket)
+      console.log('🔄 Sistema configurado para usar Supabase via HTTP (sincronização manual)');
+      return;
+    }
+
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       return;
     }
