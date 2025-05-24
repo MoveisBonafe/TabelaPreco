@@ -1760,6 +1760,10 @@ function renderCatalogView() {
     const basePrice = product.base_price || 0;
     const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
     
+    // Separar tabelas em grupos para melhor exibição mobile
+    const mainTables = ['A Vista', '30', '30/60', '30/60/90'];
+    const additionalTables = Object.keys(priceTable).filter(key => !mainTables.includes(key));
+    
     // Pegar todas as imagens com verificação segura
     let allImages = [];
     try {
