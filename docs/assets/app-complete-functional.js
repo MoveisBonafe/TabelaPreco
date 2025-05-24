@@ -128,23 +128,60 @@ window.login = async function() {
     return;
   }
 
-  console.log('🔍 Verificando credenciais no Supabase...');
+  console.log('🔍 Verificando credenciais...');
   
   try {
+    // Primeiro tenta buscar no Supabase
     const users = await supabase.query('auth_users', `?username=eq.${username}&password_hash=eq.${password}&active=eq.true`);
     
     if (users && users.length > 0) {
       currentUser = users[0];
+      console.log('✅ Login realizado via Supabase:', currentUser.name, 'Tipo:', currentUser.role);
       currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
-      console.log('✅ Login realizado:', currentUser.name);
+      await loadSystemData();
+      renderApp();
+      return;
+    }
+    
+    // Se não encontrou no Supabase, tenta credenciais padrão
+    const defaultUsers = {
+      'admin': { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0 },
+      'vendedor': { username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0 },
+      'cliente': { username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5 }
+    };
+    
+    const defaultUser = defaultUsers[username];
+    if (defaultUser && defaultUser.password === password) {
+      currentUser = defaultUser;
+      console.log('✅ Login realizado com credenciais padrão:', currentUser.name, 'Tipo:', currentUser.role);
+      currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
+      await loadSystemData();
+      renderApp();
+      return;
+    }
+    
+    alert('Usuário ou senha incorretos!');
+    
+  } catch (error) {
+    console.error('Erro no login:', error);
+    
+    // Fallback para credenciais padrão em caso de erro
+    const defaultUsers = {
+      'admin': { username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0 },
+      'vendedor': { username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0 },
+      'cliente': { username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5 }
+    };
+    
+    const defaultUser = defaultUsers[username];
+    if (defaultUser && defaultUser.password === password) {
+      currentUser = defaultUser;
+      console.log('✅ Login realizado com credenciais padrão (fallback):', currentUser.name, 'Tipo:', currentUser.role);
+      currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
       await loadSystemData();
       renderApp();
     } else {
-      alert('Usuário ou senha incorretos!');
+      alert('Erro ao conectar. Verifique sua conexão.');
     }
-  } catch (error) {
-    console.error('Erro no login:', error);
-    alert('Erro ao fazer login. Tente novamente.');
   }
 };
 
