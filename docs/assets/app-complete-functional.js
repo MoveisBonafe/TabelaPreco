@@ -1739,22 +1739,40 @@ function renderCatalogView() {
                   height: 140px !important;
                 }
                 
-                /* Preços super compactos no mobile - TODAS as 5 tabelas */
-                .price-tables {
+                /* Preços super compactos no mobile - TODAS as 5 tabelas visíveis */
+                [style*="grid-template-columns: 1fr 1fr"] {
                   display: grid !important;
                   grid-template-columns: repeat(5, 1fr) !important;
-                  gap: 0.15rem !important;
+                  gap: 0.1rem !important;
                   font-size: 0.6rem !important;
                 }
                 
-                .price-tables > div {
+                [style*="grid-template-columns: 1fr 1fr"] > div {
                   padding: 0.2rem 0.05rem !important;
                   min-width: 0 !important;
                 }
                 
-                .price-tables > div:last-child {
+                [style*="grid-column: 1 / -1"] {
                   grid-column: auto !important;
                   grid-row: auto !important;
+                }
+                
+                /* Força exibição de todos os preços */
+                .price-tables,
+                .price-tables-mobile,
+                [class*="price"] {
+                  display: grid !important;
+                  grid-template-columns: repeat(5, 1fr) !important;
+                  gap: 0.1rem !important;
+                }
+                
+                /* Ajusta texto para caber */
+                [style*="font-size: 0.75rem"] {
+                  font-size: 0.55rem !important;
+                }
+                
+                [style*="font-size: 0.9rem"] {
+                  font-size: 0.65rem !important;
                 }
                 
                 .price-tables [style*="font-size: 0.75rem"] {
