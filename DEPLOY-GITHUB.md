@@ -26,18 +26,29 @@ Seu sistema está configurado para administração completa diretamente no GitHu
 
 ## 📋 Passos para deploy:
 
-### 1. Configurar GitHub Pages:
+### 1. Configurar Secrets do Supabase no GitHub:
+- Vá para Settings > Secrets and variables > Actions no seu repositório
+- Clique em "New repository secret"
+- Adicione os secrets:
+  - **Nome:** `VITE_SUPABASE_URL`
+  - **Valor:** `https://oozesebwtrbzeelkcmwp.supabase.co`
+- Clique em "New repository secret" novamente
+- Adicione:
+  - **Nome:** `VITE_SUPABASE_ANON_KEY`
+  - **Valor:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwNDI4ODAsImV4cCI6MjA2MzYxODg4MH0.B7r5fxV2mCvQ0GQUk-oEEXsPlYdJTHhQ8KH8zwEWMn8`
+
+### 2. Configurar GitHub Pages:
 - Vá para Settings > Pages no seu repositório
 - Source: "GitHub Actions"
 
-### 2. Fazer commit das alterações:
+### 3. Fazer commit das alterações:
 ```bash
 git add .
 git commit -m "Configurar sistema completo para GitHub Pages"
 git push origin main
 ```
 
-### 3. Aguardar deploy automático:
+### 4. Aguardar deploy automático:
 - O GitHub Actions irá fazer o build automaticamente
 - Seu site ficará disponível em: `https://seuusuario.github.io/TabelaPreco/`
 
