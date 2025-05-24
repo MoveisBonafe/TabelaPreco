@@ -2706,53 +2706,37 @@ if (currentUser && currentUser.role === 'customer') {
         div.style.cursor = 'pointer';
         div.onclick = () => showProductModal(index);
         
-        // Corrigir cores das tabelas de preços
-        const priceDivs = div.querySelectorAll('[style*="padding: 0.5rem"]');
-        if (priceDivs.length >= 4) {
-          // À Vista - Verde
-          if (priceDivs[0] && priceDivs[0].innerHTML.includes('À Vista')) {
-            priceDivs[0].style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-            priceDivs[0].style.color = 'white';
-            const title = priceDivs[0].querySelector('div:first-child');
-            if (title) title.style.fontWeight = '700';
-          }
-          // 30 dias - Azul
-          if (priceDivs[1] && priceDivs[1].innerHTML.includes('30 dias')) {
-            priceDivs[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
-            priceDivs[1].style.color = 'white';
-            const title = priceDivs[1].querySelector('div:first-child');
-            if (title) title.style.fontWeight = '700';
-          }
-          // 30/60 - Roxo
-          if (priceDivs[2] && priceDivs[2].innerHTML.includes('30/60')) {
-            priceDivs[2].style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
-            priceDivs[2].style.color = 'white';
-            const title = priceDivs[2].querySelector('div:first-child');
-            if (title) title.style.fontWeight = '700';
-          }
-          // 30/60/90 - Laranja
-          if (priceDivs[3] && priceDivs[3].innerHTML.includes('30/60/90')) {
-            priceDivs[3].style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-            priceDivs[3].style.color = 'white';
-            const title = priceDivs[3].querySelector('div:first-child');
-            if (title) title.style.fontWeight = '700';
-          }
-        }
-        
-        // Adicionar 5ª tabela se não existir
-        const priceContainer = div.querySelector('[style*="grid-template-columns: 1fr 1fr"]');
-        if (priceContainer && !div.innerHTML.includes('30/60/90/120')) {
+        // Aplicar cores corretas e negrito nas tabelas
+        const priceContainer = div.querySelector('[style*="grid-template-columns"]');
+        if (priceContainer) {
           priceContainer.style.gridTemplateColumns = 'repeat(5, 1fr)';
           priceContainer.style.gap = '0.5rem';
           priceContainer.style.fontSize = '0.75rem';
           
-          const newDiv = document.createElement('div');
-          newDiv.style.cssText = 'padding: 0.5rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.375rem; text-align: center; color: white;';
-          newDiv.innerHTML = `
-            <div style="font-weight: 700;">30/60/90/120</div>
-            <div style="font-weight: 600; font-size: 0.9rem;">R$ 000,00</div>
-          `;
-          priceContainer.appendChild(newDiv);
+          // Recriar todas as tabelas com cores corretas
+          const priceData = [
+            { name: 'À Vista', bg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', price: 'A Vista' },
+            { name: '30', bg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)', price: '30' },
+            { name: '30/60', bg: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', price: '30/60' },
+            { name: '30/60/90', bg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', price: '30/60/90' },
+            { name: '30/60/90/120', bg: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)', price: '30/60/90/120' }
+          ];
+          
+          // Obter preços corretos do produto
+          const productData = systemData.products[index];
+          const priceTable = {};
+          Object.keys(systemData.priceSettings).forEach(tableName => {
+            const percentage = systemData.priceSettings[tableName];
+            const multiplier = 1 + (percentage / 100);
+            priceTable[tableName] = productData.base_price * multiplier;
+          });
+          
+          priceContainer.innerHTML = priceData.map(item => `
+            <div style="padding: 0.5rem; background: ${item.bg}; border-radius: 0.375rem; text-align: center; color: white;">
+              <div style="font-weight: 700;">${item.name}</div>
+              <div style="font-weight: 600; font-size: 0.9rem;">R$ ${priceTable[item.price] ? priceTable[item.price].toFixed(2) : '0,00'}</div>
+            </div>
+          `).join('');
         }
       }
     });
