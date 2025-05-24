@@ -294,16 +294,21 @@ async function loadSystemData() {
 function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
   if (isFixedPrice) {
     // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
-    return Object.keys(systemData.priceSettings).reduce((acc, table) => {
-      acc[table] = basePrice; // Mesmo preço para todas as tabelas
-      return acc;
-    }, {});
+    return {
+      'À Vista': basePrice,
+      '30': basePrice,
+      '30/60': basePrice,
+      '30/60/90': basePrice,
+      '30/60/90/120': basePrice
+    };
   } else {
-    return Object.keys(systemData.priceSettings).reduce((acc, table) => {
-      const increment = systemData.priceSettings[table] / 100;
-      acc[table] = basePrice * userMultiplier * (1 + increment);
-      return acc;
-    }, {});
+    return {
+      'À Vista': basePrice * userMultiplier * 1.0,
+      '30': basePrice * userMultiplier * 1.02,
+      '30/60': basePrice * userMultiplier * 1.04,
+      '30/60/90': basePrice * userMultiplier * 1.06,
+      '30/60/90/120': basePrice * userMultiplier * 1.08
+    };
   }
 }
 
