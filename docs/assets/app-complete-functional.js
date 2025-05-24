@@ -1507,7 +1507,7 @@ function renderApp() {
 
 // Renderizar visão do catálogo (para clientes)
 function renderCatalogView() {
-  const userMultiplier = currentUser.price_multiplier || 1.5; // Cliente tem multiplicador padrão de 1.5
+  const userMultiplier = currentUser.price_multiplier || 1.0; // Pega o multiplicador do usuário logado
   
   const productsHtml = systemData.products.map((product, index) => {
     const basePrice = product.base_price || 0;
@@ -2059,7 +2059,7 @@ window.filterProducts = function() {
 
 // Função para atualizar exibição dos produtos
 function updateProductsDisplay(productsToShow) {
-  const userMultiplier = currentUser.price_multiplier || 1.5;
+  const userMultiplier = currentUser.price_multiplier || 1.0;
   
   const productsHtml = productsToShow.map((product, index) => {
     const basePrice = product.base_price || 0;
