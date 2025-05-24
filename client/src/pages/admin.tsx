@@ -11,7 +11,7 @@ import { BackupSystem } from '@/components/admin/backup-system';
 import { MonitoringTab } from '@/components/admin/monitoring-tab';
 import { ProductModal } from '@/components/modals/product-modal';
 import { ProductFormModal } from '@/components/modals/product-form-modal';
-import { useFirebaseProducts } from '@/hooks/use-firebase-products';
+import { useProducts } from '@/hooks/use-products';
 import { useCategories } from '@/hooks/use-categories';
 import { useToast } from '@/components/ui/toast';
 import { auth } from '@/lib/auth';
@@ -22,7 +22,7 @@ interface AdminProps {
 }
 
 export function Admin({ onLogout, onShowPublicView }: AdminProps) {
-  const { products, createProduct, updateProduct, deleteProduct, bulkImportProducts } = useFirebaseProducts();
+  const { products, createProduct, updateProduct, deleteProduct } = useProducts();
   const { categories, createCategory, updateCategory, deleteCategory } = useCategories();
   const { showToast, ToastContainer } = useToast();
   const [activeTab, setActiveTab] = useState('products');
@@ -34,27 +34,30 @@ export function Admin({ onLogout, onShowPublicView }: AdminProps) {
   const canEditProducts = currentUser?.permissions?.canEditProducts ?? false;
   const canEditPrices = currentUser?.permissions?.canEditPrices ?? false;
 
-  const handleCreateProduct = async (productData: InsertProduct) => {
+  const handleCreateProduct = (productData: InsertProduct) => {
     try {
-      await createProduct(productData);
+      createProduct(productData);
+      showToast('Produto criado com sucesso!');
     } catch (error) {
-      console.error('Erro ao criar produto:', error);
+      showToast('Erro ao criar produto', 'error');
     }
   };
 
-  const handleUpdateProduct = async (id: string, productData: Partial<InsertProduct>) => {
+  const handleUpdateProduct = (id: string, productData: Partial<InsertProduct>) => {
     try {
-      await updateProduct(id, productData);
+      updateProduct(id, productData);
+      showToast('Produto atualizado com sucesso!');
     } catch (error) {
-      console.error('Erro ao atualizar produto:', error);
+      showToast('Erro ao atualizar produto', 'error');
     }
   };
 
-  const handleDeleteProduct = async (id: string) => {
+  const handleDeleteProduct = (id: string) => {
     try {
-      await deleteProduct(id);
+      deleteProduct(id);
+      showToast('Produto excluído com sucesso!');
     } catch (error) {
-      console.error('Erro ao excluir produto:', error);
+      showToast('Erro ao excluir produto', 'error');
     }
   };
 

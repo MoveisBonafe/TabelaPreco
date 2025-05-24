@@ -1,28 +1,51 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, doc, onSnapshot, setDoc, updateDoc, deleteDoc, getDocs, query, orderBy } from 'firebase/firestore';
 
-// Configuração do Firebase
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
+// Verificar se as credenciais do Firebase estão disponíveis
+const hasFirebaseConfig = import.meta.env.VITE_FIREBASE_API_KEY && 
+                          import.meta.env.VITE_FIREBASE_PROJECT_ID;
 
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
+let db: any = null;
 
-// Collections
-export const productsCollection = collection(db, 'products');
-export const categoriesCollection = collection(db, 'categories');
+if (hasFirebaseConfig) {
+  try {
+    // Configuração do Firebase
+    const firebaseConfig = {
+      apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+      authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+      projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+      storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+      messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+      appId: import.meta.env.VITE_FIREBASE_APP_ID
+    };
+
+    // Inicializar Firebase
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    console.log('🔥 Firebase configurado com sucesso!');
+  } catch (error) {
+    console.warn('⚠️ Firebase indisponível, usando sistema local:', error);
+  }
+} else {
+  console.log('💾 Usando sistema local (Firebase não configurado)');
+}
+
+export { db };
+
+// Collections (só criar se Firebase disponível)
+const productsCollection = db ? collection(db, 'products') : null;
+const categoriesCollection = db ? collection(db, 'categories') : null;
 
 // Funções para produtos
 export const firebaseProducts = {
   // Ouvir mudanças em tempo real
   onSnapshot: (callback: (products: any[]) => void) => {
+    if (!db || !productsCollection) {
+      console.log('💾 Firebase indisponível, usando sistema local');
+      callback([]);
+      return () => {}; // Retorna função vazia para cleanup
+    }
+    
     const q = query(productsCollection, orderBy('createdAt', 'desc'));
     return onSnapshot(q, (snapshot) => {
       const products = snapshot.docs.map(doc => ({
@@ -35,6 +58,9 @@ export const firebaseProducts = {
 
   // Criar produto
   create: async (product: any) => {
+    if (!db || !productsCollection) {
+      throw new Error('Firebase indisponível');
+    }
     const docRef = doc(productsCollection);
     const productData = {
       ...product,
@@ -48,6 +74,9 @@ export const firebaseProducts = {
 
   // Atualizar produto
   update: async (id: string, updates: any) => {
+    if (!db || !productsCollection) {
+      throw new Error('Firebase indisponível');
+    }
     const docRef = doc(productsCollection, id);
     const updateData = {
       ...updates,
@@ -59,6 +88,9 @@ export const firebaseProducts = {
 
   // Deletar produto
   delete: async (id: string) => {
+    if (!db || !productsCollection) {
+      throw new Error('Firebase indisponível');
+    }
     const docRef = doc(productsCollection, id);
     await deleteDoc(docRef);
     return true;
@@ -66,6 +98,9 @@ export const firebaseProducts = {
 
   // Buscar todos os produtos (uma vez)
   getAll: async () => {
+    if (!db || !productsCollection) {
+      return [];
+    }
     const q = query(productsCollection, orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
