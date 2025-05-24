@@ -267,20 +267,37 @@ window.showAddProductModal = function() {
 
 window.showEditProductModal = function(id) {
   const product = systemData.products.find(p => p.id === id);
-  if (!product) return;
-  
-  // Verificação segura para parse do JSON das imagens
-  try {
-    if (product.images && product.images !== 'null' && product.images !== '') {
-      selectedImages = JSON.parse(product.images);
-    } else {
-      selectedImages = [];
-    }
-  } catch (error) {
-    console.log('Erro ao fazer parse das imagens, usando array vazio:', error);
-    selectedImages = [];
+  if (!product) {
+    console.log('Produto não encontrado:', id);
+    return;
   }
   
+  console.log('Produto encontrado para edição:', product);
+  
+  // Verificação ultra-segura para parse do JSON das imagens
+  selectedImages = [];
+  
+  if (product.images) {
+    if (typeof product.images === 'string') {
+      try {
+        // Verifica se a string não está vazia ou é 'null'
+        const trimmedImages = product.images.trim();
+        if (trimmedImages && trimmedImages !== 'null' && trimmedImages !== '[]' && trimmedImages !== '') {
+          const parsed = JSON.parse(trimmedImages);
+          if (Array.isArray(parsed)) {
+            selectedImages = parsed;
+          }
+        }
+      } catch (error) {
+        console.log('Erro ao fazer parse das imagens, usando array vazio:', error);
+        selectedImages = [];
+      }
+    } else if (Array.isArray(product.images)) {
+      selectedImages = product.images;
+    }
+  }
+  
+  console.log('Imagens carregadas para edição:', selectedImages);
   showProductModal(product);
 };
 
