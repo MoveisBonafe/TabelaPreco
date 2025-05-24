@@ -1502,7 +1502,13 @@ function renderProductsTab() {
   const productsHtml = systemData.products.map(product => {
     const userMultiplier = currentUser.price_multiplier || 1.0;
     const basePrice = product.base_price || 0;
-    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
+    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price) || {
+      'À Vista': 0,
+      '30': 0,
+      '30/60': 0,
+      '30/60/90': 0,
+      '30/60/90/120': 0
+    };
     
     // Pegar primeira imagem com verificação segura
     let firstImage = '';
@@ -1974,18 +1980,13 @@ function renderCatalogView() {
   
   const productsHtml = systemData.products.map((product, index) => {
     const basePrice = product.base_price || 0;
-    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
-    
-    // Debug para identificar o problema
-    if (!priceTable || !priceTable['À Vista']) {
-      console.error('❌ Erro na tabela de preços:', {
-        product: product.name,
-        basePrice,
-        userMultiplier,
-        fixed_price: product.fixed_price,
-        priceTable
-      });
-    }
+    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price) || {
+      'À Vista': 0,
+      '30': 0,
+      '30/60': 0,
+      '30/60/90': 0,
+      '30/60/90/120': 0
+    };
     
     // Pegar todas as imagens com verificação segura
     let allImages = [];

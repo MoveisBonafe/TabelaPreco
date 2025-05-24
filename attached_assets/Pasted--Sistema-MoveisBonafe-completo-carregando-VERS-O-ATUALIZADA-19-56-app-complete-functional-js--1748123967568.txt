@@ -1,0 +1,43 @@
+🎉 Sistema MoveisBonafe completo carregando - VERSÃO ATUALIZADA 19:56...
+app-complete-functional.js:2902 ✅ Sistema MoveisBonafe completo carregado!
+TabelaPreco/:50 ✅ Sistema MoveisBonafe carregado!
+TabelaPreco/:1 [DOM] Password field is not contained in a form: (More info: https://goo.gl/9p2vKq) <input type=​"password" id=​"password" placeholder=​"Digite sua senha" style=​"width:​ 100%;​ padding:​ 0.9rem;​ border:​ 2px solid #e5e7eb;​ border-radius:​ 0.75rem;​ font-size:​ 1rem;​ box-sizing:​ border-box;​ transition:​ border-color 0.2s;​">​
+app-complete-functional.js:213 🔍 Verificando credenciais para: Loja
+app-complete-functional.js:256 ✅ Login Supabase realizado: Loja Tipo: customer
+app-complete-functional.js:272 📊 Carregando dados do sistema...
+app-complete-functional.js:283 ✅ Dados carregados: {produtos: 26, categorias: 7, usuarios: 3}
+app-complete-functional.js:264 Erro no login Supabase: TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at app-complete-functional.js:2051:89
+    at Array.map (<anonymous>)
+    at renderCatalogView (app-complete-functional.js:1975:44)
+    at renderApp (app-complete-functional.js:1958:5)
+    at trySupabaseLogin (app-complete-functional.js:259:7)
+trySupabaseLogin @ app-complete-functional.js:264
+await in trySupabaseLogin
+window.login @ app-complete-functional.js:246
+onclick @ TabelaPreco/:76
+app-complete-functional.js:213 🔍 Verificando credenciais para: Loja
+app-complete-functional.js:256 ✅ Login Supabase realizado: Loja Tipo: customer
+app-complete-functional.js:272 📊 Carregando dados do sistema...
+app-complete-functional.js:283 ✅ Dados carregados: {produtos: 26, categorias: 7, usuarios: 3}
+app-complete-functional.js:264 Erro no login Supabase: TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at app-complete-functional.js:2051:89
+    at Array.map (<anonymous>)
+    at renderCatalogView (app-complete-functional.js:1975:44)
+    at renderApp (app-complete-functional.js:1958:5)
+    at trySupabaseLogin (app-complete-functional.js:259:7)
+trySupabaseLogin @ app-complete-functional.js:264
+await in trySupabaseLogin
+window.login @ app-complete-functional.js:246
+onclick @ TabelaPreco/:76
+app-complete-functional.js:213 🔍 Verificando credenciais para: admin
+app-complete-functional.js:225 ✅ Login realizado: Administrador Tipo: admin
+app-complete-functional.js:272 📊 Carregando dados do sistema...
+app-complete-functional.js:283 ✅ Dados carregados: {produtos: 26, categorias: 7, usuarios: 3}
+app-complete-functional.js:1533 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'toFixed')
+    at app-complete-functional.js:1533:97
+    at Array.map (<anonymous>)
+    at renderProductsTab (app-complete-functional.js:1502:44)
+    at renderAdminView (app-complete-functional.js:2517:38)
+    at renderApp (app-complete-functional.js:1960:5)
+    at app-complete-functional.js:239:7
