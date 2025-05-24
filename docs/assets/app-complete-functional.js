@@ -1579,7 +1579,12 @@ function renderCategoriesTab() {
     <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color};">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 1rem;">
-          <span style="font-size: 2rem;">${category.icon}</span>
+          <div style="width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 0.375rem; background: #f3f4f6;">
+            ${category.icon && category.icon.startsWith('data:image') ? 
+              `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">` 
+              : `<span style="font-size: 2rem;">${category.icon || '📁'}</span>`
+            }
+          </div>
           <div>
             <h3 style="margin: 0; color: #1e293b; font-size: 1.1rem;">${category.name}</h3>
             <p style="margin: 0; color: #6b7280; font-size: 0.875rem;">ID: ${category.id}</p>
