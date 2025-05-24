@@ -1916,7 +1916,7 @@ function renderCatalogView() {
         <div>
           <h3 style="margin: 0 0 1rem; color: #1e293b;">Produtos Disponíveis</h3>
           ${systemData.products.length > 0 ? `
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem;">
               ${productsHtml}
             </div>
             
@@ -1931,9 +1931,9 @@ function renderCatalogView() {
               }
               
               @media (max-width: 768px) {
-                [style*="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))"] {
-                  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)) !important;
-                  gap: 0.75rem !important;
+                [style*="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))"] {
+                  grid-template-columns: 1fr !important;
+                  gap: 1rem !important;
                 }
                 
                 [style*="padding: 1rem"] {
@@ -1946,6 +1946,20 @@ function renderCatalogView() {
                 
                 [style*="font-size: 1.1rem"] {
                   font-size: 1rem !important;
+                }
+                
+                /* Garantir espaço suficiente para tabelas de preços no mobile */
+                [style*="border-top: 1px solid #e5e7eb; padding-top: 1rem"] {
+                  min-height: 150px !important;
+                  padding-top: 1rem !important;
+                }
+                
+                /* Grid de preços com espaço otimizado */
+                [style*="display: grid; grid-template-columns: 1fr 1fr"] {
+                  grid-template-columns: 1fr 1fr !important;
+                  gap: 0.4rem !important;
+                  min-height: 120px !important;
+                  grid-auto-rows: minmax(35px, auto) !important;
                 }
                 
                 /* Preços compactos no tablet */
