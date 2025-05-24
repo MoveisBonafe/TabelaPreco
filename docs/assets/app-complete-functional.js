@@ -932,8 +932,143 @@ window.deleteUser = async function(id) {
 // FUNÇÕES DE PREÇOS
 window.updatePricePercentage = function(table, value) {
   systemData.priceSettings[table] = parseFloat(value);
-  // Aqui você poderia salvar as configurações no banco
   console.log('Percentual atualizado:', table, value + '%');
+  // Recarregar a aba para mostrar os novos valores
+  setTimeout(() => renderTab('precos'), 100);
+};
+
+// Função para adicionar nova tabela de preços
+window.showAddPriceTableModal = function() {
+  showPriceTableModal();
+};
+
+// Função para editar tabela de preços
+window.showEditPriceTableModal = function(tableName) {
+  showPriceTableModal(tableName);
+};
+
+// Modal para gerenciar tabelas de preços
+function showPriceTableModal(tableName = null) {
+  const isEdit = !!tableName;
+  const currentPercentage = isEdit ? systemData.priceSettings[tableName] : 0;
+  
+  const modal = document.createElement('div');
+  modal.id = 'price-table-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.5); display: flex; align-items: center; 
+    justify-content: center; z-index: 1000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background: white; border-radius: 0.5rem; padding: 2rem; max-width: 500px; width: 90%;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0; color: #1e293b;">${isEdit ? 'Editar' : 'Adicionar'} Tabela de Preços</h2>
+        <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+      
+      <form id="price-table-form" style="display: grid; gap: 1rem;">
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome da Tabela</label>
+          <input type="text" id="table-name" value="${tableName || ''}" placeholder="Ex: 30/60/90/120/150" 
+                 style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" 
+                 ${isEdit ? 'readonly' : 'required'}>
+          ${isEdit ? '<p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">O nome não pode ser alterado</p>' : ''}
+        </div>
+        
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Percentual (%)</label>
+          <input type="number" id="table-percentage" value="${currentPercentage}" step="0.1" min="0" max="100" 
+                 placeholder="0.0" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
+          <p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">Percentual de acréscimo sobre o preço base</p>
+        </div>
+        
+        <div style="padding: 1rem; background: #f0f9ff; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">
+          <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Simulação</h4>
+          <div id="price-simulation">
+            <p style="margin: 0; color: #6b7280;">Produto de R$ 100,00 ficará: <strong id="simulated-price">R$ ${(100 * (1 + currentPercentage / 100)).toFixed(2)}</strong></p>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+          <button type="button" onclick="closeModal()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+            ${isEdit ? 'Atualizar' : 'Criar'} Tabela
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Atualizar simulação em tempo real
+  document.getElementById('table-percentage').addEventListener('input', function() {
+    const percentage = parseFloat(this.value) || 0;
+    const simulatedPrice = (100 * (1 + percentage / 100)).toFixed(2);
+    document.getElementById('simulated-price').textContent = `R$ ${simulatedPrice}`;
+  });
+  
+  // Event listener do formulário
+  document.getElementById('price-table-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (isEdit) {
+      updatePriceTable(tableName);
+    } else {
+      savePriceTable();
+    }
+  });
+}
+
+// Salvar nova tabela de preços
+async function savePriceTable() {
+  const tableName = document.getElementById('table-name').value.trim();
+  const percentage = parseFloat(document.getElementById('table-percentage').value) || 0;
+  
+  if (!tableName) {
+    alert('Por favor, digite um nome para a tabela!');
+    return;
+  }
+  
+  if (systemData.priceSettings.hasOwnProperty(tableName)) {
+    alert('Já existe uma tabela com este nome!');
+    return;
+  }
+  
+  systemData.priceSettings[tableName] = percentage;
+  
+  closeModal();
+  renderTab('precos');
+  alert(`Tabela "${tableName}" criada com ${percentage}% de acréscimo!`);
+}
+
+// Atualizar tabela de preços existente
+async function updatePriceTable(tableName) {
+  const percentage = parseFloat(document.getElementById('table-percentage').value) || 0;
+  
+  systemData.priceSettings[tableName] = percentage;
+  
+  closeModal();
+  renderTab('precos');
+  alert(`Tabela "${tableName}" atualizada para ${percentage}%!`);
+}
+
+// Excluir tabela de preços
+window.deletePriceTable = function(tableName) {
+  const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
+  
+  if (isDefault) {
+    alert('Não é possível excluir tabelas padrão do sistema!');
+    return;
+  }
+  
+  if (confirm(`Tem certeza que deseja excluir a tabela "${tableName}"?`)) {
+    delete systemData.priceSettings[tableName];
+    renderTab('precos');
+    alert(`Tabela "${tableName}" excluída com sucesso!`);
+  }
 };
 
 // FUNÇÕES DE EXCEL
@@ -1234,27 +1369,83 @@ function renderCategoriesTab() {
 
 // Renderizar aba de preços
 function renderPricesTab() {
-  // Ordem correta das tabelas com À Vista primeiro
-  const orderedTables = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'];
+  const tablesArray = Object.entries(systemData.priceSettings);
   
   return `
-    <h2 style="margin: 0 0 1.5rem; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Preços</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Tabelas de Preços</h2>
+      <button onclick="showAddPriceTableModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+        + Nova Tabela
+      </button>
+    </div>
     
-    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb;">
-      <h3 style="margin: 0 0 1rem; color: #1e293b;">Configurar Percentuais das Tabelas</h3>
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-        ${orderedTables.map(table => `
-          <div style="padding: 1rem; background: ${table === 'A Vista' ? '#f0fdf4' : '#eff6ff'}; border-radius: 0.5rem; border-left: 4px solid ${table === 'A Vista' ? '#10b981' : '#3b82f6'};">
-            <h4 style="margin: 0 0 0.5rem; color: #1e293b;">${table}</h4>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
-              <input type="number" value="${systemData.priceSettings[table]}" step="0.1" min="0" max="100" 
-                     onchange="updatePricePercentage('${table}', this.value)"
-                     style="width: 60px; padding: 0.25rem; border: 1px solid #d1d5db; border-radius: 0.25rem; text-align: center;">
-              <span style="color: #6b7280;">%</span>
-            </div>
-          </div>
-        `).join('')}
+    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb; margin-bottom: 2rem;">
+      <h3 style="margin: 0 0 1.5rem; color: #1e293b;">Tabelas de Preços Configuradas</h3>
+      
+      <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead style="background: #f9fafb;">
+            <tr>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Nome da Tabela</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Percentual (%)</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Multiplicador</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Exemplo (R$ 100)</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tablesArray.map(([tableName, percentage]) => {
+              const multiplier = (1 + percentage / 100).toFixed(3);
+              const example = (100 * (1 + percentage / 100)).toFixed(2);
+              const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
+              
+              return `
+                <tr style="border-bottom: 1px solid #e5e7eb;">
+                  <td style="padding: 1rem;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                      <span style="font-weight: 600; color: #1e293b;">${tableName}</span>
+                      ${tableName === 'A Vista' ? '<span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Padrão</span>' : ''}
+                    </div>
+                  </td>
+                  <td style="padding: 1rem;">
+                    <input type="number" value="${percentage}" step="0.1" min="0" max="100" 
+                           onchange="updatePricePercentage('${tableName}', this.value)"
+                           style="width: 80px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; text-align: center;">
+                  </td>
+                  <td style="padding: 1rem; color: #6b7280; font-family: monospace;">${multiplier}x</td>
+                  <td style="padding: 1rem; color: #10b981; font-weight: 600;">R$ ${example}</td>
+                  <td style="padding: 1rem;">
+                    <div style="display: flex; gap: 0.5rem;">
+                      <button onclick="showEditPriceTableModal('${tableName}')" 
+                              style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
+                        Editar
+                      </button>
+                      ${!isDefault ? `
+                        <button onclick="deletePriceTable('${tableName}')" 
+                                style="padding: 0.25rem 0.5rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
+                          Excluir
+                        </button>
+                      ` : `
+                        <span style="color: #6b7280; font-size: 0.75rem;">Sistema</span>
+                      `}
+                    </div>
+                  </td>
+                </tr>
+              `;
+            }).join('')}
+          </tbody>
+        </table>
       </div>
+    </div>
+    
+    <div style="background: #f0f9ff; border-radius: 0.5rem; padding: 1.5rem; border: 1px solid #3b82f6;">
+      <h4 style="margin: 0 0 1rem; color: #1e293b;">💡 Como Funciona</h4>
+      <ul style="margin: 0; color: #6b7280; line-height: 1.6;">
+        <li><strong>Percentual:</strong> Define o acréscimo sobre o preço base</li>
+        <li><strong>Multiplicador:</strong> Valor calculado automaticamente (1 + percentual/100)</li>
+        <li><strong>À Vista:</strong> Sempre 0% - é o preço base de referência</li>
+        <li><strong>Exemplo:</strong> Com 2%, um produto de R$ 100 fica R$ 102</li>
+      </ul>
     </div>
   `;
 }
