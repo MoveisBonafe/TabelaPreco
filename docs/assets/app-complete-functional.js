@@ -1530,7 +1530,7 @@ function renderProductsTab() {
           <div style="font-size: 0.875rem; color: #6b7280;">${product.category || 'N/A'}</div>
           ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #f59e0b;">🔒 Preço Fixo</div>' : ''}
         </td>
-        <td style="padding: 1rem; color: #10b981; font-weight: 600;">R$ ${priceTable['A Vista'].toFixed(2)}</td>
+        <td style="padding: 1rem; color: #10b981; font-weight: 600;">R$ ${priceTable['À Vista'].toFixed(2)}</td>
         <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${priceTable['30'].toFixed(2)}</td>
         <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${priceTable['30/60'].toFixed(2)}</td>
         <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${priceTable['30/60/90'].toFixed(2)}</td>
@@ -2048,7 +2048,7 @@ function renderCatalogView() {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
             <div style="padding: 0.5rem; background: #f0fdf4; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #10b981; font-weight: 600;">R$ ${priceTable['A Vista'].toFixed(2)}</div>
+              <div style="color: #10b981; font-weight: 600;">R$ ${priceTable['À Vista'].toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
@@ -2632,7 +2632,7 @@ function updateProductsDisplay(productsToShow) {
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
             <div style="padding: 0.5rem; background: #f0fdf4; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #10b981; font-weight: 600;">R$ ${priceTable['A Vista'].toFixed(2)}</div>
+              <div style="color: #10b981; font-weight: 600;">R$ ${priceTable['À Vista'].toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
@@ -3012,7 +3012,7 @@ window.showProductModal = function(productIndex) {
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
             <div style="padding: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">À Vista</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['A Vista'] ? priceTable['A Vista'].toFixed(2) : (product.base_price || 0).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['À Vista'] ? priceTable['À Vista'].toFixed(2) : (product.base_price || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30 dias</div>
