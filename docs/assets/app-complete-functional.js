@@ -1954,12 +1954,14 @@ function renderCatalogView() {
                   padding-top: 1rem !important;
                 }
                 
-                /* Grid de preços com espaço otimizado */
+                /* Grid de preços com espaço otimizado para mostrar TODAS as tabelas */
                 [style*="display: grid; grid-template-columns: 1fr 1fr"] {
+                  display: grid !important;
                   grid-template-columns: 1fr 1fr !important;
-                  gap: 0.4rem !important;
-                  min-height: 120px !important;
-                  grid-auto-rows: minmax(35px, auto) !important;
+                  gap: 0.3rem !important;
+                  min-height: 180px !important;
+                  grid-auto-rows: minmax(32px, auto) !important;
+                  overflow: visible !important;
                 }
                 
                 /* Preços compactos no tablet */
