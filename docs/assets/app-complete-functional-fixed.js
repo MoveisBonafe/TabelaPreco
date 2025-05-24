@@ -801,9 +801,7 @@ window.goToSlide = function(carouselId, slideIndex) {
   });
 };
 
-// Funções de touch/swipe para mobile
-let touchStartX = 0;
-let touchStartY = 0;
+// Variáveis de touch já declaradas acima
 
 window.handleTouchStart = function(event, carouselId, totalImages) {
   const touch = event.touches[0];
