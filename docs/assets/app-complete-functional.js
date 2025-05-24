@@ -209,7 +209,7 @@ window.login = function() {
   const defaultUsers = {
     'admin': { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0, active: true },
     'vendedor': { id: 2, username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0, active: true },
-    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.5, active: true }
+    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.0, active: true }
   };
   
   const defaultUser = defaultUsers[username];
@@ -991,7 +991,7 @@ function showPriceTableModal(tableName = null) {
         </div>
         
         <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
-          <button type="button" onclick="document.getElementById('price-table-modal').remove()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
+          <button type="button" onclick="closePriceTableModal()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
             Cancelar
           </button>
           <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
@@ -1089,6 +1089,14 @@ window.sortPriceTables = function() {
   }
   
   renderTab('precos');
+};
+
+// Função para fechar modal de tabela de preços
+window.closePriceTableModal = function() {
+  const modal = document.getElementById('price-table-modal');
+  if (modal) {
+    modal.remove();
+  }
 };
 
 // FUNÇÕES DE EXCEL
@@ -1739,7 +1747,14 @@ function renderApp() {
 
 // Renderizar visão do catálogo (para clientes)
 function renderCatalogView() {
-  const userMultiplier = currentUser.price_multiplier || 1.0; // Pega o multiplicador do usuário logado
+  // Buscar o multiplicador atual do usuário na aba de usuários
+  let userMultiplier = 1.0;
+  const userInSystem = systemData.users.find(u => u.username === currentUser.username);
+  if (userInSystem) {
+    userMultiplier = userInSystem.price_multiplier || 1.0;
+  } else {
+    userMultiplier = currentUser.price_multiplier || 1.0;
+  }
   
   const productsHtml = systemData.products.map((product, index) => {
     const basePrice = product.base_price || 0;
@@ -2291,7 +2306,14 @@ window.filterProducts = function() {
 
 // Função para atualizar exibição dos produtos
 function updateProductsDisplay(productsToShow) {
-  const userMultiplier = currentUser.price_multiplier || 1.0;
+  // Buscar o multiplicador atual do usuário na aba de usuários
+  let userMultiplier = 1.0;
+  const userInSystem = systemData.users.find(u => u.username === currentUser.username);
+  if (userInSystem) {
+    userMultiplier = userInSystem.price_multiplier || 1.0;
+  } else {
+    userMultiplier = currentUser.price_multiplier || 1.0;
+  }
   
   const productsHtml = productsToShow.map((product, index) => {
     const basePrice = product.base_price || 0;
