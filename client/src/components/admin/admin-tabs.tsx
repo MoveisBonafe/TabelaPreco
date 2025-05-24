@@ -1,4 +1,4 @@
-import { Box, Tags, DollarSign, FileSpreadsheet, Users, Cloud } from 'lucide-react';
+import { Box, Tags, DollarSign, FileSpreadsheet, Users, Cloud, Activity } from 'lucide-react';
 
 interface AdminTabsProps {
   activeTab: string;
@@ -12,6 +12,7 @@ const tabs = [
   { id: 'users', label: 'Usuários', icon: Users },
   { id: 'excel', label: 'Excel', icon: FileSpreadsheet },
   { id: 'backup', label: 'Backup', icon: Cloud },
+  { id: 'monitoring', label: 'Monitoramento', icon: Activity },
 ];
 
 export function AdminTabs({ activeTab, onTabChange }: AdminTabsProps) {
