@@ -6,6 +6,7 @@ import { ProductGrid } from '@/components/products/product-grid';
 import { ProductList } from '@/components/products/product-list';
 import { ProductCompact } from '@/components/products/product-compact';
 import { ProductModal } from '@/components/modals/product-modal';
+import { CategoryFilter } from '@/components/category-filter';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useProducts } from '@/hooks/use-products';
@@ -57,6 +58,10 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
     setIsProductModalOpen(true);
   };
 
+  const handleCategoryClick = (categoryName: string) => {
+    setSelectedCategory(categoryName);
+  };
+
   const toggleViewMode = () => {
     setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
   };
@@ -70,6 +75,12 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Category Filter */}
+        <CategoryFilter 
+          categories={categories} 
+          onCategoryClick={handleCategoryClick}
+        />
+
         {/* Search and Filters */}
         <div className="mb-8">
           <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
