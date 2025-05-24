@@ -321,7 +321,21 @@ window.handleCategoryFileUpload = function(event) {
   if (file && file.type.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = function(e) {
-      categoryImageData = e.target.result;
+      // Converter imagem para emoji/ícone baseado no tipo
+      const fileName = file.name.toLowerCase();
+      let emoji = '🖼️';
+      
+      if (fileName.includes('sofa') || fileName.includes('sofá')) emoji = '🛋️';
+      else if (fileName.includes('cadeira')) emoji = '🪑';
+      else if (fileName.includes('mesa')) emoji = '🪑';
+      else if (fileName.includes('cama')) emoji = '🛏️';
+      else if (fileName.includes('cozinha')) emoji = '🍽️';
+      else if (fileName.includes('quarto')) emoji = '🛏️';
+      else if (fileName.includes('sala')) emoji = '🛋️';
+      else if (fileName.includes('decoracao') || fileName.includes('decoração')) emoji = '🎨';
+      else if (fileName.includes('escritorio') || fileName.includes('escritório')) emoji = '💼';
+      
+      categoryImageData = emoji;
       updateCategoryImagePreview();
     };
     reader.readAsDataURL(file);
@@ -331,7 +345,7 @@ window.handleCategoryFileUpload = function(event) {
 function updateCategoryImagePreview() {
   const preview = document.getElementById('category-image-preview');
   if (preview && categoryImageData) {
-    preview.innerHTML = `<img src="${categoryImageData}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 0.375rem;">`;
+    preview.innerHTML = `<div style="display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; background: #f3f4f6; border-radius: 0.375rem;"><span style="font-size: 2rem;">${categoryImageData}</span><span style="color: #6b7280;">Ícone selecionado automaticamente</span></div>`;
   }
 }
 
@@ -1148,13 +1162,19 @@ window.importExcel = function() {
             console.log('🔍 Processando linha:', row);
             
             if (row.nome || row.name || row.Nome || row.Name) {
+              const altura = row.altura || row.Altura || row.Height || '';
+              const largura = row.largura || row.Largura || row.Width || '';
+              const comprimento = row.comprimento || row.Comprimento || row.Length || '';
+              
+              // Montar dimensões a partir das colunas separadas
+              const dimensionsArray = [altura, largura, comprimento].filter(d => d);
+              const dimensionsText = dimensionsArray.length > 0 ? dimensionsArray.join(' x ') : '';
+              
               const productData = {
                 name: row.nome || row.name || row.Nome || row.Name || '',
                 category: row.categoria || row.category || row.Categoria || row.Category || 'Geral',
                 price: parseFloat(row.preco || row.price || row.Preco || row.Price || 0),
-                dimensions: row.dimensoes || row.dimensions || row.Dimensões || row.Dimensions || '',
-                weight: row.peso || row.weight || row.Peso || row.Weight || '',
-                description: row.descricao || row.description || row.Descrição || row.Description || '',
+                description: `${row.descricao || row.description || row.Descrição || row.Description || ''}${dimensionsText ? '\nDimensões: ' + dimensionsText : ''}${row.peso || row.weight || row.Peso || row.Weight ? '\nPeso: ' + (row.peso || row.weight || row.Peso || row.Weight) + 'kg' : ''}`.trim(),
                 image: row.imagem || row.image || row.Imagem || row.Image || '',
                 isFixedPrice: (row.precoFixo || row.fixedPrice || row.PrecoFixo || row.FixedPrice || '').toString().toLowerCase() === 'sim'
               };
