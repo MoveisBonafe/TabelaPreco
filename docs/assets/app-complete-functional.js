@@ -2025,6 +2025,9 @@ function renderCatalogView() {
       </footer>
     </div>
   `;
+  
+  // Aplicar correções na tela de clientes
+  applyClientFixes();
 }
 
 // Renderizar visão admin
@@ -2474,6 +2477,78 @@ window.clearFilters = function() {
   updateProductsDisplay(systemData.products);
 };
 
+// Função para corrigir tabelas de preços na tela de clientes
+function fixClientPriceTables() {
+  // Corrigir apenas na tela de clientes
+  if (currentUser && currentUser.role === 'customer') {
+    const priceGrids = document.querySelectorAll('[style*="grid-template-columns: 1fr 1fr"]');
+    priceGrids.forEach(grid => {
+      if (grid.innerHTML.includes('À Vista')) {
+        // Mudar para 5 colunas
+        grid.style.gridTemplateColumns = '1fr 1fr 1fr 1fr 1fr';
+        grid.style.gap = '0.25rem';
+        grid.style.fontSize = '0.75rem';
+        
+        // Adicionar a 5ª tabela se não existir
+        if (!grid.innerHTML.includes('30/60/90/120')) {
+          const lastDiv = grid.lastElementChild;
+          if (lastDiv) {
+            const newDiv = document.createElement('div');
+            newDiv.style.cssText = 'padding: 0.4rem; background: #fef2f2; border-radius: 0.25rem; text-align: center;';
+            newDiv.innerHTML = `
+              <div style="color: #6b7280; font-size: 0.7rem;">30/60/90/120</div>
+              <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">R$ ${(parseFloat(lastDiv.querySelector('div:last-child').textContent.replace('R$ ', '')) * 1.02).toFixed(2)}</div>
+            `;
+            grid.appendChild(newDiv);
+          }
+        }
+        
+        // Ajustar padding e fonte dos elementos existentes
+        const divs = grid.querySelectorAll('div[style*="padding: 0.5rem"]');
+        divs.forEach(div => {
+          div.style.padding = '0.4rem';
+          const labels = div.querySelectorAll('div');
+          if (labels[0]) labels[0].style.fontSize = '0.7rem';
+          if (labels[1]) labels[1].style.fontSize = '0.8rem';
+        });
+      }
+    });
+  }
+}
+
+// Função para ajustar categorias
+function fixCategoryLayout() {
+  if (currentUser && currentUser.role === 'customer') {
+    const categoryGrid = document.querySelector('[style*="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"]');
+    if (categoryGrid) {
+      categoryGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(120px, 1fr))';
+    }
+    
+    // Ajustar padding e tamanho das categorias
+    const categoryCards = document.querySelectorAll('[onclick*="filterByCategory"]');
+    categoryCards.forEach(card => {
+      card.style.padding = '0.75rem';
+      const icon = card.querySelector('div[style*="font-size: 2rem"]');
+      if (icon) icon.style.fontSize = '1.5rem';
+      const title = card.querySelector('h4');
+      if (title) title.style.fontSize = '0.85rem';
+    });
+  }
+}
+
+// Aplicar correções após renderização
+function applyClientFixes() {
+  setTimeout(() => {
+    fixClientPriceTables();
+    fixCategoryLayout();
+  }, 100);
+}
+
 // Inicializar aplicação
 console.log('✅ Sistema MoveisBonafe completo carregado!');
 renderApp();
+
+// Aplicar correções se for cliente
+if (currentUser && currentUser.role === 'customer') {
+  applyClientFixes();
+}
