@@ -2065,11 +2065,14 @@ function renderPromotionsTab() {
   
   const promotionsHtml = promotions.map(promotion => `
     <tr>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+        <div style="padding: 0.5rem 1rem; color: white; border-radius: 0.375rem; text-align: center; background: ${promotion.cor}; min-width: 200px;">
+          <div style="font-weight: 600; font-size: 0.9rem;">${promotion.texto}</div>
+          <div style="font-size: 0.75rem; margin-top: 0.25rem; opacity: 0.9;">${promotion.descricao}</div>
+        </div>
+      </td>
       <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.texto || ''}</td>
       <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.descricao || ''}</td>
-      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
-        <div style="width: 30px; height: 20px; background: ${promotion.cor || '#ff6b6b'}; border-radius: 4px; border: 1px solid #ddd;"></div>
-      </td>
       <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
         <span style="padding: 0.25rem 0.5rem; background: ${promotion.ativo ? '#10b981' : '#ef4444'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
           ${promotion.ativo ? 'Ativa' : 'Inativa'}
@@ -2101,9 +2104,9 @@ function renderPromotionsTab() {
         <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <thead style="background: #f8f9fa;">
             <tr>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Preview</th>
               <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Texto</th>
               <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Descrição</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Cor</th>
               <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Status</th>
               <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Ações</th>
             </tr>
@@ -2120,6 +2123,191 @@ function renderPromotionsTab() {
       </div>
     </div>
   `;
+}
+
+// Modal de promoções
+function showPromotionModal(promotionId = null) {
+  const promotion = promotionId ? systemData.promotions.find(p => p.id === promotionId) : null;
+  const isEdit = !!promotion;
+  
+  const modalHtml = `
+    <div id="promotion-modal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center;">
+      <div style="background: white; border-radius: 1rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <div style="padding: 1.5rem; border-bottom: 1px solid #e5e7eb;">
+          <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600;">🎯 ${isEdit ? 'Editar' : 'Nova'} Promoção</h3>
+        </div>
+        
+        <form id="promotion-form" style="padding: 1.5rem;">
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Texto da Promoção *</label>
+            <input type="text" id="promotion-texto" value="${promotion?.texto || ''}" placeholder="Ex: Desconto Especial de 20%!" 
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem;" required>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Descrição</label>
+            <textarea id="promotion-descricao" placeholder="Ex: Válido até o final do mês" rows="3"
+                      style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; resize: vertical;">${promotion?.descricao || ''}</textarea>
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">🎨 Cor de Fundo</label>
+            <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.5rem; margin-bottom: 0.75rem;">
+              ${['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899', '#6b7280', '#1f2937'].map(color => `
+                <button type="button" onclick="selectPromotionColor('${color}')" 
+                        style="width: 40px; height: 40px; border-radius: 0.5rem; border: 2px solid ${promotion?.cor === color ? '#374151' : '#e5e7eb'}; background: ${color}; cursor: pointer;"></button>
+              `).join('')}
+            </div>
+            <input type="color" id="promotion-cor" value="${promotion?.cor || '#ef4444'}" 
+                   style="width: 50px; height: 40px; border: 1px solid #d1d5db; border-radius: 0.375rem;">
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500;">Preview</label>
+            <div id="promotion-preview" style="padding: 1rem; border-radius: 0.5rem; text-align: center; color: white; font-weight: 500; background: ${promotion?.cor || '#ef4444'};">
+              ${promotion?.texto || 'Texto da promoção aparecerá aqui'}
+            </div>
+          </div>
+          
+          <div style="margin-bottom: 1.5rem; padding: 1rem; background: #fef3c7; border: 1px solid #f59e0b; border-radius: 0.5rem;">
+            <label style="display: flex; align-items: center; cursor: pointer;">
+              <input type="checkbox" id="promotion-ativo" ${promotion?.ativo ? 'checked' : ''} 
+                     style="margin-right: 0.5rem;">
+              <span style="font-weight: 500; color: #92400e;">⭐ Ativar esta promoção</span>
+            </label>
+            <p style="margin: 0.5rem 0 0; font-size: 0.875rem; color: #92400e;">
+              <strong>ℹ️ Importante:</strong> Apenas uma promoção pode estar ativa por vez.
+            </p>
+          </div>
+          
+          <div style="display: flex; gap: 0.75rem;">
+            <button type="submit" style="flex: 1; padding: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer;">
+              ${isEdit ? 'Atualizar' : 'Criar'} Promoção
+            </button>
+            <button type="button" onclick="closePromotionModal()" style="flex: 1; padding: 0.75rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; font-weight: 500; cursor: pointer;">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+  
+  // Event listeners
+  document.getElementById('promotion-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    savePromotion(promotionId);
+  });
+  
+  document.getElementById('promotion-texto').addEventListener('input', updatePromotionPreview);
+  document.getElementById('promotion-cor').addEventListener('input', updatePromotionPreview);
+  
+  updatePromotionPreview();
+}
+
+function selectPromotionColor(color) {
+  document.getElementById('promotion-cor').value = color;
+  updatePromotionPreview();
+}
+
+function updatePromotionPreview() {
+  const texto = document.getElementById('promotion-texto').value || 'Texto da promoção aparecerá aqui';
+  const cor = document.getElementById('promotion-cor').value;
+  const preview = document.getElementById('promotion-preview');
+  
+  preview.textContent = texto;
+  preview.style.background = cor;
+}
+
+function closePromotionModal() {
+  const modal = document.getElementById('promotion-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function savePromotion(promotionId = null) {
+  const texto = document.getElementById('promotion-texto').value.trim();
+  const descricao = document.getElementById('promotion-descricao').value.trim();
+  const cor = document.getElementById('promotion-cor').value;
+  const ativo = document.getElementById('promotion-ativo').checked;
+  
+  if (!texto) {
+    alert('Por favor, preencha o texto da promoção.');
+    return;
+  }
+  
+  const promotionData = {
+    texto,
+    descricao,
+    cor,
+    ativo
+  };
+  
+  try {
+    if (promotionId) {
+      await updatePromotion(promotionId, promotionData);
+    } else {
+      await createPromotion(promotionData);
+    }
+    
+    closePromotionModal();
+    renderApp();
+  } catch (error) {
+    console.error('Erro ao salvar promoção:', error);
+    alert('Erro ao salvar promoção. Tente novamente.');
+  }
+}
+
+async function createPromotion(promotionData) {
+  const id = Date.now().toString();
+  const newPromotion = {
+    id,
+    ...promotionData,
+    createdAt: new Date().toISOString()
+  };
+  
+  // Se a nova promoção está ativa, desativar todas as outras
+  if (promotionData.ativo) {
+    systemData.promotions = systemData.promotions.map(p => ({ ...p, ativo: false }));
+  }
+  
+  systemData.promotions = systemData.promotions || [];
+  systemData.promotions.push(newPromotion);
+  
+  await saveSystemData();
+  console.log('✅ Promoção criada:', newPromotion);
+}
+
+async function updatePromotion(id, promotionData) {
+  const index = systemData.promotions.findIndex(p => p.id === id);
+  if (index === -1) {
+    throw new Error('Promoção não encontrada');
+  }
+  
+  // Se a promoção está sendo ativada, desativar todas as outras
+  if (promotionData.ativo) {
+    systemData.promotions = systemData.promotions.map(p => ({ ...p, ativo: false }));
+  }
+  
+  systemData.promotions[index] = { ...systemData.promotions[index], ...promotionData };
+  
+  await saveSystemData();
+  console.log('✅ Promoção atualizada:', systemData.promotions[index]);
+}
+
+async function deletePromotion(id) {
+  const promotion = systemData.promotions.find(p => p.id === id);
+  if (!promotion) return;
+  
+  if (confirm(`Tem certeza que deseja excluir a promoção "${promotion.texto}"?`)) {
+    systemData.promotions = systemData.promotions.filter(p => p.id !== id);
+    await saveSystemData();
+    renderApp();
+    console.log('✅ Promoção excluída:', id);
+  }
 }
 
 // Renderizar aba de usuários
