@@ -1,9 +1,12 @@
 // MoveisBonafe - Sistema completo e funcional - Atualizado em 24/05/2025 19:56
-console.log('🎉 Sistema MoveisBonafe completo carregando - VERSÃO ATUALIZADA 19:56...');
+console.log(
+  "🎉 Sistema MoveisBonafe completo carregando - VERSÃO ATUALIZADA 19:56...",
+);
 
 // Configuração do Supabase - Credenciais corretas
-const SUPABASE_URL = 'https://oozesebwtrbzeelkcmwp.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDk2MzAsImV4cCI6MjA2MzU4NTYzMH0.yL6FHKbig8Uqn-e4gZzXbuBm3YuB5gmCeowRD96n7OY';
+const SUPABASE_URL = "https://oozesebwtrbzeelkcmwp.supabase.co";
+const SUPABASE_ANON_KEY =
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDk2MzAsImV4cCI6MjA2MzU4NTYzMH0.yL6FHKbig8Uqn-e4gZzXbuBm3YuB5gmCeowRD96n7OY";
 
 // Cliente Supabase
 class SupabaseClient {
@@ -12,33 +15,33 @@ class SupabaseClient {
     this.key = key;
   }
 
-  async query(table, query = '') {
+  async query(table, query = "") {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
-      
+
       const response = await fetch(`${this.url}/rest/v1/${table}${query}`, {
         headers: {
-          'apikey': this.key,
-          'Authorization': `Bearer ${this.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
+          apikey: this.key,
+          Authorization: `Bearer ${this.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
         },
-        signal: controller.signal
+        signal: controller.signal,
       });
-      
+
       clearTimeout(timeoutId);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      
+
       return await response.json();
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.error('⏰ Timeout na consulta Supabase:', table);
+      if (error.name === "AbortError") {
+        console.error("⏰ Timeout na consulta Supabase:", table);
       } else {
-        console.error('❌ Erro na consulta:', error);
+        console.error("❌ Erro na consulta:", error);
       }
       return [];
     }
@@ -47,25 +50,25 @@ class SupabaseClient {
   async insert(table, data) {
     try {
       const response = await fetch(`${this.url}/rest/v1/${table}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'apikey': this.key,
-          'Authorization': `Bearer ${this.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
+          apikey: this.key,
+          Authorization: `Bearer ${this.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
-        console.error('Erro HTTP:', response.status, error);
+        console.error("Erro HTTP:", response.status, error);
         return null;
       }
-      
+
       return await response.json();
     } catch (error) {
-      console.error('Erro ao inserir:', error);
+      console.error("Erro ao inserir:", error);
       return null;
     }
   }
@@ -73,24 +76,24 @@ class SupabaseClient {
   async update(table, id, data) {
     try {
       const response = await fetch(`${this.url}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'apikey': this.key,
-          'Authorization': `Bearer ${this.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
+          apikey: this.key,
+          Authorization: `Bearer ${this.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
         },
-        body: JSON.stringify(data)
+        body: JSON.stringify(data),
       });
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Erro no update:', response.status, errorText);
+        console.error("Erro no update:", response.status, errorText);
         alert(`Erro ao atualizar: ${response.status} - ${errorText}`);
         return null;
       }
       return await response.json();
     } catch (error) {
-      console.error('Erro ao atualizar:', error);
+      console.error("Erro ao atualizar:", error);
       alert(`Erro de conexão: ${error.message}`);
       return null;
     }
@@ -99,26 +102,26 @@ class SupabaseClient {
   async delete(table, id) {
     try {
       const response = await fetch(`${this.url}/rest/v1/${table}?id=eq.${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'apikey': this.key,
-          'Authorization': `Bearer ${this.key}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        }
+          apikey: this.key,
+          Authorization: `Bearer ${this.key}`,
+          "Content-Type": "application/json",
+          Prefer: "return=representation",
+        },
       });
-      
+
       if (!response.ok) {
         const error = await response.text();
-        console.error('Erro HTTP na exclusão:', response.status, error);
+        console.error("Erro HTTP na exclusão:", response.status, error);
         return false;
       }
-      
+
       const result = await response.text();
-      console.log('🗑️ Resultado da exclusão:', result);
+      console.log("🗑️ Resultado da exclusão:", result);
       return true;
     } catch (error) {
-      console.error('Erro ao excluir:', error);
+      console.error("Erro ao excluir:", error);
       return false;
     }
   }
@@ -128,24 +131,52 @@ const supabase = new SupabaseClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Estado da aplicação
 let currentUser = null;
-let currentView = 'login';
+let currentView = "login";
 let systemData = {
   products: [],
   categories: [
-    { id: 1, name: 'Sala de Estar', icon: '🛋️', color: '#3b82f6', image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=200&fit=crop' },
-    { id: 2, name: 'Quarto', icon: '🛏️', color: '#10b981', image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=300&h=200&fit=crop' },
-    { id: 3, name: 'Cozinha', icon: '🍽️', color: '#f59e0b', image: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop' },
-    { id: 4, name: 'Escritório', icon: '💼', color: '#8b5cf6', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop' }
+    {
+      id: 1,
+      name: "Sala de Estar",
+      icon: "🛋️",
+      color: "#3b82f6",
+      image:
+        "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=200&fit=crop",
+    },
+    {
+      id: 2,
+      name: "Quarto",
+      icon: "🛏️",
+      color: "#10b981",
+      image:
+        "https://images.unsplash.com/photo-1631049307264-da0ec9d70304?w=300&h=200&fit=crop",
+    },
+    {
+      id: 3,
+      name: "Cozinha",
+      icon: "🍽️",
+      color: "#f59e0b",
+      image:
+        "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=200&fit=crop",
+    },
+    {
+      id: 4,
+      name: "Escritório",
+      icon: "💼",
+      color: "#8b5cf6",
+      image:
+        "https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop",
+    },
   ],
   users: [],
   promotions: [],
   priceSettings: {
-    'A Vista': 0,
-    '30': 2,
-    '30/60': 4,
-    '30/60/90': 6,
-    '30/60/90/120': 8
-  }
+    "A Vista": 0,
+    30: 2,
+    "30/60": 4,
+    "30/60/90": 6,
+    "30/60/90/120": 8,
+  },
 };
 
 // Função para garantir integridade dos dados
@@ -159,13 +190,16 @@ function ensureDataIntegrity() {
   if (!systemData.users || !Array.isArray(systemData.users)) {
     systemData.users = [];
   }
-  if (!systemData.priceSettings || typeof systemData.priceSettings !== 'object') {
+  if (
+    !systemData.priceSettings ||
+    typeof systemData.priceSettings !== "object"
+  ) {
     systemData.priceSettings = {
-      'A Vista': 0,
-      '30': 2,
-      '30/60': 4,
-      '30/60/90': 6,
-      '30/60/90/120': 8
+      "A Vista": 0,
+      30: 2,
+      "30/60": 4,
+      "30/60/90": 6,
+      "30/60/90/120": 8,
     };
   }
 }
@@ -177,99 +211,103 @@ let selectedImages = [];
 let carouselStates = {};
 let touchStartX = 0;
 let touchStartY = 0;
-let categoryImageData = '';
+let categoryImageData = "";
 
 // Funções do carrossel de imagens
-window.nextImage = function(carouselId, totalImages) {
+window.nextImage = function (carouselId, totalImages) {
   if (!carouselStates[carouselId]) carouselStates[carouselId] = 0;
-  
+
   carouselStates[carouselId] = (carouselStates[carouselId] + 1) % totalImages;
   updateCarousel(carouselId, totalImages);
 };
 
-window.previousImage = function(carouselId, totalImages) {
+window.previousImage = function (carouselId, totalImages) {
   if (!carouselStates[carouselId]) carouselStates[carouselId] = 0;
-  
-  carouselStates[carouselId] = carouselStates[carouselId] === 0 ? totalImages - 1 : carouselStates[carouselId] - 1;
+
+  carouselStates[carouselId] =
+    carouselStates[carouselId] === 0
+      ? totalImages - 1
+      : carouselStates[carouselId] - 1;
   updateCarousel(carouselId, totalImages);
 };
 
 function updateCarousel(carouselId, totalImages) {
   const carousel = document.getElementById(carouselId);
   const currentIndex = carouselStates[carouselId] || 0;
-  
+
   if (carousel) {
     const translateX = -(currentIndex * (100 / totalImages));
     carousel.style.transform = `translateX(${translateX}%)`;
-    
+
     // Atualizar indicadores
     for (let i = 0; i < totalImages; i++) {
       const dot = document.getElementById(`dot-${carouselId}-${i}`);
       if (dot) {
-        dot.style.background = i === currentIndex ? 'white' : 'rgba(255,255,255,0.5)';
+        dot.style.background =
+          i === currentIndex ? "white" : "rgba(255,255,255,0.5)";
       }
     }
   }
 }
 
 // Funções de touch para mobile
-window.handleTouchStart = function(event, carouselId, totalImages) {
+window.handleTouchStart = function (event, carouselId, totalImages) {
   event.preventDefault();
   const touch = event.touches[0];
   touchStartX = touch.clientX;
   touchStartY = touch.clientY;
-  console.log('Touch start:', touchStartX);
+  console.log("Touch start:", touchStartX);
 };
 
-window.handleTouchMove = function(event) {
+window.handleTouchMove = function (event) {
   event.preventDefault();
 };
 
-window.handleTouchEnd = function(event, carouselId, totalImages) {
+window.handleTouchEnd = function (event, carouselId, totalImages) {
   event.preventDefault();
   const touch = event.changedTouches[0];
   const touchEndX = touch.clientX;
   const touchEndY = touch.clientY;
-  
+
   const deltaX = touchEndX - touchStartX;
   const deltaY = touchEndY - touchStartY;
-  
-  console.log('Touch end - deltaX:', deltaX, 'deltaY:', deltaY);
-  
+
+  console.log("Touch end - deltaX:", deltaX, "deltaY:", deltaY);
+
   // Verifica se é um swipe horizontal com movimento mínimo de 30px
   if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
     if (deltaX > 0) {
-      console.log('Swipe direita - imagem anterior');
+      console.log("Swipe direita - imagem anterior");
       previousImage(carouselId, totalImages);
     } else {
-      console.log('Swipe esquerda - próxima imagem');
+      console.log("Swipe esquerda - próxima imagem");
       nextImage(carouselId, totalImages);
     }
   }
 };
 
 // Função para alternar visibilidade da senha
-window.togglePasswordVisibility = function() {
-  const passwordInput = document.getElementById('password');
-  const toggleButton = document.getElementById('togglePassword');
-  
-  if (passwordInput.type === 'password') {
-    passwordInput.type = 'text';
-    toggleButton.textContent = '🔒';
+window.togglePasswordVisibility = function () {
+  const passwordInput = document.getElementById("password");
+  const toggleButton = document.getElementById("togglePassword");
+
+  if (passwordInput.type === "password") {
+    passwordInput.type = "text";
+    toggleButton.textContent = "🔒";
   } else {
-    passwordInput.type = 'password';
-    toggleButton.textContent = '👁️';
+    passwordInput.type = "password";
+    toggleButton.textContent = "👁️";
   }
 };
 
 // Função de login
-window.login = function() {
-  const username = document.getElementById('username').value;
-  const password = document.getElementById('password').value;
+window.login = function () {
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
   const loginButton = document.querySelector('button[onclick="login()"]');
-  
+
   if (!username || !password) {
-    alert('Por favor, preencha usuário e senha!');
+    alert("Por favor, preencha usuário e senha!");
     return;
   }
 
@@ -282,11 +320,11 @@ window.login = function() {
         Entrando...
       </div>
     `;
-    
+
     // Adicionar CSS da animação se não existir
-    if (!document.getElementById('loading-styles')) {
-      const style = document.createElement('style');
-      style.id = 'loading-styles';
+    if (!document.getElementById("loading-styles")) {
+      const style = document.createElement("style");
+      style.id = "loading-styles";
       style.textContent = `
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -296,38 +334,69 @@ window.login = function() {
     }
   }
 
-  console.log('🔍 Verificando credenciais para:', username);
-  
+  console.log("🔍 Verificando credenciais para:", username);
+
   // Credenciais padrão sempre disponíveis
   const defaultUsers = {
-    'admin': { id: 1, username: 'admin', password: 'admin123', role: 'admin', name: 'Administrador', price_multiplier: 1.0, active: true },
-    'vendedor': { id: 2, username: 'vendedor', password: 'venda123', role: 'seller', name: 'Vendedor', price_multiplier: 1.0, active: true },
-    'cliente': { id: 3, username: 'cliente', password: 'cliente123', role: 'customer', name: 'Cliente Teste', price_multiplier: 1.0, active: true }
+    admin: {
+      id: 1,
+      username: "admin",
+      password: "admin123",
+      role: "admin",
+      name: "Administrador",
+      price_multiplier: 1.0,
+      active: true,
+    },
+    vendedor: {
+      id: 2,
+      username: "vendedor",
+      password: "venda123",
+      role: "seller",
+      name: "Vendedor",
+      price_multiplier: 1.0,
+      active: true,
+    },
+    cliente: {
+      id: 3,
+      username: "cliente",
+      password: "cliente123",
+      role: "customer",
+      name: "Cliente Teste",
+      price_multiplier: 1.0,
+      active: true,
+    },
   };
-  
+
   const defaultUser = defaultUsers[username];
   if (defaultUser && defaultUser.password === password) {
     currentUser = defaultUser;
-    console.log('✅ Login realizado:', currentUser.name, 'Tipo:', currentUser.role);
-    
+    console.log(
+      "✅ Login realizado:",
+      currentUser.name,
+      "Tipo:",
+      currentUser.role,
+    );
+
     // Define a view baseada no tipo de usuário
-    if (currentUser.role === 'customer') {
-      currentView = 'catalog';
+    if (currentUser.role === "customer") {
+      currentView = "catalog";
     } else {
-      currentView = 'admin';
+      currentView = "admin";
     }
-    
+
     // Carrega dados e renderiza
-    loadSystemData().then(() => {
-      renderApp();
-    }).catch(() => {
-      // Se falhar, renderiza mesmo assim
-      renderApp();
-    });
-    
+    loadSystemData()
+      .then(() => {
+        renderApp();
+      })
+      .catch(() => {
+        // Se falhar, renderiza mesmo assim
+        renderApp();
+      });
+
     return;
   }
-  
+
   // Se não é usuário padrão, tenta Supabase (assíncrono em background)
   trySupabaseLogin(username, password);
 };
@@ -337,136 +406,162 @@ function restoreLoginButton() {
   const loginButton = document.querySelector('button[onclick="login()"]');
   if (loginButton) {
     loginButton.disabled = false;
-    loginButton.innerHTML = 'Entrar';
+    loginButton.innerHTML = "Entrar";
   }
 }
 
 // Função auxiliar para tentar login no Supabase
 async function trySupabaseLogin(username, password) {
   try {
-    const users = await supabase.query('auth_users', `?username=eq.${username}&password_hash=eq.${password}&active=eq.true`);
-    
+    const users = await supabase.query(
+      "auth_users",
+      `?username=eq.${username}&password_hash=eq.${password}&active=eq.true`,
+    );
+
     if (users && users.length > 0) {
       currentUser = users[0];
-      console.log('✅ Login Supabase realizado:', currentUser.name, 'Tipo:', currentUser.role);
-      currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
+      console.log(
+        "✅ Login Supabase realizado:",
+        currentUser.name,
+        "Tipo:",
+        currentUser.role,
+      );
+      currentView = currentUser.role === "customer" ? "catalog" : "admin";
       await loadSystemData();
       renderApp();
     } else {
       restoreLoginButton();
-      alert('Usuário ou senha incorretos!');
+      alert("Usuário ou senha incorretos!");
     }
   } catch (error) {
-    console.error('Erro no login Supabase:', error);
+    console.error("Erro no login Supabase:", error);
     restoreLoginButton();
-    alert('Usuário ou senha incorretos!');
+    alert("Usuário ou senha incorretos!");
   }
 }
 
 // Carregar dados do sistema com retry
 async function loadSystemData(maxRetries = 3) {
   let attempt = 1;
-  
+
   while (attempt <= maxRetries) {
     try {
-      console.log(`📊 Carregando dados do sistema... (tentativa ${attempt}/${maxRetries})`);
-      
+      console.log(
+        `📊 Carregando dados do sistema... (tentativa ${attempt}/${maxRetries})`,
+      );
+
       // Carregar dados com timeout menor para cada tabela
-      const [products, categories, users, promotions] = await Promise.allSettled([
-        supabase.query('products'),
-        supabase.query('categories'), 
-        supabase.query('auth_users'),
-        supabase.query('promocoes')
-      ]);
-      
+      const [products, categories, users, promotions] =
+        await Promise.allSettled([
+          supabase.query("products"),
+          supabase.query("categories"),
+          supabase.query("auth_users"),
+          supabase.query("promocoes"),
+        ]);
+
       // Processar resultados
-      if (products.status === 'fulfilled' && Array.isArray(products.value)) {
+      if (products.status === "fulfilled" && Array.isArray(products.value)) {
         systemData.products = products.value;
       } else {
         systemData.products = [];
       }
-      
-      if (categories.status === 'fulfilled' && Array.isArray(categories.value) && categories.value.length > 0) {
+
+      if (
+        categories.status === "fulfilled" &&
+        Array.isArray(categories.value) &&
+        categories.value.length > 0
+      ) {
         systemData.categories = categories.value;
       }
-      
-      if (users.status === 'fulfilled' && Array.isArray(users.value)) {
+
+      if (users.status === "fulfilled" && Array.isArray(users.value)) {
         systemData.users = users.value;
       }
-      
-      if (promotions.status === 'fulfilled' && Array.isArray(promotions.value)) {
+
+      if (
+        promotions.status === "fulfilled" &&
+        Array.isArray(promotions.value)
+      ) {
         systemData.promotions = promotions.value;
       } else {
         systemData.promotions = [];
       }
-      
+
       // Garantir integridade dos dados
       ensureDataIntegrity();
-      
-      console.log('✅ Dados carregados do Supabase:', {
+
+      console.log("✅ Dados carregados do Supabase:", {
         produtos: systemData.products.length,
         categorias: systemData.categories.length,
         usuarios: systemData.users.length,
-        promocoes: systemData.promotions.length
+        promocoes: systemData.promotions.length,
       });
-      
+
       return; // Sucesso, sair do loop
-      
     } catch (error) {
       console.error(`❌ Erro ao carregar dados (tentativa ${attempt}):`, error);
-      
+
       if (attempt === maxRetries) {
-        console.error('❌ Todas as tentativas falharam, usando dados padrão');
+        console.error("❌ Todas as tentativas falharam, usando dados padrão");
         ensureDataIntegrity();
       } else {
         // Aguardar antes de tentar novamente
-        await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+        await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
       }
-      
+
       attempt++;
     }
   }
 }
 
 // Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
-function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
+function calculatePriceTable(
+  basePrice,
+  userMultiplier = 1,
+  isFixedPrice = false,
+) {
   // Garantir que isFixedPrice seja boolean - CORRIGIDO DEFINITIVO
-  const fixedPrice = isFixedPrice === true || isFixedPrice === 1 || isFixedPrice === '1' || isFixedPrice === 'true' || isFixedPrice === 'sim';
-  
+  const fixedPrice =
+    isFixedPrice === true ||
+    isFixedPrice === 1 ||
+    isFixedPrice === "1" ||
+    isFixedPrice === "true" ||
+    isFixedPrice === "sim";
+
   if (fixedPrice) {
     // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
     return {
-      'À Vista': basePrice,
-      '30': basePrice,
-      '30/60': basePrice,
-      '30/60/90': basePrice,
-      '30/60/90/120': basePrice
+      "À Vista": basePrice,
+      30: basePrice,
+      "30/60": basePrice,
+      "30/60/90": basePrice,
+      "30/60/90/120": basePrice,
     };
   } else {
     return {
-      'À Vista': basePrice * userMultiplier * 1.0,
-      '30': basePrice * userMultiplier * 1.02,
-      '30/60': basePrice * userMultiplier * 1.04,
-      '30/60/90': basePrice * userMultiplier * 1.06,
-      '30/60/90/120': basePrice * userMultiplier * 1.08
+      "À Vista": basePrice * userMultiplier * 1.0,
+      30: basePrice * userMultiplier * 1.02,
+      "30/60": basePrice * userMultiplier * 1.04,
+      "30/60/90": basePrice * userMultiplier * 1.06,
+      "30/60/90/120": basePrice * userMultiplier * 1.08,
     };
   }
 }
 
 // Funções para upload de imagem de categoria
-window.addCategoryImageUrl = function() {
-  const url = document.getElementById('category-image').value.trim();
+window.addCategoryImageUrl = function () {
+  const url = document.getElementById("category-image").value.trim();
   if (url) {
     categoryImageData = url;
     updateCategoryImagePreview();
   }
 };
 
-window.handleCategoryFileUpload = function(event) {
+window.handleCategoryFileUpload = function (event) {
   const file = event.target.files[0];
-  if (file && file.type.startsWith('image/')) {
+  if (file && file.type.startsWith("image/")) {
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = function (e) {
       categoryImageData = e.target.result;
       updateCategoryImagePreview();
     };
@@ -475,106 +570,122 @@ window.handleCategoryFileUpload = function(event) {
 };
 
 function updateCategoryImagePreview() {
-  const preview = document.getElementById('category-image-preview');
+  const preview = document.getElementById("category-image-preview");
   if (preview && categoryImageData) {
     preview.innerHTML = `<img src="${categoryImageData}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 0.375rem;">`;
   }
 }
 
 // Função de logout
-window.logout = function() {
+window.logout = function () {
   currentUser = null;
-  currentView = 'login';
+  currentView = "login";
   renderApp();
 };
 
 // Função para trocar abas
-window.showTab = function(tabName) {
-  const allTabs = ['produtos', 'categorias', 'precos', 'usuarios', 'promocoes', 'excel', 'backup', 'monitoramento'];
-  allTabs.forEach(tab => {
-    const content = document.getElementById('content-' + tab);
-    const button = document.getElementById('tab-' + tab);
-    
-    if (content) content.style.display = 'none';
+window.showTab = function (tabName) {
+  const allTabs = [
+    "produtos",
+    "categorias",
+    "precos",
+    "usuarios",
+    "excel",
+    "backup",
+    "monitoramento",
+  ];
+  allTabs.forEach((tab) => {
+    const content = document.getElementById("content-" + tab);
+    const button = document.getElementById("tab-" + tab);
+
+    if (content) content.style.display = "none";
     if (button) {
-      button.style.borderBottomColor = 'transparent';
-      button.style.color = '#6b7280';
+      button.style.borderBottomColor = "transparent";
+      button.style.color = "#6b7280";
     }
   });
-  
-  const activeContent = document.getElementById('content-' + tabName);
-  const activeButton = document.getElementById('tab-' + tabName);
-  
-  if (activeContent) activeContent.style.display = 'block';
+
+  const activeContent = document.getElementById("content-" + tabName);
+  const activeButton = document.getElementById("tab-" + tabName);
+
+  if (activeContent) activeContent.style.display = "block";
   if (activeButton) {
-    activeButton.style.borderBottomColor = '#3b82f6';
-    activeButton.style.color = '#3b82f6';
+    activeButton.style.borderBottomColor = "#3b82f6";
+    activeButton.style.color = "#3b82f6";
   }
-  
+
   renderTab(tabName);
 };
 
 // FUNÇÕES DE PRODUTOS
-window.showAddProductModal = function() {
+window.showAddProductModal = function () {
   selectedImages = [];
   showProductModal();
 };
 
-window.showEditProductModal = function(id) {
-  const product = systemData.products.find(p => p.id === id);
+window.showEditProductModal = function (id) {
+  const product = systemData.products.find((p) => p.id === id);
   if (!product) {
-    console.log('Produto não encontrado:', id);
+    console.log("Produto não encontrado:", id);
     return;
   }
-  
-  console.log('Produto encontrado para edição:', product);
-  console.log('Dimensões do produto para edição:', {
+
+  console.log("Produto encontrado para edição:", product);
+  console.log("Dimensões do produto para edição:", {
     height: product.height,
-    width: product.width, 
-    length: product.length
+    width: product.width,
+    length: product.length,
   });
-  
+
   // Verificação ultra-segura para parse do JSON das imagens
   selectedImages = [];
-  
+
   if (product.images) {
-    if (typeof product.images === 'string') {
+    if (typeof product.images === "string") {
       try {
         // Verifica se a string não está vazia ou é 'null'
         const trimmedImages = product.images.trim();
-        if (trimmedImages && trimmedImages !== 'null' && trimmedImages !== '[]' && trimmedImages !== '') {
+        if (
+          trimmedImages &&
+          trimmedImages !== "null" &&
+          trimmedImages !== "[]" &&
+          trimmedImages !== ""
+        ) {
           const parsed = JSON.parse(trimmedImages);
           if (Array.isArray(parsed)) {
             selectedImages = parsed;
           }
         }
       } catch (error) {
-        console.log('Erro ao fazer parse das imagens, usando array vazio:', error);
+        console.log(
+          "Erro ao fazer parse das imagens, usando array vazio:",
+          error,
+        );
         selectedImages = [];
       }
     } else if (Array.isArray(product.images)) {
       selectedImages = product.images;
     }
   }
-  
-  console.log('Imagens carregadas para edição:', selectedImages);
+
+  console.log("Imagens carregadas para edição:", selectedImages);
   showProductModal(product);
 };
 
 function showProductModal(product = null) {
   const isEdit = !!product;
-  const modal = document.createElement('div');
-  modal.id = 'product-modal';
+  const modal = document.createElement("div");
+  modal.id = "product-modal";
   modal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.5); display: flex; align-items: center; 
     justify-content: center; z-index: 1000;
   `;
-  
+
   modal.innerHTML = `
     <div style="background: white; border-radius: 0.5rem; padding: 2rem; max-width: 700px; width: 90%; max-height: 90vh; overflow-y: auto;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0; color: #1e293b;">${isEdit ? 'Editar' : 'Adicionar'} Produto</h2>
+        <h2 style="margin: 0; color: #1e293b;">${isEdit ? "Editar" : "Adicionar"} Produto</h2>
         <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
       </div>
       
@@ -582,50 +693,50 @@ function showProductModal(product = null) {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome do Produto</label>
-            <input type="text" id="product-name" value="${product?.name || ''}" placeholder="Digite o nome do produto" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
+            <input type="text" id="product-name" value="${product?.name || ""}" placeholder="Digite o nome do produto" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
           </div>
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Categoria</label>
             <select id="product-category" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
               <option value="">Selecione uma categoria</option>
-              ${systemData.categories.map(cat => `<option value="${cat.id}" ${product?.category === cat.name ? 'selected' : ''}>${cat.name}</option>`).join('')}
+              ${systemData.categories.map((cat) => `<option value="${cat.id}" ${product?.category === cat.name ? "selected" : ""}>${cat.name}</option>`).join("")}
             </select>
           </div>
         </div>
         
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Descrição</label>
-          <textarea id="product-description" placeholder="Digite a descrição do produto" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; height: 80px; resize: vertical; box-sizing: border-box;">${product?.description || ''}</textarea>
+          <textarea id="product-description" placeholder="Digite a descrição do produto" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; height: 80px; resize: vertical; box-sizing: border-box;">${product?.description || ""}</textarea>
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Preço À Vista (R$)</label>
-            <input type="number" id="product-price" value="${product?.base_price || ''}" placeholder="0" step="0.01" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
+            <input type="number" id="product-price" value="${product?.base_price || ""}" placeholder="0" step="0.01" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
           </div>
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Peso (kg)</label>
-            <input type="number" id="product-weight" value="${product?.weight || ''}" placeholder="0" step="0.01" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="number" id="product-weight" value="${product?.weight || ""}" placeholder="0" step="0.01" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
           </div>
         </div>
         
         <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Altura (cm)</label>
-            <input type="number" id="product-height" value="${product?.height || product?.altura || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="number" id="product-height" value="${product?.height || product?.altura || ""}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
           </div>
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Largura (cm)</label>
-            <input type="number" id="product-width" value="${product?.width || product?.largura || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="number" id="product-width" value="${product?.width || product?.largura || ""}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
           </div>
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Comprimento (cm)</label>
-            <input type="number" id="product-length" value="${product?.length || product?.comprimento || ''}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="number" id="product-length" value="${product?.length || product?.comprimento || ""}" placeholder="0" step="0.1" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
           </div>
         </div>
         
         <div style="display: flex; align-items: center; gap: 0.5rem; padding: 1rem; background: #f0f9ff; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">
-          <input type="checkbox" id="product-fixed-price" ${product?.fixed_price ? 'checked' : ''} style="margin: 0;">
+          <input type="checkbox" id="product-fixed-price" ${product?.fixed_price ? "checked" : ""} style="margin: 0;">
           <label for="product-fixed-price" style="margin: 0; color: #1f2937; font-weight: 500;">
             🔒 Preço Fixo - Este produto não será afetado pelo multiplicador de preços dos usuários
           </label>
@@ -641,12 +752,16 @@ function showProductModal(product = null) {
           </div>
           <input type="file" id="product-image-file" accept="image/*" multiple style="margin-bottom: 1rem;">
           <div id="images-preview" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.5rem;">
-            ${selectedImages.map((img, index) => `
+            ${selectedImages
+              .map(
+                (img, index) => `
               <div style="position: relative;">
                 <img src="${img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 0.375rem;">
                 <button type="button" onclick="removeImage(${index})" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px;">×</button>
               </div>
-            `).join('')}
+            `,
+              )
+              .join("")}
           </div>
         </div>
         
@@ -655,64 +770,72 @@ function showProductModal(product = null) {
             Cancelar
           </button>
           <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-            ${isEdit ? 'Atualizar' : 'Salvar'} Produto
+            ${isEdit ? "Atualizar" : "Salvar"} Produto
           </button>
         </div>
       </form>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
-  
+
   // Event listeners
-  document.getElementById('product-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    if (isEdit) {
-      await updateProduct(product.id);
-    } else {
-      await saveProduct();
-    }
-  });
-  
-  document.getElementById('product-image-file').addEventListener('change', handleFileUpload);
+  document
+    .getElementById("product-form")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (isEdit) {
+        await updateProduct(product.id);
+      } else {
+        await saveProduct();
+      }
+    });
+
+  document
+    .getElementById("product-image-file")
+    .addEventListener("change", handleFileUpload);
 }
 
 // Adicionar imagem por URL
-window.addImageUrl = function() {
-  const url = document.getElementById('product-image-url').value.trim();
+window.addImageUrl = function () {
+  const url = document.getElementById("product-image-url").value.trim();
   if (url) {
     selectedImages.push(url);
-    document.getElementById('product-image-url').value = '';
+    document.getElementById("product-image-url").value = "";
     updateImagesPreview();
   }
 };
 
 // Remover imagem
-window.removeImage = function(index) {
+window.removeImage = function (index) {
   selectedImages.splice(index, 1);
   updateImagesPreview();
 };
 
 // Atualizar preview das imagens
 function updateImagesPreview() {
-  const preview = document.getElementById('images-preview');
+  const preview = document.getElementById("images-preview");
   if (preview) {
-    preview.innerHTML = selectedImages.map((img, index) => `
+    preview.innerHTML = selectedImages
+      .map(
+        (img, index) => `
       <div style="position: relative;">
         <img src="${img}" style="width: 100%; height: 80px; object-fit: cover; border-radius: 0.375rem;">
         <button type="button" onclick="removeImage(${index})" style="position: absolute; top: -5px; right: -5px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 12px;">×</button>
       </div>
-    `).join('');
+    `,
+      )
+      .join("");
   }
 }
 
 // Lidar com upload de arquivos
 function handleFileUpload(event) {
   const files = Array.from(event.target.files);
-  files.forEach(file => {
-    if (file.type.startsWith('image/')) {
+  files.forEach((file) => {
+    if (file.type.startsWith("image/")) {
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         selectedImages.push(e.target.result);
         updateImagesPreview();
       };
@@ -723,14 +846,18 @@ function handleFileUpload(event) {
 
 // Salvar produto
 async function saveProduct() {
-  const categoryId = parseInt(document.getElementById('product-category').value);
-  const categoryName = systemData.categories.find(c => c.id === categoryId)?.name || 'Categoria';
-  const basePrice = parseFloat(document.getElementById('product-price').value) || 0;
-  
+  const categoryId = parseInt(
+    document.getElementById("product-category").value,
+  );
+  const categoryName =
+    systemData.categories.find((c) => c.id === categoryId)?.name || "Categoria";
+  const basePrice =
+    parseFloat(document.getElementById("product-price").value) || 0;
+
   const productData = {
-    name: document.getElementById('product-name').value,
+    name: document.getElementById("product-name").value,
     category: categoryName,
-    description: document.getElementById('product-description').value || '',
+    description: document.getElementById("product-description").value || "",
     base_price: basePrice,
     final_price: basePrice,
     price_a_vista: basePrice,
@@ -738,47 +865,51 @@ async function saveProduct() {
     price_30_60: basePrice * 1.04,
     price_30_60_90: basePrice * 1.06,
     price_30_60_90_120: basePrice * 1.08,
-    weight: parseFloat(document.getElementById('product-weight').value) || 0,
-    height: parseFloat(document.getElementById('product-height').value) || 0,
-    width: parseFloat(document.getElementById('product-width').value) || 0,
-    length: parseFloat(document.getElementById('product-length').value) || 0,
-    fixed_price: document.getElementById('product-fixed-price').checked,
+    weight: parseFloat(document.getElementById("product-weight").value) || 0,
+    height: parseFloat(document.getElementById("product-height").value) || 0,
+    width: parseFloat(document.getElementById("product-width").value) || 0,
+    length: parseFloat(document.getElementById("product-length").value) || 0,
+    fixed_price: document.getElementById("product-fixed-price").checked,
     images: JSON.stringify(selectedImages),
     active: true,
     discount: 0,
     discount_percent: 0,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
-  
-  console.log('💾 Salvando produto:', productData);
-  
+
+  console.log("💾 Salvando produto:", productData);
+
   try {
-    const result = await supabase.insert('products', productData);
+    const result = await supabase.insert("products", productData);
     if (result && result.length > 0) {
-      console.log('✅ Produto salvo com sucesso:', result[0]);
+      console.log("✅ Produto salvo com sucesso:", result[0]);
       closeModal();
       await loadSystemData();
-      renderTab('produtos');
-      alert('Produto adicionado com sucesso!');
+      renderTab("produtos");
+      alert("Produto adicionado com sucesso!");
     } else {
-      alert('Erro ao salvar produto. Verifique os dados e tente novamente.');
+      alert("Erro ao salvar produto. Verifique os dados e tente novamente.");
     }
   } catch (error) {
-    console.error('❌ Erro ao salvar produto:', error);
-    alert('Erro ao salvar produto. Tente novamente.');
+    console.error("❌ Erro ao salvar produto:", error);
+    alert("Erro ao salvar produto. Tente novamente.");
   }
 }
 
 // Atualizar produto
 async function updateProduct(id) {
-  const categoryId = parseInt(document.getElementById('product-category').value);
-  const categoryName = systemData.categories.find(c => c.id === categoryId)?.name || 'Categoria';
-  const basePrice = parseFloat(document.getElementById('product-price').value) || 0;
-  
+  const categoryId = parseInt(
+    document.getElementById("product-category").value,
+  );
+  const categoryName =
+    systemData.categories.find((c) => c.id === categoryId)?.name || "Categoria";
+  const basePrice =
+    parseFloat(document.getElementById("product-price").value) || 0;
+
   const productData = {
-    name: document.getElementById('product-name').value,
+    name: document.getElementById("product-name").value,
     category: categoryName,
-    description: document.getElementById('product-description').value || '',
+    description: document.getElementById("product-description").value || "",
     base_price: basePrice,
     final_price: basePrice,
     price_a_vista: basePrice,
@@ -786,99 +917,99 @@ async function updateProduct(id) {
     price_30_60: basePrice * 1.04,
     price_30_60_90: basePrice * 1.06,
     price_30_60_90_120: basePrice * 1.08,
-    weight: parseFloat(document.getElementById('product-weight').value) || 0,
-    height: parseFloat(document.getElementById('product-height').value) || 0,
-    width: parseFloat(document.getElementById('product-width').value) || 0,
-    length: parseFloat(document.getElementById('product-length').value) || 0,
-    fixed_price: document.getElementById('product-fixed-price').checked,
-    images: JSON.stringify(selectedImages)
+    weight: parseFloat(document.getElementById("product-weight").value) || 0,
+    height: parseFloat(document.getElementById("product-height").value) || 0,
+    width: parseFloat(document.getElementById("product-width").value) || 0,
+    length: parseFloat(document.getElementById("product-length").value) || 0,
+    fixed_price: document.getElementById("product-fixed-price").checked,
+    images: JSON.stringify(selectedImages),
   };
-  
+
   try {
-    const result = await supabase.update('products', id, productData);
+    const result = await supabase.update("products", id, productData);
     if (result) {
       closeModal();
       await loadSystemData();
-      renderTab('produtos');
-      alert('Produto atualizado com sucesso!');
+      renderTab("produtos");
+      alert("Produto atualizado com sucesso!");
     } else {
-      alert('Erro ao atualizar produto.');
+      alert("Erro ao atualizar produto.");
     }
   } catch (error) {
-    console.error('❌ Erro ao atualizar produto:', error);
-    alert('Erro ao atualizar produto. Tente novamente.');
+    console.error("❌ Erro ao atualizar produto:", error);
+    alert("Erro ao atualizar produto. Tente novamente.");
   }
 }
 
-window.deleteProduct = async function(id) {
-  if (confirm('Tem certeza que deseja excluir este produto?')) {
-    const result = await supabase.delete('products', id);
+window.deleteProduct = async function (id) {
+  if (confirm("Tem certeza que deseja excluir este produto?")) {
+    const result = await supabase.delete("products", id);
     if (result) {
       await loadSystemData();
-      renderTab('produtos');
-      alert('Produto excluído!');
+      renderTab("produtos");
+      alert("Produto excluído!");
     }
   }
 };
 
 // FUNÇÕES DE CATEGORIAS
-window.showAddCategoryModal = function() {
-  categoryImageData = '';
+window.showAddCategoryModal = function () {
+  categoryImageData = "";
   showCategoryModal();
 };
 
-window.showEditCategoryModal = function(id) {
-  const category = systemData.categories.find(c => c.id === id);
+window.showEditCategoryModal = function (id) {
+  const category = systemData.categories.find((c) => c.id === id);
   if (category) {
-    categoryImageData = category.image || '';
+    categoryImageData = category.image || "";
     showCategoryModal(category);
   }
 };
 
 function showCategoryModal(category = null) {
   const isEdit = !!category;
-  const modal = document.createElement('div');
-  modal.id = 'category-modal';
+  const modal = document.createElement("div");
+  modal.id = "category-modal";
   modal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.5); display: flex; align-items: center; 
     justify-content: center; z-index: 1000;
   `;
-  
+
   modal.innerHTML = `
     <div style="background: white; border-radius: 0.5rem; padding: 2rem; max-width: 500px; width: 90%;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0; color: #1e293b;">${isEdit ? 'Editar' : 'Adicionar'} Categoria</h2>
+        <h2 style="margin: 0; color: #1e293b;">${isEdit ? "Editar" : "Adicionar"} Categoria</h2>
         <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
       </div>
       
       <form id="category-form" style="display: grid; gap: 1rem;">
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome da Categoria</label>
-          <input type="text" id="category-name" value="${category?.name || ''}" placeholder="Digite o nome da categoria" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
+          <input type="text" id="category-name" value="${category?.name || ""}" placeholder="Digite o nome da categoria" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
         </div>
         
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Ícone (Emoji) - Opcional se usar imagem</label>
-          <input type="text" id="category-icon" value="${category?.icon || ''}" placeholder="Ex: 🛋️ (ou faça upload de imagem abaixo)" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+          <input type="text" id="category-icon" value="${category?.icon || ""}" placeholder="Ex: 🛋️ (ou faça upload de imagem abaixo)" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
         </div>
         
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Cor</label>
-          <input type="color" id="category-color" value="${category?.color || '#3b82f6'}" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+          <input type="color" id="category-color" value="${category?.color || "#3b82f6"}" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
         </div>
         
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Imagem da Categoria</label>
           <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-            <input type="url" id="category-image" value="${category?.image || ''}" placeholder="https://exemplo.com/imagem.jpg" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
+            <input type="url" id="category-image" value="${category?.image || ""}" placeholder="https://exemplo.com/imagem.jpg" style="flex: 1; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;">
             <button type="button" onclick="addCategoryImageUrl()" style="padding: 0.75rem 1rem; background: #10b981; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
               Usar URL
             </button>
           </div>
           <input type="file" id="category-image-file" accept="image/*" onchange="handleCategoryFileUpload(event)" style="margin-bottom: 1rem;">
           <div id="category-image-preview" style="margin-top: 1rem;">
-            ${category?.image ? `<img src="${category.image}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 0.375rem;">` : ''}
+            ${category?.image ? `<img src="${category.image}" style="width: 100px; height: 60px; object-fit: cover; border-radius: 0.375rem;">` : ""}
           </div>
         </div>
         
@@ -887,132 +1018,141 @@ function showCategoryModal(category = null) {
             Cancelar
           </button>
           <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-            ${isEdit ? 'Atualizar' : 'Salvar'} Categoria
+            ${isEdit ? "Atualizar" : "Salvar"} Categoria
           </button>
         </div>
       </form>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
-  
-  document.getElementById('category-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    if (isEdit) {
-      await updateCategory(category.id);
-    } else {
-      await saveCategory();
-    }
-  });
+
+  document
+    .getElementById("category-form")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (isEdit) {
+        await updateCategory(category.id);
+      } else {
+        await saveCategory();
+      }
+    });
 }
 
 async function saveCategory() {
-  const iconValue = document.getElementById('category-icon').value;
-  console.log('🔍 Salvando categoria - categoryImageData:', categoryImageData ? 'IMAGEM PRESENTE' : 'SEM IMAGEM');
-  console.log('🔍 iconValue:', iconValue);
-  
+  const iconValue = document.getElementById("category-icon").value;
+  console.log(
+    "🔍 Salvando categoria - categoryImageData:",
+    categoryImageData ? "IMAGEM PRESENTE" : "SEM IMAGEM",
+  );
+  console.log("🔍 iconValue:", iconValue);
+
   const categoryData = {
-    name: document.getElementById('category-name').value,
-    icon: categoryImageData || iconValue || '📁',
-    color: document.getElementById('category-color').value
+    name: document.getElementById("category-name").value,
+    icon: categoryImageData || iconValue || "📁",
+    color: document.getElementById("category-color").value,
   };
-  
-  console.log('🔍 Dados da categoria a serem salvos:', categoryData);
-  
-  const result = await supabase.insert('categories', categoryData);
+
+  console.log("🔍 Dados da categoria a serem salvos:", categoryData);
+
+  const result = await supabase.insert("categories", categoryData);
   if (result) {
-    console.log('✅ Categoria salva com sucesso!');
-    categoryImageData = ''; // Limpar após salvar
+    console.log("✅ Categoria salva com sucesso!");
+    categoryImageData = ""; // Limpar após salvar
     closeModal();
     await loadSystemData();
-    renderTab('categorias');
-    alert('Categoria adicionada!');
+    renderTab("categorias");
+    alert("Categoria adicionada!");
   } else {
-    console.log('❌ Erro ao salvar categoria');
-    alert('Erro ao salvar categoria. Tente novamente.');
+    console.log("❌ Erro ao salvar categoria");
+    alert("Erro ao salvar categoria. Tente novamente.");
   }
 }
 
 async function updateCategory(id) {
-  const iconValue = document.getElementById('category-icon').value;
+  const iconValue = document.getElementById("category-icon").value;
   const categoryData = {
-    name: document.getElementById('category-name').value,
-    icon: categoryImageData || iconValue || '📁',
-    color: document.getElementById('category-color').value
+    name: document.getElementById("category-name").value,
+    icon: categoryImageData || iconValue || "📁",
+    color: document.getElementById("category-color").value,
   };
-  
-  const result = await supabase.update('categories', id, categoryData);
+
+  const result = await supabase.update("categories", id, categoryData);
   if (result) {
     closeModal();
     await loadSystemData();
-    renderTab('categorias');
-    alert('Categoria atualizada!');
+    renderTab("categorias");
+    alert("Categoria atualizada!");
   }
 }
 
-window.deleteCategory = async function(id) {
-  if (confirm('Tem certeza que deseja excluir esta categoria?')) {
-    const result = await supabase.delete('categories', id);
+window.deleteCategory = async function (id) {
+  if (confirm("Tem certeza que deseja excluir esta categoria?")) {
+    const result = await supabase.delete("categories", id);
     if (result) {
       await loadSystemData();
-      renderTab('categorias');
-      alert('Categoria excluída!');
+      renderTab("categorias");
+      alert("Categoria excluída!");
     }
   }
 };
 
 // FUNÇÕES DE USUÁRIOS
-window.showAddUserModal = function() {
+window.showAddUserModal = function () {
   showUserModal();
 };
 
-window.showEditUserModal = function(id) {
-  const user = systemData.users.find(u => u.id === id);
+window.showEditUserModal = function (id) {
+  const user = systemData.users.find((u) => u.id === id);
   if (user) showUserModal(user);
 };
 
 function showUserModal(user = null) {
   const isEdit = !!user;
-  const modal = document.createElement('div');
-  modal.id = 'user-modal';
+  const modal = document.createElement("div");
+  modal.id = "user-modal";
   modal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.5); display: flex; align-items: center; 
     justify-content: center; z-index: 1000;
   `;
-  
+
   modal.innerHTML = `
     <div style="background: white; border-radius: 0.5rem; padding: 2rem; max-width: 500px; width: 90%;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0; color: #1e293b;">${isEdit ? 'Editar' : 'Adicionar'} Usuário</h2>
+        <h2 style="margin: 0; color: #1e293b;">${isEdit ? "Editar" : "Adicionar"} Usuário</h2>
         <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
       </div>
       
       <form id="user-form" style="display: grid; gap: 1rem;">
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome Completo</label>
-          <input type="text" id="user-name" value="${user?.name || ''}" placeholder="Digite o nome completo" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
+          <input type="text" id="user-name" value="${user?.name || ""}" placeholder="Digite o nome completo" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
         </div>
         
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome de Usuário</label>
-          <input type="text" id="user-username" value="${user?.username || ''}" placeholder="Digite o nome de usuário" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required ${isEdit ? 'readonly' : ''}>
+          <input type="text" id="user-username" value="${user?.username || ""}" placeholder="Digite o nome de usuário" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required ${isEdit ? "readonly" : ""}>
         </div>
         
-        ${!isEdit ? `
+        ${
+          !isEdit
+            ? `
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Senha</label>
           <input type="password" id="user-password" placeholder="Digite a senha" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
         </div>
-        ` : ''}
+        `
+            : ""
+        }
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Função</label>
             <select id="user-role" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
-              <option value="customer" ${user?.role === 'customer' ? 'selected' : ''}>Cliente</option>
-              <option value="seller" ${user?.role === 'seller' ? 'selected' : ''}>Vendedor</option>
-              <option value="admin" ${user?.role === 'admin' ? 'selected' : ''}>Admin</option>
+              <option value="customer" ${user?.role === "customer" ? "selected" : ""}>Cliente</option>
+              <option value="seller" ${user?.role === "seller" ? "selected" : ""}>Vendedor</option>
+              <option value="admin" ${user?.role === "admin" ? "selected" : ""}>Admin</option>
             </select>
           </div>
           <div>
@@ -1022,7 +1162,7 @@ function showUserModal(user = null) {
         </div>
         
         <div style="display: flex; align-items: center; gap: 0.5rem;">
-          <input type="checkbox" id="user-active" ${user?.active !== false ? 'checked' : ''} style="margin: 0;">
+          <input type="checkbox" id="user-active" ${user?.active !== false ? "checked" : ""} style="margin: 0;">
           <label for="user-active" style="margin: 0; color: #374151;">Usuário Ativo</label>
         </div>
         
@@ -1031,100 +1171,108 @@ function showUserModal(user = null) {
             Cancelar
           </button>
           <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-            ${isEdit ? 'Atualizar' : 'Criar'} Usuário
+            ${isEdit ? "Atualizar" : "Criar"} Usuário
           </button>
         </div>
       </form>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
-  
-  document.getElementById('user-form').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    if (isEdit) {
-      await updateUser(user.id);
-    } else {
-      await saveUser();
-    }
-  });
+
+  document
+    .getElementById("user-form")
+    .addEventListener("submit", async function (e) {
+      e.preventDefault();
+      if (isEdit) {
+        await updateUser(user.id);
+      } else {
+        await saveUser();
+      }
+    });
 }
 
 async function saveUser() {
   const userData = {
-    name: document.getElementById('user-name').value,
-    username: document.getElementById('user-username').value,
-    password_hash: document.getElementById('user-password').value,
-    role: document.getElementById('user-role').value,
-    price_multiplier: parseFloat(document.getElementById('user-multiplier').value),
-    active: document.getElementById('user-active').checked
+    name: document.getElementById("user-name").value,
+    username: document.getElementById("user-username").value,
+    password_hash: document.getElementById("user-password").value,
+    role: document.getElementById("user-role").value,
+    price_multiplier: parseFloat(
+      document.getElementById("user-multiplier").value,
+    ),
+    active: document.getElementById("user-active").checked,
   };
-  
-  const result = await supabase.insert('auth_users', userData);
+
+  const result = await supabase.insert("auth_users", userData);
   if (result) {
     closeModal();
     await loadSystemData();
-    renderTab('usuarios');
-    alert('Usuário criado!');
+    renderTab("usuarios");
+    alert("Usuário criado!");
   }
 }
 
 async function updateUser(id) {
   const userData = {
-    name: document.getElementById('user-name').value,
-    role: document.getElementById('user-role').value,
-    price_multiplier: parseFloat(document.getElementById('user-multiplier').value),
-    active: document.getElementById('user-active').checked
+    name: document.getElementById("user-name").value,
+    role: document.getElementById("user-role").value,
+    price_multiplier: parseFloat(
+      document.getElementById("user-multiplier").value,
+    ),
+    active: document.getElementById("user-active").checked,
   };
-  
-  const result = await supabase.update('auth_users', id, userData);
+
+  const result = await supabase.update("auth_users", id, userData);
   if (result) {
     closeModal();
     await loadSystemData();
-    renderTab('usuarios');
-    alert('Usuário atualizado!');
+    renderTab("usuarios");
+    alert("Usuário atualizado!");
   }
 }
 
-window.deleteUser = async function(id) {
-  if (confirm('Tem certeza que deseja excluir este usuário?')) {
-    const result = await supabase.delete('auth_users', id);
+window.deleteUser = async function (id) {
+  if (confirm("Tem certeza que deseja excluir este usuário?")) {
+    const result = await supabase.delete("auth_users", id);
     if (result) {
       await loadSystemData();
-      renderTab('usuarios');
-      alert('Usuário excluído!');
+      renderTab("usuarios");
+      alert("Usuário excluído!");
     }
   }
 };
 
 // FUNÇÕES DE PROMOÇÕES
-window.showPromotionModal = function(promotionId = null) {
-  console.log('🔍 Abrindo modal para promoção ID:', promotionId);
-  const promotion = promotionId ? systemData.promotions.find(p => p.id == promotionId) : null;
-  console.log('📋 Promoção encontrada:', promotion);
-  
-  const modal = document.createElement('div');
-  modal.id = 'promotion-modal';
+window.showPromotionModal = function (promotionId = null) {
+  console.log("🔍 Abrindo modal para promoção ID:", promotionId);
+  const promotion = promotionId
+    ? systemData.promotions.find((p) => p.id == promotionId)
+    : null;
+  console.log("📋 Promoção encontrada:", promotion);
+
+  const modal = document.createElement("div");
+  modal.id = "promotion-modal";
   modal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.8); display: flex; align-items: center; 
     justify-content: center; z-index: 1000; padding: 1rem;
   `;
-  
+
   modal.innerHTML = `
     <div style="background: white; border-radius: 1rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
       <div style="padding: 2rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
           <h3 style="margin: 0; color: #1e293b; font-size: 1.25rem;">
-            ${promotion ? '🎯 Editar Promoção' : '🎯 Nova Promoção'}
+            ${promotion ? "🎯 Editar Promoção" : "🎯 Nova Promoção"}
           </h3>
           <button onclick="closePromotionModal()" style="background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">×</button>
         </div>
         
-        <form onsubmit="handlePromotionSubmit(event, '${promotion?.id || ''}')" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <form onsubmit="handlePromotionSubmit(event, '${promotion?.id || ""}')" style="display: flex; flex-direction: column; gap: 1.5rem;">
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Texto da Promoção *</label>
-            <input type="text" id="promotion-texto" value="${promotion?.texto || ''}" required
+            <input type="text" id="promotion-texto" value="${promotion?.texto || ""}" required
                    placeholder="Ex: Desconto Especial de 20%!"
                    style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
           </div>
@@ -1132,13 +1280,13 @@ window.showPromotionModal = function(promotionId = null) {
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Descrição (opcional)</label>
             <textarea id="promotion-descricao" placeholder="Ex: Válido até o final do mês para todos os produtos"
-                      style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; resize: vertical; min-height: 80px;">${promotion?.descricao || ''}</textarea>
+                      style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; resize: vertical; min-height: 80px;">${promotion?.descricao || ""}</textarea>
           </div>
           
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Cor de Fundo</label>
             <div style="display: flex; gap: 1rem; align-items: center;">
-              <input type="color" id="promotion-cor" value="${promotion?.cor || '#ff6b6b'}"
+              <input type="color" id="promotion-cor" value="${promotion?.cor || "#ff6b6b"}"
                      style="width: 50px; height: 40px; border: 1px solid #d1d5db; border-radius: 0.375rem; cursor: pointer;">
               <span style="color: #6b7280; font-size: 0.875rem;">Escolha a cor de fundo do banner</span>
             </div>
@@ -1146,7 +1294,7 @@ window.showPromotionModal = function(promotionId = null) {
           
           <div>
             <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
-              <input type="checkbox" id="promotion-ativo" ${promotion?.ativo ? 'checked' : ''}
+              <input type="checkbox" id="promotion-ativo" ${promotion?.ativo ? "checked" : ""}
                      style="width: 18px; height: 18px; cursor: pointer;">
               <span style="font-weight: 500; color: #374151;">Ativar esta promoção</span>
             </label>
@@ -1160,207 +1308,229 @@ window.showPromotionModal = function(promotionId = null) {
             </button>
             <button type="submit" 
                     style="flex: 1; padding: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-              ${promotion ? 'Atualizar' : 'Criar'} Promoção
+              ${promotion ? "Atualizar" : "Criar"} Promoção
             </button>
           </div>
         </form>
       </div>
     </div>
   `;
-  
-  document.body.appendChild(modal);
-}
 
-window.closePromotionModal = function() {
-  const modal = document.getElementById('promotion-modal');
+  document.body.appendChild(modal);
+};
+
+window.closePromotionModal = function () {
+  const modal = document.getElementById("promotion-modal");
   if (modal) {
     modal.remove();
   }
-}
+};
 
-window.handlePromotionSubmit = async function(event, promotionId) {
+window.handlePromotionSubmit = async function (event, promotionId) {
   event.preventDefault();
-  
+
   if (promotionId) {
     await updatePromotion(promotionId);
   } else {
     await savePromotion(event);
   }
-}
+};
 
 async function savePromotion(event) {
   event.preventDefault();
-  
+
   try {
-    const texto = document.getElementById('promotion-texto').value.trim();
-    const descricao = document.getElementById('promotion-descricao').value.trim();
-    const cor = document.getElementById('promotion-cor').value;
-    const ativo = document.getElementById('promotion-ativo').checked;
-    
+    const texto = document.getElementById("promotion-texto").value.trim();
+    const descricao = document
+      .getElementById("promotion-descricao")
+      .value.trim();
+    const cor = document.getElementById("promotion-cor").value;
+    const ativo = document.getElementById("promotion-ativo").checked;
+
     if (!texto) {
-      alert('Por favor, insira o texto da promoção.');
+      alert("Por favor, insira o texto da promoção.");
       return;
     }
-    
+
     // Se ativar esta promoção, desativar todas as outras
     if (ativo) {
       for (const promo of systemData.promotions || []) {
         if (promo.ativo) {
-          await supabase.update('promocoes', promo.id, { ativo: false });
+          await supabase.update("promocoes", promo.id, { ativo: false });
         }
       }
     }
-    
+
     const promotionData = {
       texto,
       descricao,
       cor,
-      ativo
+      ativo,
     };
-    
-    console.log('📤 Salvando promoção no Supabase:', promotionData);
-    const result = await supabase.insert('promocoes', promotionData);
-    
+
+    console.log("📤 Salvando promoção no Supabase:", promotionData);
+    const result = await supabase.insert("promocoes", promotionData);
+
     if (result && result.length > 0) {
-      console.log('✅ Promoção salva com sucesso!');
+      console.log("✅ Promoção salva com sucesso!");
       await loadSystemData();
-      renderTab('promocoes');
+      renderTab("promocoes");
       closePromotionModal();
-      alert('Promoção criada com sucesso!');
+      alert("Promoção criada com sucesso!");
     } else {
-      console.error('❌ Erro: Resultado vazio do Supabase');
-      alert('Erro ao salvar promoção. Tente novamente.');
+      console.error("❌ Erro: Resultado vazio do Supabase");
+      alert("Erro ao salvar promoção. Tente novamente.");
     }
-    
   } catch (error) {
-    console.error('❌ Erro ao salvar promoção:', error);
-    alert(`Erro ao salvar promoção: ${error.message || 'Verifique os dados e tente novamente.'}`);
+    console.error("❌ Erro ao salvar promoção:", error);
+    alert(
+      `Erro ao salvar promoção: ${error.message || "Verifique os dados e tente novamente."}`,
+    );
   }
 }
 
 async function updatePromotion(id) {
   try {
-    const texto = document.getElementById('promotion-texto').value.trim();
-    const descricao = document.getElementById('promotion-descricao').value.trim();
-    const cor = document.getElementById('promotion-cor').value;
-    const ativo = document.getElementById('promotion-ativo').checked;
-    
+    const texto = document.getElementById("promotion-texto").value.trim();
+    const descricao = document
+      .getElementById("promotion-descricao")
+      .value.trim();
+    const cor = document.getElementById("promotion-cor").value;
+    const ativo = document.getElementById("promotion-ativo").checked;
+
     if (!texto) {
-      alert('Por favor, insira o texto da promoção.');
+      alert("Por favor, insira o texto da promoção.");
       return;
     }
-    
+
     const promotionData = {
       texto,
       descricao,
       cor,
-      ativo
+      ativo,
     };
-    
-    console.log('📤 Atualizando promoção no Supabase:', id, promotionData);
-    
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json'
+
+    console.log("📤 Atualizando promoção no Supabase:", id, promotionData);
+
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/promocoes?id=eq.${id}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(promotionData),
       },
-      body: JSON.stringify(promotionData)
-    });
-    
-    console.log('📋 Status da atualização:', response.status, response.ok);
-    
+    );
+
+    console.log("📋 Status da atualização:", response.status, response.ok);
+
     if (response.ok) {
-      console.log('✅ Promoção atualizada com sucesso! Status:', response.status);
+      console.log(
+        "✅ Promoção atualizada com sucesso! Status:",
+        response.status,
+      );
       await loadSystemData();
-      renderTab('promocoes');
+      renderTab("promocoes");
       closePromotionModal();
-      alert('Promoção atualizada com sucesso!');
+      alert("Promoção atualizada com sucesso!");
     } else {
       const errorText = await response.text();
-      console.error('❌ Erro na atualização:', response.status, errorText);
-      alert('Erro ao atualizar promoção. Tente novamente.');
+      console.error("❌ Erro na atualização:", response.status, errorText);
+      alert("Erro ao atualizar promoção. Tente novamente.");
     }
-    
   } catch (error) {
-    console.error('❌ Erro ao atualizar promoção:', error);
-    if (error.name === 'AbortError') {
-      alert('Timeout: A operação demorou muito. Tente novamente.');
+    console.error("❌ Erro ao atualizar promoção:", error);
+    if (error.name === "AbortError") {
+      alert("Timeout: A operação demorou muito. Tente novamente.");
     } else {
-      alert(`Erro ao atualizar promoção: ${error.message || 'Verifique sua conexão e tente novamente.'}`);
+      alert(
+        `Erro ao atualizar promoção: ${error.message || "Verifique sua conexão e tente novamente."}`,
+      );
     }
   }
 }
 
-window.deletePromotion = async function(id) {
-  const promotion = systemData.promotions?.find(p => p.id == id);
-  const promotionName = promotion ? promotion.texto : 'esta promoção';
-  
+window.deletePromotion = async function (id) {
+  const promotion = systemData.promotions?.find((p) => p.id == id);
+  const promotionName = promotion ? promotion.texto : "esta promoção";
+
   if (!confirm(`Tem certeza que deseja excluir "${promotionName}"?`)) {
     return;
   }
-  
+
   try {
-    console.log('🗑️ Excluindo promoção do Supabase, ID:', id, 'Tipo:', typeof id);
-    
+    console.log(
+      "🗑️ Excluindo promoção do Supabase, ID:",
+      id,
+      "Tipo:",
+      typeof id,
+    );
+
     const numericId = parseInt(id);
-    console.log('🔢 ID convertido para número:', numericId);
-    
+    console.log("🔢 ID convertido para número:", numericId);
+
     // Exclusão direta
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
-      method: 'DELETE',
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    console.log('📋 Status da exclusão:', response.status, response.ok);
-    
+    const response = await fetch(
+      `${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`,
+      {
+        method: "DELETE",
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+          "Content-Type": "application/json",
+        },
+      },
+    );
+
+    console.log("📋 Status da exclusão:", response.status, response.ok);
+
     // Verificar se realmente excluiu
-    const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-      }
-    });
-    
+    const checkResponse = await fetch(
+      `${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`,
+      {
+        headers: {
+          apikey: SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+        },
+      },
+    );
+
     const remainingPromotions = await checkResponse.json();
-    console.log('🔍 Promoções restantes:', remainingPromotions);
-    
+    console.log("🔍 Promoções restantes:", remainingPromotions);
+
     if (remainingPromotions.length === 0) {
-      console.log('✅ Promoção realmente excluída!');
+      console.log("✅ Promoção realmente excluída!");
       await loadSystemData();
-      renderTab('promocoes');
-      alert('Promoção excluída com sucesso!');
+      renderTab("promocoes");
+      alert("Promoção excluída com sucesso!");
     } else {
-      console.log('⚠️ Promoção ainda existe no banco');
-      alert('Erro: Promoção não foi excluída do banco.');
+      console.log("⚠️ Promoção ainda existe no banco");
+      alert("Erro: Promoção não foi excluída do banco.");
     }
-    
   } catch (error) {
-    console.error('❌ Erro ao excluir promoção:', error);
+    console.error("❌ Erro ao excluir promoção:", error);
     alert(`Erro ao excluir promoção: ${error.message}`);
   }
-}
+};
 
 // FUNÇÕES DE PREÇOS
-window.updatePricePercentage = function(table, value) {
+window.updatePricePercentage = function (table, value) {
   systemData.priceSettings[table] = parseFloat(value);
-  console.log('Percentual atualizado:', table, value + '%');
+  console.log("Percentual atualizado:", table, value + "%");
   // Recarregar a aba para mostrar os novos valores
-  setTimeout(() => renderTab('precos'), 100);
+  setTimeout(() => renderTab("precos"), 100);
 };
 
 // Função para adicionar nova tabela de preços
-window.showAddPriceTableModal = function() {
+window.showAddPriceTableModal = function () {
   showPriceTableModal();
 };
 
 // Função para editar tabela de preços
-window.showEditPriceTableModal = function(tableName) {
+window.showEditPriceTableModal = function (tableName) {
   showPriceTableModal(tableName);
 };
 
@@ -1368,29 +1538,29 @@ window.showEditPriceTableModal = function(tableName) {
 function showPriceTableModal(tableName = null) {
   const isEdit = !!tableName;
   const currentPercentage = isEdit ? systemData.priceSettings[tableName] : 0;
-  
-  const modal = document.createElement('div');
-  modal.id = 'price-table-modal';
+
+  const modal = document.createElement("div");
+  modal.id = "price-table-modal";
   modal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.5); display: flex; align-items: center; 
     justify-content: center; z-index: 1000;
   `;
-  
+
   modal.innerHTML = `
     <div style="background: white; border-radius: 0.5rem; padding: 2rem; max-width: 500px; width: 90%;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-        <h2 style="margin: 0; color: #1e293b;">${isEdit ? 'Editar' : 'Adicionar'} Tabela de Preços</h2>
+        <h2 style="margin: 0; color: #1e293b;">${isEdit ? "Editar" : "Adicionar"} Tabela de Preços</h2>
         <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
       </div>
       
       <form id="price-table-form" style="display: grid; gap: 1rem;">
         <div>
           <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Nome da Tabela</label>
-          <input type="text" id="table-name" value="${tableName || ''}" placeholder="Ex: 30/60/90/120/150" 
+          <input type="text" id="table-name" value="${tableName || ""}" placeholder="Ex: 30/60/90/120/150" 
                  style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" 
-                 ${isEdit ? 'readonly' : 'required'}>
-          ${isEdit ? '<p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">O nome não pode ser alterado</p>' : ''}
+                 ${isEdit ? "readonly" : "required"}>
+          ${isEdit ? '<p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">O nome não pode ser alterado</p>' : ""}
         </div>
         
         <div>
@@ -1412,162 +1582,204 @@ function showPriceTableModal(tableName = null) {
             Cancelar
           </button>
           <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
-            ${isEdit ? 'Atualizar' : 'Criar'} Tabela
+            ${isEdit ? "Atualizar" : "Criar"} Tabela
           </button>
         </div>
       </form>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
-  
+
   // Atualizar simulação em tempo real
-  document.getElementById('table-percentage').addEventListener('input', function() {
-    const percentage = parseFloat(this.value) || 0;
-    const simulatedPrice = (100 * (1 + percentage / 100)).toFixed(2);
-    document.getElementById('simulated-price').textContent = `R$ ${simulatedPrice}`;
-  });
-  
+  document
+    .getElementById("table-percentage")
+    .addEventListener("input", function () {
+      const percentage = parseFloat(this.value) || 0;
+      const simulatedPrice = (100 * (1 + percentage / 100)).toFixed(2);
+      document.getElementById("simulated-price").textContent =
+        `R$ ${simulatedPrice}`;
+    });
+
   // Event listener do formulário
-  document.getElementById('price-table-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    if (isEdit) {
-      updatePriceTable(tableName);
-    } else {
-      savePriceTable();
-    }
-  });
+  document
+    .getElementById("price-table-form")
+    .addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (isEdit) {
+        updatePriceTable(tableName);
+      } else {
+        savePriceTable();
+      }
+    });
 }
 
 // Salvar nova tabela de preços
 async function savePriceTable() {
-  const tableName = document.getElementById('table-name').value.trim();
-  const percentage = parseFloat(document.getElementById('table-percentage').value) || 0;
-  
+  const tableName = document.getElementById("table-name").value.trim();
+  const percentage =
+    parseFloat(document.getElementById("table-percentage").value) || 0;
+
   if (!tableName) {
-    alert('Por favor, digite um nome para a tabela!');
+    alert("Por favor, digite um nome para a tabela!");
     return;
   }
-  
+
   if (systemData.priceSettings.hasOwnProperty(tableName)) {
-    alert('Já existe uma tabela com este nome!');
+    alert("Já existe uma tabela com este nome!");
     return;
   }
-  
+
   systemData.priceSettings[tableName] = percentage;
-  
+
   // Fechar modal específico
-  const modal = document.getElementById('price-table-modal');
+  const modal = document.getElementById("price-table-modal");
   if (modal) modal.remove();
-  
-  renderTab('precos');
+
+  renderTab("precos");
   alert(`Tabela "${tableName}" criada com ${percentage}% de acréscimo!`);
 }
 
 // Atualizar tabela de preços existente
 async function updatePriceTable(tableName) {
-  const percentage = parseFloat(document.getElementById('table-percentage').value) || 0;
-  
+  const percentage =
+    parseFloat(document.getElementById("table-percentage").value) || 0;
+
   systemData.priceSettings[tableName] = percentage;
-  
+
   // Fechar modal específico
-  const modal = document.getElementById('price-table-modal');
+  const modal = document.getElementById("price-table-modal");
   if (modal) modal.remove();
-  
-  renderTab('precos');
+
+  renderTab("precos");
   alert(`Tabela "${tableName}" atualizada para ${percentage}%!`);
 }
 
 // Excluir tabela de preços
-window.deletePriceTable = function(tableName) {
-  const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
-  
+window.deletePriceTable = function (tableName) {
+  const isDefault = [
+    "A Vista",
+    "30",
+    "30/60",
+    "30/60/90",
+    "30/60/90/120",
+  ].includes(tableName);
+
   if (isDefault) {
-    alert('Não é possível excluir tabelas padrão do sistema!');
+    alert("Não é possível excluir tabelas padrão do sistema!");
     return;
   }
-  
+
   if (confirm(`Tem certeza que deseja excluir a tabela "${tableName}"?`)) {
     delete systemData.priceSettings[tableName];
-    renderTab('precos');
+    renderTab("precos");
     alert(`Tabela "${tableName}" excluída com sucesso!`);
   }
 };
 
 // Função para ordenar tabelas de preços
-window.sortPriceTables = function() {
+window.sortPriceTables = function () {
   // Alternar entre ordenação por nome e por percentual
   if (!window.priceTableSortOrder) {
-    window.priceTableSortOrder = 'name';
-  } else if (window.priceTableSortOrder === 'name') {
-    window.priceTableSortOrder = 'percentage';
+    window.priceTableSortOrder = "name";
+  } else if (window.priceTableSortOrder === "name") {
+    window.priceTableSortOrder = "percentage";
   } else {
-    window.priceTableSortOrder = 'name';
+    window.priceTableSortOrder = "name";
   }
-  
-  renderTab('precos');
+
+  renderTab("precos");
 };
 
 // Função para fechar modal de tabela de preços
-window.closePriceTableModal = function() {
-  const modal = document.getElementById('price-table-modal');
+window.closePriceTableModal = function () {
+  const modal = document.getElementById("price-table-modal");
   if (modal) {
     modal.remove();
   }
 };
 
 // FUNÇÕES DE EXCEL
-window.importExcel = function() {
-  console.log('🔍 Iniciando importação Excel...');
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.xlsx,.xls,.csv';
-  
-  input.onchange = function(e) {
+window.importExcel = function () {
+  console.log("🔍 Iniciando importação Excel...");
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".xlsx,.xls,.csv";
+
+  input.onchange = function (e) {
     const file = e.target.files[0];
     if (file) {
-      console.log('📁 Arquivo selecionado:', file.name, 'Tipo:', file.type);
-      
+      console.log("📁 Arquivo selecionado:", file.name, "Tipo:", file.type);
+
       const reader = new FileReader();
-      reader.onload = async function(event) {
+      reader.onload = async function (event) {
         try {
-          console.log('📖 Lendo arquivo...');
+          console.log("📖 Lendo arquivo...");
           const data = new Uint8Array(event.target.result);
-          console.log('📊 Dados carregados, tamanho:', data.length);
-          
-          const workbook = XLSX.read(data, { type: 'array' });
-          console.log('📋 Planilhas encontradas:', workbook.SheetNames);
-          
+          console.log("📊 Dados carregados, tamanho:", data.length);
+
+          const workbook = XLSX.read(data, { type: "array" });
+          console.log("📋 Planilhas encontradas:", workbook.SheetNames);
+
           const firstSheetName = workbook.SheetNames[0];
           const worksheet = workbook.Sheets[firstSheetName];
           const jsonData = XLSX.utils.sheet_to_json(worksheet);
-          console.log('📄 Dados JSON extraídos:', jsonData);
-          
+          console.log("📄 Dados JSON extraídos:", jsonData);
+
           // Detectar automaticamente as colunas do arquivo
           const firstRow = jsonData[0] || {};
           const columns = Object.keys(firstRow);
-          console.log('🔍 Colunas detectadas:', columns);
+          console.log("🔍 Colunas detectadas:", columns);
 
           let importedCount = 0;
           for (const row of jsonData) {
-            console.log('🔍 Processando linha:', row);
-            console.log('📏 Dimensões do Excel - Altura:', row.Altura, 'Largura:', row.Largura, 'Comprimento:', row.Comprimento);
-            
+            console.log("🔍 Processando linha:", row);
+            console.log(
+              "📏 Dimensões do Excel - Altura:",
+              row.Altura,
+              "Largura:",
+              row.Largura,
+              "Comprimento:",
+              row.Comprimento,
+            );
+
             // Detectar nome do produto de forma mais flexível
-            const productName = row.nome || row.name || row.Nome || row.Name || 
-                               row.produto || row.Produto || row.product || row.Product ||
-                               Object.values(row)[0]; // Primeira coluna como fallback
-            
+            const productName =
+              row.nome ||
+              row.name ||
+              row.Nome ||
+              row.Name ||
+              row.produto ||
+              row.Produto ||
+              row.product ||
+              row.Product ||
+              Object.values(row)[0]; // Primeira coluna como fallback
+
             if (productName && productName.toString().trim()) {
               // Converter preço com vírgula para ponto
-              const priceString = (row.preco || row.price || row.Preco || row.Price || 
-                                 row.valor || row.Valor || Object.values(row)[2] || '0').toString();
-              const basePrice = parseFloat(priceString.replace(',', '.'));
-              
+              const priceString = (
+                row.preco ||
+                row.price ||
+                row.Preco ||
+                row.Price ||
+                row.valor ||
+                row.Valor ||
+                Object.values(row)[2] ||
+                "0"
+              ).toString();
+              const basePrice = parseFloat(priceString.replace(",", "."));
+
               const productData = {
                 name: productName.toString().trim(),
-                category: row.categoria || row.category || row.Categoria || row.Category || 
-                         row.tipo || row.Tipo || Object.values(row)[1] || 'Geral',
+                category:
+                  row.categoria ||
+                  row.category ||
+                  row.Categoria ||
+                  row.Category ||
+                  row.tipo ||
+                  row.Tipo ||
+                  Object.values(row)[1] ||
+                  "Geral",
                 base_price: basePrice,
                 final_price: basePrice,
                 price_a_vista: basePrice * 1.0,
@@ -1575,54 +1787,143 @@ window.importExcel = function() {
                 price_30_60: basePrice * 1.04,
                 price_30_60_90: basePrice * 1.06,
                 price_30_60_90_120: basePrice * 1.08,
-                
+
                 // Campos individuais de dimensões - detectar múltiplas variações
-                height: parseFloat((row.altura || row.Altura || row.ALTURA || row.height || row.Height || '0').toString().replace(',', '.')),
-                width: parseFloat((row.largura || row.Largura || row.LARGURA || row.width || row.Width || '0').toString().replace(',', '.')),
-                length: parseFloat((row.comprimento || row.Comprimento || row.COMPRIMENTO || row.length || row.Length || '0').toString().replace(',', '.')),
-                
+                height: parseFloat(
+                  (
+                    row.altura ||
+                    row.Altura ||
+                    row.ALTURA ||
+                    row.height ||
+                    row.Height ||
+                    "0"
+                  )
+                    .toString()
+                    .replace(",", "."),
+                ),
+                width: parseFloat(
+                  (
+                    row.largura ||
+                    row.Largura ||
+                    row.LARGURA ||
+                    row.width ||
+                    row.Width ||
+                    "0"
+                  )
+                    .toString()
+                    .replace(",", "."),
+                ),
+                length: parseFloat(
+                  (
+                    row.comprimento ||
+                    row.Comprimento ||
+                    row.COMPRIMENTO ||
+                    row.length ||
+                    row.Length ||
+                    "0"
+                  )
+                    .toString()
+                    .replace(",", "."),
+                ),
+
                 // Campos de texto
-                dimensions: `${row.Altura || row.altura || ''}x${row.Largura || row.largura || ''}x${row.Comprimento || row.comprimento || ''}`.replace(/^x|x$/g, ''),
-                weight_text: (row.peso || row.weight || row.Peso || row.Weight || '').toString(),
-                weight: parseFloat((row.peso || row.weight || row.Peso || row.Weight || '0').toString().replace(',', '.')),
-                description: row.descricao || row.description || row.Descrição || row.Description || '',
-                image: row.imagem || row.image || row.Imagem || row.Image || '',
-                fixed_price: (row.precoFixo || row.fixedPrice || row.PrecoFixo || row.FixedPrice || '').toString().toLowerCase() === 'sim',
-                active: true
+                dimensions:
+                  `${row.Altura || row.altura || ""}x${row.Largura || row.largura || ""}x${row.Comprimento || row.comprimento || ""}`.replace(
+                    /^x|x$/g,
+                    "",
+                  ),
+                weight_text: (
+                  row.peso ||
+                  row.weight ||
+                  row.Peso ||
+                  row.Weight ||
+                  ""
+                ).toString(),
+                weight: parseFloat(
+                  (row.peso || row.weight || row.Peso || row.Weight || "0")
+                    .toString()
+                    .replace(",", "."),
+                ),
+                description:
+                  row.descricao ||
+                  row.description ||
+                  row.Descrição ||
+                  row.Description ||
+                  "",
+                image: row.imagem || row.image || row.Imagem || row.Image || "",
+                fixed_price:
+                  (
+                    row.precoFixo ||
+                    row.fixedPrice ||
+                    row.PrecoFixo ||
+                    row.FixedPrice ||
+                    ""
+                  )
+                    .toString()
+                    .toLowerCase() === "sim",
+                active: true,
               };
 
-              console.log('💾 Dados do produto processados:', productData);
-              console.log('🔍 Altura:', productData.altura, 'Largura:', productData.largura, 'Comprimento:', productData.comprimento);
-              
+              console.log("💾 Dados do produto processados:", productData);
+              console.log(
+                "🔍 Altura:",
+                productData.altura,
+                "Largura:",
+                productData.largura,
+                "Comprimento:",
+                productData.comprimento,
+              );
+
               // Verificar se produto já existe pelo nome
-              const existingProduct = systemData.products.find(p => p.name.toLowerCase() === productData.name.toLowerCase());
-              
+              const existingProduct = systemData.products.find(
+                (p) => p.name.toLowerCase() === productData.name.toLowerCase(),
+              );
+
               let result;
               if (existingProduct) {
-                console.log('🔄 Produto existe, atualizando ID:', existingProduct.id);
-                console.log('📊 Dados originais:', {altura: existingProduct.altura, largura: existingProduct.largura, comprimento: existingProduct.comprimento});
-                console.log('📊 Novos dados:', {altura: productData.altura, largura: productData.largura, comprimento: productData.comprimento});
-                result = await supabase.update('products', existingProduct.id, productData);
+                console.log(
+                  "🔄 Produto existe, atualizando ID:",
+                  existingProduct.id,
+                );
+                console.log("📊 Dados originais:", {
+                  altura: existingProduct.altura,
+                  largura: existingProduct.largura,
+                  comprimento: existingProduct.comprimento,
+                });
+                console.log("📊 Novos dados:", {
+                  altura: productData.altura,
+                  largura: productData.largura,
+                  comprimento: productData.comprimento,
+                });
+                result = await supabase.update(
+                  "products",
+                  existingProduct.id,
+                  productData,
+                );
               } else {
-                console.log('➕ Produto novo, inserindo');
-                result = await supabase.insert('products', productData);
+                console.log("➕ Produto novo, inserindo");
+                result = await supabase.insert("products", productData);
               }
-              
-              console.log('✅ Resultado da operação:', result);
+
+              console.log("✅ Resultado da operação:", result);
               if (result) importedCount++;
             }
           }
 
           if (importedCount > 0) {
             await loadSystemData();
-            renderTab('produtos');
-            alert(`✅ Importação concluída! ${importedCount} produtos foram importados com sucesso.`);
+            renderTab("produtos");
+            alert(
+              `✅ Importação concluída! ${importedCount} produtos foram importados com sucesso.`,
+            );
           } else {
-            console.log('❌ Nenhum produto válido encontrado');
-            alert('❌ Nenhum produto foi importado. Verifique se o arquivo está no formato correto.');
+            console.log("❌ Nenhum produto válido encontrado");
+            alert(
+              "❌ Nenhum produto foi importado. Verifique se o arquivo está no formato correto.",
+            );
           }
         } catch (error) {
-          console.error('❌ Erro na importação:', error);
+          console.error("❌ Erro na importação:", error);
           alert(`❌ Erro ao importar arquivo: ${error.message}`);
         }
       };
@@ -1632,36 +1933,36 @@ window.importExcel = function() {
   input.click();
 };
 
-window.exportExcel = function() {
-  const data = systemData.products.map(p => ({
-    Nome: p.name || '',
-    Categoria: p.category || '',
+window.exportExcel = function () {
+  const data = systemData.products.map((p) => ({
+    Nome: p.name || "",
+    Categoria: p.category || "",
     Preco: p.base_price || 0,
     Altura: p.height || 0,
     Largura: p.width || 0,
     Comprimento: p.length || 0,
     Peso: p.weight || 0,
-    Descricao: p.description || ''
+    Descricao: p.description || "",
   }));
-  
-  console.log('Exportando produtos para Excel:', data);
-  
+
+  console.log("Exportando produtos para Excel:", data);
+
   // Criar arquivo Excel real usando SheetJS
   try {
     // Verificar se a biblioteca XLSX está disponível
-    if (typeof XLSX === 'undefined') {
+    if (typeof XLSX === "undefined") {
       // Fallback para CSV se XLSX não estiver disponível
-      console.log('XLSX não disponível, usando CSV como fallback');
+      console.log("XLSX não disponível, usando CSV como fallback");
       exportAsCSV(data);
       return;
     }
-    
+
     // Criar workbook
     const wb = XLSX.utils.book_new();
-    
+
     // Criar worksheet com os dados
     const ws = XLSX.utils.json_to_sheet(data);
-    
+
     // Definir largura das colunas
     const colWidths = [
       { wch: 30 }, // Nome
@@ -1671,21 +1972,20 @@ window.exportExcel = function() {
       { wch: 10 }, // Largura
       { wch: 12 }, // Comprimento
       { wch: 10 }, // Peso
-      { wch: 40 }  // Descricao
+      { wch: 40 }, // Descricao
     ];
-    ws['!cols'] = colWidths;
-    
+    ws["!cols"] = colWidths;
+
     // Adicionar worksheet ao workbook
-    XLSX.utils.book_append_sheet(wb, ws, 'Produtos');
-    
+    XLSX.utils.book_append_sheet(wb, ws, "Produtos");
+
     // Gerar arquivo Excel
-    const fileName = `produtos-moveisbonafe-${new Date().toISOString().split('T')[0]}.xlsx`;
+    const fileName = `produtos-moveisbonafe-${new Date().toISOString().split("T")[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
-    
+
     alert(`${data.length} produtos exportados para Excel (.xlsx)!`);
-    
   } catch (error) {
-    console.error('Erro ao exportar Excel:', error);
+    console.error("Erro ao exportar Excel:", error);
     // Fallback para CSV em caso de erro
     exportAsCSV(data);
   }
@@ -1693,61 +1993,76 @@ window.exportExcel = function() {
 
 // Função fallback para exportar como CSV
 function exportAsCSV(data) {
-  const headers = ['Nome', 'Categoria', 'Preco', 'Altura', 'Largura', 'Comprimento', 'Peso', 'Descricao'];
+  const headers = [
+    "Nome",
+    "Categoria",
+    "Preco",
+    "Altura",
+    "Largura",
+    "Comprimento",
+    "Peso",
+    "Descricao",
+  ];
   const csvContent = [
-    headers.join(';'),
-    ...data.map(row => headers.map(header => `"${row[header] || ''}"`).join(';'))
-  ].join('\n');
-  
+    headers.join(";"),
+    ...data.map((row) =>
+      headers.map((header) => `"${row[header] || ""}"`).join(";"),
+    ),
+  ].join("\n");
+
   // Adicionar BOM para UTF-8 (melhor compatibilidade com Excel)
-  const bom = '\uFEFF';
-  const blob = new Blob([bom + csvContent], { type: 'text/csv;charset=utf-8' });
+  const bom = "\uFEFF";
+  const blob = new Blob([bom + csvContent], { type: "text/csv;charset=utf-8" });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = `produtos-moveisbonafe-${new Date().toISOString().split('T')[0]}.csv`;
+  a.download = `produtos-moveisbonafe-${new Date().toISOString().split("T")[0]}.csv`;
   a.click();
   URL.revokeObjectURL(url);
-  
+
   alert(`${data.length} produtos exportados para CSV (compatível com Excel)!`);
 }
 
 // FUNÇÕES DE BACKUP
-window.createBackup = function() {
+window.createBackup = function () {
   const backup = {
     timestamp: new Date().toISOString(),
     products: systemData.products,
     categories: systemData.categories,
-    users: systemData.users.map(u => ({ ...u, password_hash: '***' })),
-    priceSettings: systemData.priceSettings
+    users: systemData.users.map((u) => ({ ...u, password_hash: "***" })),
+    priceSettings: systemData.priceSettings,
   };
-  
-  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {
+    type: "application/json",
+  });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
+  const a = document.createElement("a");
   a.href = url;
-  a.download = `backup-moveisbonafe-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = `backup-moveisbonafe-${new Date().toISOString().split("T")[0]}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  
-  alert('Backup criado e baixado com sucesso!');
+
+  alert("Backup criado e baixado com sucesso!");
 };
 
-window.restoreBackup = function() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.onchange = function(e) {
+window.restoreBackup = function () {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".json";
+  input.onchange = function (e) {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         try {
           const backup = JSON.parse(e.target.result);
-          console.log('Backup carregado:', backup);
-          alert('Backup carregado! Funcionalidade de restauração será implementada em breve.');
+          console.log("Backup carregado:", backup);
+          alert(
+            "Backup carregado! Funcionalidade de restauração será implementada em breve.",
+          );
         } catch (error) {
-          alert('Erro ao ler arquivo de backup!');
+          alert("Erro ao ler arquivo de backup!");
         }
       };
       reader.readAsText(file);
@@ -1757,61 +2072,78 @@ window.restoreBackup = function() {
 };
 
 // Função de importação Excel REMOVIDA - usando apenas a função principal
-window.importExcelProducts_DISABLED = async function() {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.xlsx,.xls';
-  input.onchange = async function(e) {
+window.importExcelProducts_DISABLED = async function () {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = ".xlsx,.xls";
+  input.onchange = async function (e) {
     const file = e.target.files[0];
     if (file) {
       try {
-        console.log('📊 Processando arquivo Excel:', file.name);
-        
+        console.log("📊 Processando arquivo Excel:", file.name);
+
         const reader = new FileReader();
-        reader.onload = async function(e) {
+        reader.onload = async function (e) {
           try {
             // Processar Excel com SheetJS
             const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, {type: 'array'});
+            const workbook = XLSX.read(data, { type: "array" });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
             const jsonData = XLSX.utils.sheet_to_json(worksheet);
-            
-            console.log('📋 Dados do Excel processados:', jsonData);
-            
+
+            console.log("📋 Dados do Excel processados:", jsonData);
+
             if (jsonData.length === 0) {
-              alert('❌ Nenhum produto encontrado no arquivo Excel!');
+              alert("❌ Nenhum produto encontrado no arquivo Excel!");
               return;
             }
-            
+
             // Confirmar importação
-            const confirmImport = confirm(`📊 Encontrados ${jsonData.length} produtos no Excel.\n\nDeseja importar todos os produtos para o sistema?`);
-            
+            const confirmImport = confirm(
+              `📊 Encontrados ${jsonData.length} produtos no Excel.\n\nDeseja importar todos os produtos para o sistema?`,
+            );
+
             if (confirmImport) {
               let successCount = 0;
               let errorCount = 0;
-              
+
               // Processar cada produto do Excel
               for (const excelRow of jsonData) {
                 try {
                   // Mapear campos do Excel para o formato do sistema
                   const productData = {
-                    name: excelRow.Nome || excelRow.name || 'Produto sem nome',
-                    category: excelRow.Categoria || excelRow.category || 'Sem categoria',
-                    base_price: parseFloat(excelRow['Preço Base'] || excelRow.base_price || excelRow.preco || 0),
+                    name: excelRow.Nome || excelRow.name || "Produto sem nome",
+                    category:
+                      excelRow.Categoria ||
+                      excelRow.category ||
+                      "Sem categoria",
+                    base_price: parseFloat(
+                      excelRow["Preço Base"] ||
+                        excelRow.base_price ||
+                        excelRow.preco ||
+                        0,
+                    ),
                     height: parseInt(excelRow.Altura || excelRow.height || 0),
                     width: parseInt(excelRow.Largura || excelRow.width || 0),
-                    length: parseInt(excelRow.Comprimento || excelRow.length || 0),
+                    length: parseInt(
+                      excelRow.Comprimento || excelRow.length || 0,
+                    ),
                     weight: parseFloat(excelRow.Peso || excelRow.weight || 0),
-                    description: excelRow.Descricao || excelRow.description || '',
+                    description:
+                      excelRow.Descricao || excelRow.description || "",
                     fixed_price: false,
-                    image_url: excelRow['URL Imagem'] || excelRow.image_url || '',
-                    images: '[]'
+                    image_url:
+                      excelRow["URL Imagem"] || excelRow.image_url || "",
+                    images: "[]",
                   };
-                  
+
                   // Validar dados básicos
                   if (productData.name && productData.base_price > 0) {
-                    const result = await supabase.insert('products', productData);
+                    const result = await supabase.insert(
+                      "products",
+                      productData,
+                    );
                     if (result) {
                       successCount++;
                       console.log(`✅ Produto importado: ${productData.name}`);
@@ -1821,32 +2153,36 @@ window.importExcelProducts_DISABLED = async function() {
                     }
                   } else {
                     errorCount++;
-                    console.log(`❌ Dados inválidos para produto: ${productData.name}`);
+                    console.log(
+                      `❌ Dados inválidos para produto: ${productData.name}`,
+                    );
                   }
                 } catch (error) {
                   errorCount++;
-                  console.error('❌ Erro ao processar produto:', error);
+                  console.error("❌ Erro ao processar produto:", error);
                 }
               }
-              
+
               // Recarregar dados e atualizar interface
               await loadSystemData();
-              renderTab('produtos');
-              
+              renderTab("produtos");
+
               // Mostrar resultado da importação
-              alert(`🎉 Importação concluída!\n\n✅ Produtos importados: ${successCount}\n❌ Erros: ${errorCount}\n\nTotal processado: ${jsonData.length}`);
+              alert(
+                `🎉 Importação concluída!\n\n✅ Produtos importados: ${successCount}\n❌ Erros: ${errorCount}\n\nTotal processado: ${jsonData.length}`,
+              );
             }
-            
           } catch (error) {
-            console.error('❌ Erro ao processar Excel:', error);
-            alert('❌ Erro ao processar arquivo Excel! Verifique se o formato está correto.');
+            console.error("❌ Erro ao processar Excel:", error);
+            alert(
+              "❌ Erro ao processar arquivo Excel! Verifique se o formato está correto.",
+            );
           }
         };
         reader.readAsArrayBuffer(file);
-        
       } catch (error) {
-        console.error('❌ Erro ao ler arquivo:', error);
-        alert('❌ Erro ao ler arquivo Excel!');
+        console.error("❌ Erro ao ler arquivo:", error);
+        alert("❌ Erro ao ler arquivo Excel!");
       }
     }
   };
@@ -1854,9 +2190,9 @@ window.importExcelProducts_DISABLED = async function() {
 };
 
 // Fechar modal
-window.closeModal = function() {
-  const modals = ['product-modal', 'category-modal', 'user-modal'];
-  modals.forEach(modalId => {
+window.closeModal = function () {
+  const modals = ["product-modal", "category-modal", "user-modal"];
+  modals.forEach((modalId) => {
     const modal = document.getElementById(modalId);
     if (modal) modal.remove();
   });
@@ -1864,32 +2200,32 @@ window.closeModal = function() {
 
 // Renderizar abas
 function renderTab(tabName) {
-  const content = document.getElementById('content-' + tabName);
+  const content = document.getElementById("content-" + tabName);
   if (!content) return;
-  
-  switch(tabName) {
-    case 'produtos':
+
+  switch (tabName) {
+    case "produtos":
       content.innerHTML = renderProductsTab();
       break;
-    case 'categorias':
+    case "categorias":
       content.innerHTML = renderCategoriesTab();
       break;
-    case 'precos':
+    case "precos":
       content.innerHTML = renderPricesTab();
       break;
-    case 'usuarios':
+    case "usuarios":
       content.innerHTML = renderUsersTab();
       break;
-    case 'promocoes':
+    case "promocoes":
       content.innerHTML = renderPromotionsTab();
       break;
-    case 'excel':
+    case "excel":
       content.innerHTML = renderExcelTab();
       break;
-    case 'backup':
+    case "backup":
       content.innerHTML = renderBackupTab();
       break;
-    case 'monitoramento':
+    case "monitoramento":
       content.innerHTML = renderMonitoringTab();
       break;
   }
@@ -1901,57 +2237,71 @@ function renderProductsTab() {
   if (!systemData.products || !Array.isArray(systemData.products)) {
     systemData.products = [];
   }
-  
+
   // Ordenar produtos por nome (alfabética) e depois por categoria
   const sortedProducts = [...systemData.products].sort((a, b) => {
     if (a.category !== b.category) {
-      return (a.category || '').localeCompare(b.category || '', 'pt-BR', { numeric: true });
+      return (a.category || "").localeCompare(b.category || "", "pt-BR", {
+        numeric: true,
+      });
     }
-    return (a.name || '').localeCompare(b.name || '', 'pt-BR', { numeric: true });
+    return (a.name || "").localeCompare(b.name || "", "pt-BR", {
+      numeric: true,
+    });
   });
-  
-  const productsHtml = sortedProducts.map(product => {
-    const userMultiplier = currentUser.price_multiplier || 1.0;
-    const basePrice = product.base_price || 0;
-    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price) || {
-      'À Vista': 0,
-      '30': 0,
-      '30/60': 0,
-      '30/60/90': 0,
-      '30/60/90/120': 0
-    };
-    
-    // Pegar primeira imagem com verificação segura
-    let firstImage = '';
-    try {
-      if (product.images && product.images !== 'null' && product.images !== '') {
-        const images = JSON.parse(product.images);
-        firstImage = images[0] || product.image_url;
-      } else {
+
+  const productsHtml = sortedProducts
+    .map((product) => {
+      const userMultiplier = currentUser.price_multiplier || 1.0;
+      const basePrice = product.base_price || 0;
+      const priceTable = calculatePriceTable(
+        basePrice,
+        userMultiplier,
+        product.fixed_price,
+      ) || {
+        "À Vista": 0,
+        30: 0,
+        "30/60": 0,
+        "30/60/90": 0,
+        "30/60/90/120": 0,
+      };
+
+      // Pegar primeira imagem com verificação segura
+      let firstImage = "";
+      try {
+        if (
+          product.images &&
+          product.images !== "null" &&
+          product.images !== ""
+        ) {
+          const images = JSON.parse(product.images);
+          firstImage = images[0] || product.image_url;
+        } else {
+          firstImage = product.image_url;
+        }
+      } catch (e) {
         firstImage = product.image_url;
       }
-    } catch (e) {
-      firstImage = product.image_url;
-    }
-    
-    return `
+
+      return `
       <tr style="border-bottom: 1px solid #e5e7eb;">
         <td style="padding: 1rem;">
-          ${firstImage ? 
-            `<img src="${firstImage}" alt="${product.name}" style="width: 60px; height: 60px; object-fit: contain; border-radius: 0.375rem; background: #f8f9fa;">` :
-            `<div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; color: #6b7280;">📷</div>`
+          ${
+            firstImage
+              ? `<img src="${firstImage}" alt="${product.name}" style="width: 60px; height: 60px; object-fit: contain; border-radius: 0.375rem; background: #f8f9fa;">`
+              : `<div style="width: 60px; height: 60px; background: #f3f4f6; border-radius: 0.375rem; display: flex; align-items: center; justify-content: center; color: #6b7280;">📷</div>`
           }
         </td>
         <td style="padding: 1rem;">
           <div style="font-weight: 600; color: #1e293b;">${product.name}</div>
-          <div style="font-size: 0.875rem; color: #6b7280;">${product.category || 'N/A'}</div>
-          ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #1f2937;">🔒 Preço Fixo</div>' : ''}
+          <div style="font-size: 0.875rem; color: #6b7280;">${product.category || "N/A"}</div>
+          ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #1f2937;">🔒 Preço Fixo</div>' : ""}
         </td>
-        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90/120'] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</td>
         <td style="padding: 1rem;">
           <button onclick="showEditProductModal(${product.id})" style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem; margin-right: 0.5rem;">
             Editar
@@ -1962,7 +2312,8 @@ function renderProductsTab() {
         </td>
       </tr>
     `;
-  }).join('');
+    })
+    .join("");
 
   return `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -2003,17 +2354,22 @@ function renderProductsTab() {
 function renderCategoriesTab() {
   // Ordenar categorias por nome (alfabética)
   const sortedCategories = [...systemData.categories].sort((a, b) => {
-    return (a.name || '').localeCompare(b.name || '', 'pt-BR', { numeric: true });
+    return (a.name || "").localeCompare(b.name || "", "pt-BR", {
+      numeric: true,
+    });
   });
-  
-  const categoriesHtml = sortedCategories.map(category => `
+
+  const categoriesHtml = sortedCategories
+    .map(
+      (category) => `
     <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid ${category.color};">
       <div style="display: flex; justify-content: space-between; align-items: center;">
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div style="width: 60px; height: 40px; display: flex; align-items: center; justify-content: center; overflow: hidden; border-radius: 0.375rem; background: #f3f4f6;">
-            ${category.icon && category.icon.length > 50 ? 
-              `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">` 
-              : `<span style="font-size: 2rem;">${category.icon || '📁'}</span>`
+            ${
+              category.icon && category.icon.length > 50
+                ? `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">`
+                : `<span style="font-size: 2rem;">${category.icon || "📁"}</span>`
             }
           </div>
           <div>
@@ -2031,7 +2387,9 @@ function renderCategoriesTab() {
         </div>
       </div>
     </div>
-  `).join('');
+  `,
+    )
+    .join("");
 
   return `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -2050,23 +2408,23 @@ function renderCategoriesTab() {
 // Renderizar aba de preços
 function renderPricesTab() {
   const tablesArray = Object.entries(systemData.priceSettings);
-  
+
   // Aplicar ordenação baseada na preferência do usuário
   let sortedTables;
-  if (window.priceTableSortOrder === 'percentage') {
+  if (window.priceTableSortOrder === "percentage") {
     sortedTables = tablesArray.sort((a, b) => {
-      if (a[0] === 'A Vista') return -1;
-      if (b[0] === 'A Vista') return 1;
+      if (a[0] === "A Vista") return -1;
+      if (b[0] === "A Vista") return 1;
       return a[1] - b[1];
     });
   } else {
     sortedTables = tablesArray.sort((a, b) => {
-      if (a[0] === 'A Vista') return -1;
-      if (b[0] === 'A Vista') return 1;
+      if (a[0] === "A Vista") return -1;
+      if (b[0] === "A Vista") return 1;
       return a[0].localeCompare(b[0]);
     });
   }
-  
+
   return `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
       <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1e293b;">Gerenciar Tabelas de Preços</h2>
@@ -2095,17 +2453,24 @@ function renderPricesTab() {
             </tr>
           </thead>
           <tbody>
-            ${sortedTables.map(([tableName, percentage]) => {
-              const multiplier = (1 + percentage / 100).toFixed(3);
-              const example = (100 * (1 + percentage / 100)).toFixed(2);
-              const isDefault = ['A Vista', '30', '30/60', '30/60/90', '30/60/90/120'].includes(tableName);
-              
-              return `
+            ${sortedTables
+              .map(([tableName, percentage]) => {
+                const multiplier = (1 + percentage / 100).toFixed(3);
+                const example = (100 * (1 + percentage / 100)).toFixed(2);
+                const isDefault = [
+                  "A Vista",
+                  "30",
+                  "30/60",
+                  "30/60/90",
+                  "30/60/90/120",
+                ].includes(tableName);
+
+                return `
                 <tr style="border-bottom: 1px solid #e5e7eb;">
                   <td style="padding: 1rem;">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                       <span style="font-weight: 600; color: #1e293b;">${tableName}</span>
-                      ${tableName === 'A Vista' ? '<span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Padrão</span>' : ''}
+                      ${tableName === "A Vista" ? '<span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Padrão</span>' : ""}
                     </div>
                   </td>
                   <td style="padding: 1rem;">
@@ -2121,19 +2486,24 @@ function renderPricesTab() {
                               style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
                         Editar
                       </button>
-                      ${!isDefault ? `
+                      ${
+                        !isDefault
+                          ? `
                         <button onclick="deletePriceTable('${tableName}')" 
                                 style="padding: 0.25rem 0.5rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
                           Excluir
                         </button>
-                      ` : `
+                      `
+                          : `
                         <span style="color: #6b7280; font-size: 0.75rem;">Sistema</span>
-                      `}
+                      `
+                      }
                     </div>
                   </td>
                 </tr>
               `;
-            }).join('')}
+              })
+              .join("")}
           </tbody>
         </table>
       </div>
@@ -2154,17 +2524,19 @@ function renderPricesTab() {
 // Renderizar aba de promoções
 function renderPromotionsTab() {
   const promotions = systemData.promotions || [];
-  
-  const promotionsHtml = promotions.map(promotion => `
+
+  const promotionsHtml = promotions
+    .map(
+      (promotion) => `
     <tr>
-      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.texto || ''}</td>
-      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.descricao || ''}</td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.texto || ""}</td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.descricao || ""}</td>
       <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
-        <div style="width: 30px; height: 20px; background: ${promotion.cor || '#ff6b6b'}; border-radius: 4px; border: 1px solid #ddd;"></div>
+        <div style="width: 30px; height: 20px; background: ${promotion.cor || "#ff6b6b"}; border-radius: 4px; border: 1px solid #ddd;"></div>
       </td>
       <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
-        <span style="padding: 0.25rem 0.5rem; background: ${promotion.ativo ? '#10b981' : '#ef4444'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
-          ${promotion.ativo ? 'Ativa' : 'Inativa'}
+        <span style="padding: 0.25rem 0.5rem; background: ${promotion.ativo ? "#10b981" : "#ef4444"}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
+          ${promotion.ativo ? "Ativa" : "Inativa"}
         </span>
       </td>
       <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
@@ -2178,7 +2550,9 @@ function renderPromotionsTab() {
         </div>
       </td>
     </tr>
-  `).join('');
+  `,
+    )
+    .join("");
 
   return `
     <div style="background: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
@@ -2189,15 +2563,15 @@ function renderPromotionsTab() {
         </button>
       </div>
       
-      <div class="table-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-        <table style="width: 100%; min-width: 600px; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <thead style="background: #f8f9fa;">
             <tr>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 150px;">Texto</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 200px;">Descrição</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 60px;">Cor</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 80px;">Status</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 120px;">Ações</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Texto</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Descrição</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Cor</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Status</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -2216,21 +2590,23 @@ function renderPromotionsTab() {
 
 // Renderizar aba de usuários
 function renderUsersTab() {
-  const usersHtml = systemData.users.map(user => `
+  const usersHtml = systemData.users
+    .map(
+      (user) => `
     <tr style="border-bottom: 1px solid #e5e7eb;">
       <td style="padding: 1rem; color: #1e293b;">${user.name}</td>
       <td style="padding: 1rem; color: #1e293b;">@${user.username}</td>
       <td style="padding: 1rem;">
-        <span style="padding: 0.25rem 0.5rem; background: ${user.role === 'admin' ? '#dc2626' : user.role === 'seller' ? '#3b82f6' : '#10b981'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
-          ${user.role === 'admin' ? 'Admin' : user.role === 'seller' ? 'Vendedor' : 'Cliente'}
+        <span style="padding: 0.25rem 0.5rem; background: ${user.role === "admin" ? "#dc2626" : user.role === "seller" ? "#3b82f6" : "#10b981"}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
+          ${user.role === "admin" ? "Admin" : user.role === "seller" ? "Vendedor" : "Cliente"}
         </span>
       </td>
       <td style="padding: 1rem; color: #1f2937; font-weight: 600;">
         x${(user.price_multiplier || 1.0).toFixed(2)}
       </td>
       <td style="padding: 1rem;">
-        <span style="color: ${user.active ? '#10b981' : '#ef4444'};">
-          ${user.active ? '● Ativo' : '○ Inativo'}
+        <span style="color: ${user.active ? "#10b981" : "#ef4444"};">
+          ${user.active ? "● Ativo" : "○ Inativo"}
         </span>
       </td>
       <td style="padding: 1rem;">
@@ -2242,7 +2618,9 @@ function renderUsersTab() {
         </button>
       </td>
     </tr>
-  `).join('');
+  `,
+    )
+    .join("");
 
   return `
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -2397,7 +2775,7 @@ function renderMonitoringTab() {
       </div>
       <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid #f59e0b;">
         <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Usuário Ativo</h4>
-        <p style="margin: 0; font-size: 1.2rem; color: #1f2937;">${currentUser ? currentUser.name : 'N/A'}</p>
+        <p style="margin: 0; font-size: 1.2rem; color: #1f2937;">${currentUser ? currentUser.name : "N/A"}</p>
       </div>
     </div>
     
@@ -2406,7 +2784,7 @@ function renderMonitoringTab() {
       <div style="background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 0.375rem; font-family: monospace; font-size: 0.875rem; height: 200px; overflow-y: auto;">
         <div>${new Date().toISOString()} - Sistema inicializado</div>
         <div>${new Date().toISOString()} - Conectado ao Supabase</div>
-        <div>${new Date().toISOString()} - Login realizado: ${currentUser ? currentUser.name : 'N/A'}</div>
+        <div>${new Date().toISOString()} - Login realizado: ${currentUser ? currentUser.name : "N/A"}</div>
         <div>${new Date().toISOString()} - Dados carregados: ${systemData.products.length} produtos</div>
         <div>${new Date().toISOString()} - Sistema funcionando normalmente</div>
       </div>
@@ -2416,7 +2794,7 @@ function renderMonitoringTab() {
 
 // Função principal para renderizar a aplicação
 function renderApp() {
-  if (currentView === 'login') {
+  if (currentView === "login") {
     document.body.innerHTML = `
       <div style="min-height: 100vh; background: linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #000000 100%); display: flex; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
         <div style="background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); max-width: 420px; width: 100%; margin: 1rem;">
@@ -2442,30 +2820,37 @@ function renderApp() {
         </div>
       </div>
     `;
-  } else if (currentView === 'catalog') {
+  } else if (currentView === "catalog") {
     renderCatalogView();
-  } else if (currentView === 'admin') {
+  } else if (currentView === "admin") {
     renderAdminView();
   }
 }
 
 // Função para renderizar banner de promoção
 function renderPromotionBanner() {
-  console.log('🎯 Verificando promoções ativas:', systemData.promotions);
-  const activePromotion = systemData.promotions?.find(p => p.ativo === true);
-  
+  console.log("🎯 Verificando promoções ativas:", systemData.promotions);
+  const activePromotion = systemData.promotions?.find((p) => p.ativo === true);
+
   if (!activePromotion) {
-    console.log('❌ Nenhuma promoção ativa encontrada');
-    console.log('📋 Promoções disponíveis:', systemData.promotions.map(p => ({id: p.id, texto: p.texto, ativo: p.ativo})));
-    return '';
+    console.log("❌ Nenhuma promoção ativa encontrada");
+    console.log(
+      "📋 Promoções disponíveis:",
+      systemData.promotions.map((p) => ({
+        id: p.id,
+        texto: p.texto,
+        ativo: p.ativo,
+      })),
+    );
+    return "";
   }
-  
-  console.log('✅ Promoção ativa encontrada:', activePromotion);
-  
+
+  console.log("✅ Promoção ativa encontrada:", activePromotion);
+
   return `
-    <div style="background: ${activePromotion.cor || 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'}; color: white; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; text-align: center; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative;">
-      <div style="font-size: 1.1rem;">🎉 ${activePromotion.texto || 'Promoção Especial!'}</div>
-      ${activePromotion.descricao ? `<div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">${activePromotion.descricao}</div>` : ''}
+    <div style="background: ${activePromotion.cor || "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)"}; color: white; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; text-align: center; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative;">
+      <div style="font-size: 1.1rem;">⚠️ ${activePromotion.texto || "Promoção Especial!"}</div>
+      ${activePromotion.descricao ? `<div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">${activePromotion.descricao}</div>` : ""}
     </div>
   `;
 }
@@ -2474,70 +2859,95 @@ function renderPromotionBanner() {
 function renderCatalogView() {
   // Buscar o multiplicador atual do usuário na aba de usuários
   let userMultiplier = 1.0;
-  const userInSystem = systemData.users.find(u => u.username === currentUser.username);
+  const userInSystem = systemData.users.find(
+    (u) => u.username === currentUser.username,
+  );
   if (userInSystem) {
     userMultiplier = userInSystem.price_multiplier || 1.0;
   } else {
     userMultiplier = currentUser.price_multiplier || 1.0;
   }
-  
+
   // Ordenar produtos por categoria (alfabética) e depois por nome (alfabética)
   const sortedProducts = [...systemData.products].sort((a, b) => {
     if (a.category !== b.category) {
-      return (a.category || '').localeCompare(b.category || '', 'pt-BR', { numeric: true });
+      return (a.category || "").localeCompare(b.category || "", "pt-BR", {
+        numeric: true,
+      });
     }
-    return (a.name || '').localeCompare(b.name || '', 'pt-BR', { numeric: true });
+    return (a.name || "").localeCompare(b.name || "", "pt-BR", {
+      numeric: true,
+    });
   });
-  
-  const productsHtml = sortedProducts.map((product, index) => {
-    const basePrice = product.base_price || 0;
-    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price) || {
-      'À Vista': 0,
-      '30': 0,
-      '30/60': 0,
-      '30/60/90': 0,
-      '30/60/90/120': 0
-    };
-    
-    // Pegar todas as imagens com verificação segura
-    let allImages = [];
-    try {
-      if (product.images && product.images !== 'null' && product.images !== '') {
-        const parsed = JSON.parse(product.images);
-        if (Array.isArray(parsed)) {
-          allImages = parsed;
+
+  const productsHtml = sortedProducts
+    .map((product, index) => {
+      const basePrice = product.base_price || 0;
+      const priceTable = calculatePriceTable(
+        basePrice,
+        userMultiplier,
+        product.fixed_price,
+      ) || {
+        "À Vista": 0,
+        30: 0,
+        "30/60": 0,
+        "30/60/90": 0,
+        "30/60/90/120": 0,
+      };
+
+      // Pegar todas as imagens com verificação segura
+      let allImages = [];
+      try {
+        if (
+          product.images &&
+          product.images !== "null" &&
+          product.images !== ""
+        ) {
+          const parsed = JSON.parse(product.images);
+          if (Array.isArray(parsed)) {
+            allImages = parsed;
+          }
+        }
+        if (product.image_url && !allImages.includes(product.image_url)) {
+          allImages.unshift(product.image_url);
+        }
+      } catch (e) {
+        if (product.image_url) {
+          allImages = [product.image_url];
         }
       }
-      if (product.image_url && !allImages.includes(product.image_url)) {
-        allImages.unshift(product.image_url);
-      }
-    } catch (e) {
-      if (product.image_url) {
-        allImages = [product.image_url];
-      }
-    }
-    
-    // Filtrar imagens válidas
-    allImages = allImages.filter(img => img && img.trim() !== '');
-    
-    const hasMultipleImages = allImages.length > 1;
-    const carouselId = `carousel-${product.id || index}`;
-    
-    return `
+
+      // Filtrar imagens válidas
+      allImages = allImages.filter((img) => img && img.trim() !== "");
+
+      const hasMultipleImages = allImages.length > 1;
+      const carouselId = `carousel-${product.id || index}`;
+
+      return `
       <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; padding: 1rem; transition: transform 0.2s; max-width: 100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
         <!-- Carrossel de Imagens -->
         <div style="position: relative; margin-bottom: 1rem; overflow: hidden; border-radius: 0.375rem;">
           <div id="${carouselId}" style="display: flex; transition: transform 0.3s ease; width: ${allImages.length * 100}%;">
-            ${allImages.length > 0 ? allImages.map((img, imgIndex) => `
+            ${
+              allImages.length > 0
+                ? allImages
+                    .map(
+                      (img, imgIndex) => `
               <div style="width: ${100 / allImages.length}%; flex-shrink: 0;">
                 <img src="${img}" alt="${product.name}" style="width: 100%; height: 180px; object-fit: cover; display: block;">
               </div>
-            `).join('') : `
+            `,
+                    )
+                    .join("")
+                : `
               <div style="width: 100%; height: 180px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 2rem;">📷</div>
-            `}
+            `
+            }
           </div>
           
-          ${hasMultipleImages ? `
+          ${
+            hasMultipleImages
+              ? `
             <!-- Setas de Navegação -->
             <button onclick="previousImage('${carouselId}', ${allImages.length})" 
                     style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10;">
@@ -2550,9 +2960,13 @@ function renderCatalogView() {
             
             <!-- Indicadores -->
             <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px;">
-              ${allImages.map((_, imgIndex) => `
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${imgIndex === 0 ? 'white' : 'rgba(255,255,255,0.5)'};" id="dot-${carouselId}-${imgIndex}"></div>
-              `).join('')}
+              ${allImages
+                .map(
+                  (_, imgIndex) => `
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${imgIndex === 0 ? "white" : "rgba(255,255,255,0.5)"};" id="dot-${carouselId}-${imgIndex}"></div>
+              `,
+                )
+                .join("")}
             </div>
             
             <!-- Configurar swipe touch para mobile -->
@@ -2561,45 +2975,48 @@ function renderCatalogView() {
                  ontouchmove="handleTouchMove(event)" 
                  ontouchend="handleTouchEnd(event, '${carouselId}', ${allImages.length})">
             </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
         
         <h3 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 1.1rem; font-weight: 600;">${product.name}</h3>
-        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">${product.category || 'Categoria'}</p>
+        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">${product.category || "Categoria"}</p>
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60/90</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
             </div>
           </div>
           <div style="margin-top: 0.5rem;">
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280; font-size: 0.8rem;">30/60/90/120</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90/120'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
         
-        ${product.description ? `<p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ''}
+        ${product.description ? `<p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ""}
         
-        ${product.fixed_price ? '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #fef3c7; color: #92400e; border-radius: 0.25rem; font-size: 0.75rem; text-align: center;">🔒 Preço Fixo</div>' : ''}
+        ${product.fixed_price ? '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #fef3c7; color: #92400e; border-radius: 0.25rem; font-size: 0.75rem; text-align: center;">🔒 Preço Fixo</div>' : ""}
       </div>
     `;
-  }).join('');
+    })
+    .join("");
 
   document.body.innerHTML = `
     <div style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
@@ -2632,7 +3049,7 @@ function renderCatalogView() {
             <select id="category-filter" onchange="filterProducts()" 
                     style="padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.375rem; background: white;">
               <option value="">Todas as categorias</option>
-              ${systemData.categories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('')}
+              ${systemData.categories.map((cat) => `<option value="${cat.name}">${cat.name}</option>`).join("")}
             </select>
           </div>
         </div>
@@ -2641,28 +3058,35 @@ function renderCatalogView() {
         <div style="margin-bottom: 2rem;">
           <h3 style="margin: 0 0 1rem; color: #1e293b;">Categorias</h3>
           <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 0.75rem;">
-            ${systemData.categories.map(category => {
-              const productCount = systemData.products.filter(p => p.category === category.name).length;
-              return `
+            ${systemData.categories
+              .map((category) => {
+                const productCount = systemData.products.filter(
+                  (p) => p.category === category.name,
+                ).length;
+                return `
                 <div onclick="filterByCategory('${category.name}')" style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 3px solid ${category.color}; text-align: center; cursor: pointer; transition: transform 0.2s; overflow: hidden; padding: 0.75rem;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
                   <div style="height: 60px; display: flex; align-items: center; justify-content: center; background-color: #f3f4f6; border-radius: 0.375rem; margin-bottom: 0.5rem; overflow: hidden;">
-                    ${category.icon && category.icon.length > 50 ? 
-                      `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">` 
-                      : `<div style="font-size: 1.5rem;">${category.icon || '📁'}</div>`
+                    ${
+                      category.icon && category.icon.length > 50
+                        ? `<img src="${category.icon}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 0.375rem;" alt="${category.name}">`
+                        : `<div style="font-size: 1.5rem;">${category.icon || "📁"}</div>`
                     }
                   </div>
                   <h4 style="margin: 0; color: #1e293b; font-size: 0.875rem;">${category.name}</h4>
                   <p style="margin: 0; color: #6b7280; font-size: 0.75rem;">${productCount} produtos</p>
                 </div>
               `;
-            }).join('')}
+              })
+              .join("")}
           </div>
         </div>
 
         <!-- Produtos -->
         <div>
           <h3 style="margin: 0 0 1rem; color: #1e293b;">Produtos Disponíveis</h3>
-          ${systemData.products.length > 0 ? `
+          ${
+            systemData.products.length > 0
+              ? `
             <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
               ${productsHtml}
             </div>
@@ -2778,13 +3202,15 @@ function renderCatalogView() {
                 }
               }
             </style>
-          ` : `
+          `
+              : `
             <div style="background: white; padding: 3rem; border-radius: 0.5rem; text-align: center; border: 2px dashed #d1d5db;">
               <div style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;">📦</div>
               <h3 style="margin: 0 0 0.5rem; color: #6b7280;">Nenhum produto disponível</h3>
               <p style="margin: 0; color: #6b7280;">Novos produtos serão adicionados em breve!</p>
             </div>
-          `}
+          `
+          }
         </div>
       </main>
       
@@ -2794,7 +3220,7 @@ function renderCatalogView() {
       </footer>
     </div>
   `;
-  
+
   // Correções removidas - layout já correto
 }
 
@@ -3061,20 +3487,25 @@ function renderAdminView() {
 }
 
 // Função de filtro de produtos
-window.filterProducts = function() {
-  const searchTerm = document.getElementById('search-input').value.toLowerCase();
-  const selectedCategory = document.getElementById('category-filter').value;
-  
-  const filteredProducts = systemData.products.filter(product => {
-    const matchesSearch = !searchTerm || 
+window.filterProducts = function () {
+  const searchTerm = document
+    .getElementById("search-input")
+    .value.toLowerCase();
+  const selectedCategory = document.getElementById("category-filter").value;
+
+  const filteredProducts = systemData.products.filter((product) => {
+    const matchesSearch =
+      !searchTerm ||
       product.name.toLowerCase().includes(searchTerm) ||
-      (product.description && product.description.toLowerCase().includes(searchTerm));
-    
-    const matchesCategory = !selectedCategory || product.category === selectedCategory;
-    
+      (product.description &&
+        product.description.toLowerCase().includes(searchTerm));
+
+    const matchesCategory =
+      !selectedCategory || product.category === selectedCategory;
+
     return matchesSearch && matchesCategory;
   });
-  
+
   // Re-renderizar apenas a seção de produtos
   updateProductsDisplay(filteredProducts);
 };
@@ -3083,56 +3514,77 @@ window.filterProducts = function() {
 function updateProductsDisplay(productsToShow) {
   // Buscar o multiplicador atual do usuário na aba de usuários
   let userMultiplier = 1.0;
-  const userInSystem = systemData.users.find(u => u.username === currentUser.username);
+  const userInSystem = systemData.users.find(
+    (u) => u.username === currentUser.username,
+  );
   if (userInSystem) {
     userMultiplier = userInSystem.price_multiplier || 1.0;
   } else {
     userMultiplier = currentUser.price_multiplier || 1.0;
   }
-  
-  const productsHtml = productsToShow.map((product, index) => {
-    const basePrice = product.base_price || 0;
-    const priceTable = calculatePriceTable(basePrice, userMultiplier, product.fixed_price);
-    
-    // Pegar todas as imagens com verificação segura
-    let allImages = [];
-    try {
-      if (product.images && product.images !== 'null' && product.images !== '') {
-        const parsed = JSON.parse(product.images);
-        if (Array.isArray(parsed)) {
-          allImages = parsed;
+
+  const productsHtml = productsToShow
+    .map((product, index) => {
+      const basePrice = product.base_price || 0;
+      const priceTable = calculatePriceTable(
+        basePrice,
+        userMultiplier,
+        product.fixed_price,
+      );
+
+      // Pegar todas as imagens com verificação segura
+      let allImages = [];
+      try {
+        if (
+          product.images &&
+          product.images !== "null" &&
+          product.images !== ""
+        ) {
+          const parsed = JSON.parse(product.images);
+          if (Array.isArray(parsed)) {
+            allImages = parsed;
+          }
+        }
+        if (product.image_url && !allImages.includes(product.image_url)) {
+          allImages.unshift(product.image_url);
+        }
+      } catch (e) {
+        if (product.image_url) {
+          allImages = [product.image_url];
         }
       }
-      if (product.image_url && !allImages.includes(product.image_url)) {
-        allImages.unshift(product.image_url);
-      }
-    } catch (e) {
-      if (product.image_url) {
-        allImages = [product.image_url];
-      }
-    }
-    
-    // Filtrar imagens válidas
-    allImages = allImages.filter(img => img && img.trim() !== '');
-    
-    const hasMultipleImages = allImages.length > 1;
-    const carouselId = `carousel-${product.id || index}`;
-    
-    return `
+
+      // Filtrar imagens válidas
+      allImages = allImages.filter((img) => img && img.trim() !== "");
+
+      const hasMultipleImages = allImages.length > 1;
+      const carouselId = `carousel-${product.id || index}`;
+
+      return `
       <div style="background: white; border-radius: 0.5rem; border: 1px solid #e5e7eb; padding: 1rem; transition: transform 0.2s; max-width: 100%;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
         <!-- Carrossel de Imagens -->
         <div style="position: relative; margin-bottom: 1rem; overflow: hidden; border-radius: 0.375rem;">
           <div id="${carouselId}" style="display: flex; transition: transform 0.3s ease; width: ${allImages.length * 100}%;">
-            ${allImages.length > 0 ? allImages.map((img, imgIndex) => `
+            ${
+              allImages.length > 0
+                ? allImages
+                    .map(
+                      (img, imgIndex) => `
               <div style="width: ${100 / allImages.length}%; flex-shrink: 0;">
                 <img src="${img}" alt="${product.name}" style="width: 100%; height: 180px; object-fit: cover; display: block;">
               </div>
-            `).join('') : `
+            `,
+                    )
+                    .join("")
+                : `
               <div style="width: 100%; height: 180px; background: #f3f4f6; display: flex; align-items: center; justify-content: center; color: #6b7280; font-size: 2rem;">📷</div>
-            `}
+            `
+            }
           </div>
           
-          ${hasMultipleImages ? `
+          ${
+            hasMultipleImages
+              ? `
             <!-- Setas de Navegação -->
             <button onclick="previousImage('${carouselId}', ${allImages.length})" 
                     style="position: absolute; left: 5px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10;">
@@ -3145,9 +3597,13 @@ function updateProductsDisplay(productsToShow) {
             
             <!-- Indicadores -->
             <div style="position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); display: flex; gap: 3px;">
-              ${allImages.map((_, imgIndex) => `
-                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${imgIndex === 0 ? 'white' : 'rgba(255,255,255,0.5)'};" id="dot-${carouselId}-${imgIndex}"></div>
-              `).join('')}
+              ${allImages
+                .map(
+                  (_, imgIndex) => `
+                <div style="width: 6px; height: 6px; border-radius: 50%; background: ${imgIndex === 0 ? "white" : "rgba(255,255,255,0.5)"};" id="dot-${carouselId}-${imgIndex}"></div>
+              `,
+                )
+                .join("")}
             </div>
             
             <!-- Configurar swipe touch para mobile -->
@@ -3156,98 +3612,131 @@ function updateProductsDisplay(productsToShow) {
                  ontouchmove="handleTouchMove(event)" 
                  ontouchend="handleTouchEnd(event, '${carouselId}', ${allImages.length})">
             </div>
-          ` : ''}
+          `
+              : ""
+          }
         </div>
         
         <h3 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 1.1rem; font-weight: 600;">${product.name}</h3>
-        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">${product.category || 'Categoria'}</p>
+        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">${product.category || "Categoria"}</p>
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60/90</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
         
-        ${product.description ? `<p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ''}
+        ${product.description ? `<p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ""}
         
-        ${product.fixed_price ? '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #fef3c7; color: #92400e; border-radius: 0.25rem; font-size: 0.75rem; text-align: center;">🔒 Preço Fixo</div>' : ''}
+        ${product.fixed_price ? '<div style="margin-top: 0.5rem; padding: 0.25rem 0.5rem; background: #fef3c7; color: #92400e; border-radius: 0.25rem; font-size: 0.75rem; text-align: center;">🔒 Preço Fixo</div>' : ""}
       </div>
     `;
-  }).join('');
+    })
+    .join("");
 
   // Atualizar container de produtos
-  const productsContainer = document.querySelector('[style*="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))"]');
+  const productsContainer = document.querySelector(
+    '[style*="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))"]',
+  );
   if (productsContainer) {
     if (productsToShow.length > 0) {
       productsContainer.innerHTML = productsHtml;
       // Aplicar melhorias visuais após filtrar
       setTimeout(() => {
-        const priceTables = document.querySelectorAll('[style*="grid-template-columns: 1fr 1fr"]');
+        const priceTables = document.querySelectorAll(
+          '[style*="grid-template-columns: 1fr 1fr"]',
+        );
         priceTables.forEach((table, tableIndex) => {
-          if (table.innerHTML.includes('À Vista')) {
+          if (table.innerHTML.includes("À Vista")) {
             // Atualizar para 5 tabelas coloridas
-            table.style.gridTemplateColumns = 'repeat(5, 1fr)';
-            table.style.gap = '0.5rem';
-            table.style.fontSize = '0.75rem';
-            console.log('🔍 CLIQUE DETECTADO NA TABELA DE PREÇOS - INDEX:', tableIndex);
-            table.style.cursor = 'default';
+            table.style.gridTemplateColumns = "repeat(5, 1fr)";
+            table.style.gap = "0.5rem";
+            table.style.fontSize = "0.75rem";
+            console.log(
+              "🔍 CLIQUE DETECTADO NA TABELA DE PREÇOS - INDEX:",
+              tableIndex,
+            );
+            table.style.cursor = "default";
             table.onclick = (e) => {
-              console.log('❌ TENTATIVA DE ABRIR MODAL BLOQUEADA PARA CLIENTE');
+              console.log("❌ TENTATIVA DE ABRIR MODAL BLOQUEADA PARA CLIENTE");
               e.preventDefault();
               e.stopPropagation();
             };
-            
+
             const boxes = table.children;
             if (boxes.length >= 4) {
               // Aplicar cores corretas
               if (boxes[0]) {
-                boxes[0].style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-                boxes[0].style.color = 'white';
-                boxes[0].style.fontWeight = '700';
-                boxes[0].innerHTML = boxes[0].innerHTML.replace('À Vista', 'À Vista').replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
+                boxes[0].style.background =
+                  "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+                boxes[0].style.color = "white";
+                boxes[0].style.fontWeight = "700";
+                boxes[0].innerHTML = boxes[0].innerHTML
+                  .replace("À Vista", "À Vista")
+                  .replace("color: #6b7280", "font-weight: 700")
+                  .replace("color: #1f2937", "font-weight: 600");
               }
               if (boxes[1]) {
-                boxes[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
-                boxes[1].style.color = 'white';
-                boxes[1].style.fontWeight = '700';
-                boxes[1].innerHTML = boxes[1].innerHTML.replace('30 dias', '30').replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
+                boxes[1].style.background =
+                  "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
+                boxes[1].style.color = "white";
+                boxes[1].style.fontWeight = "700";
+                boxes[1].innerHTML = boxes[1].innerHTML
+                  .replace("30 dias", "30")
+                  .replace("color: #6b7280", "font-weight: 700")
+                  .replace("color: #1f2937", "font-weight: 600");
               }
               if (boxes[2]) {
-                boxes[2].style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
-                boxes[2].style.color = 'white';
-                boxes[2].style.fontWeight = '700';
-                boxes[2].innerHTML = boxes[2].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
+                boxes[2].style.background =
+                  "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)";
+                boxes[2].style.color = "white";
+                boxes[2].style.fontWeight = "700";
+                boxes[2].innerHTML = boxes[2].innerHTML
+                  .replace("color: #6b7280", "font-weight: 700")
+                  .replace("color: #1f2937", "font-weight: 600");
               }
               if (boxes[3]) {
-                boxes[3].style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-                boxes[3].style.color = 'white';
-                boxes[3].style.fontWeight = '700';
-                boxes[3].innerHTML = boxes[3].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
+                boxes[3].style.background =
+                  "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)";
+                boxes[3].style.color = "white";
+                boxes[3].style.fontWeight = "700";
+                boxes[3].innerHTML = boxes[3].innerHTML
+                  .replace("color: #6b7280", "font-weight: 700")
+                  .replace("color: #1f2937", "font-weight: 600");
               }
-              
+
               // Adicionar 5ª tabela se não existir
               if (boxes.length === 4) {
-                const lastPrice = boxes[3].querySelector('[style*="font-weight: 600"]');
-                const baseValue = lastPrice ? parseFloat(lastPrice.textContent.replace('R$ ', '').replace(',', '.')) : 0;
+                const lastPrice = boxes[3].querySelector(
+                  '[style*="font-weight: 600"]',
+                );
+                const baseValue = lastPrice
+                  ? parseFloat(
+                      lastPrice.textContent
+                        .replace("R$ ", "")
+                        .replace(",", "."),
+                    )
+                  : 0;
                 const newPrice = (baseValue * 1.02).toFixed(2);
-                
-                const newBox = document.createElement('div');
-                newBox.style.cssText = 'padding: 0.5rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.375rem; text-align: center; color: white;';
+
+                const newBox = document.createElement("div");
+                newBox.style.cssText =
+                  "padding: 0.5rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.375rem; text-align: center; color: white;";
                 newBox.innerHTML = `
                   <div style="font-weight: 700;">30/60/90/120</div>
                   <div style="font-weight: 600; font-size: 0.9rem;">R$ ${newPrice}</div>
@@ -3268,84 +3757,92 @@ function updateProductsDisplay(productsToShow) {
       `;
     }
   }
-};
+}
 
 // Função para filtrar por categoria quando clicar no card da categoria
-window.filterByCategory = function(categoryName) {
-  console.log('Filtrando por categoria:', categoryName);
-  
+window.filterByCategory = function (categoryName) {
+  console.log("Filtrando por categoria:", categoryName);
+
   // Atualizar o select de categoria
-  const categoryFilter = document.getElementById('category-filter');
+  const categoryFilter = document.getElementById("category-filter");
   if (categoryFilter) {
     categoryFilter.value = categoryName;
   }
-  
+
   // Limpar busca por texto
-  const searchInput = document.getElementById('search-input');
+  const searchInput = document.getElementById("search-input");
   if (searchInput) {
-    searchInput.value = '';
+    searchInput.value = "";
   }
-  
+
   // Filtrar produtos da categoria
-  const filteredProducts = systemData.products.filter(product => product.category === categoryName);
-  
-  console.log(`Produtos da categoria "${categoryName}":`, filteredProducts.length);
+  const filteredProducts = systemData.products.filter(
+    (product) => product.category === categoryName,
+  );
+
+  console.log(
+    `Produtos da categoria "${categoryName}":`,
+    filteredProducts.length,
+  );
   updateProductsDisplay(filteredProducts);
-  
+
   // Scroll suave para a seção de produtos
   setTimeout(() => {
-    const productsSection = document.querySelector('h3');
+    const productsSection = document.querySelector("h3");
     if (productsSection) {
-      productsSection.scrollIntoView({ behavior: 'smooth' });
+      productsSection.scrollIntoView({ behavior: "smooth" });
     }
   }, 100);
 };
 
 // Função para limpar filtros e mostrar todos os produtos
-window.clearFilters = function() {
-  const searchInput = document.getElementById('search-input');
-  const categoryFilter = document.getElementById('category-filter');
-  
-  if (searchInput) searchInput.value = '';
-  if (categoryFilter) categoryFilter.value = '';
-  
+window.clearFilters = function () {
+  const searchInput = document.getElementById("search-input");
+  const categoryFilter = document.getElementById("category-filter");
+
+  if (searchInput) searchInput.value = "";
+  if (categoryFilter) categoryFilter.value = "";
+
   updateProductsDisplay(systemData.products);
 };
 
 // Função para corrigir tabelas de preços na tela de clientes
 function fixClientPriceTables() {
   // Corrigir apenas na tela de clientes
-  if (currentUser && currentUser.role === 'customer') {
-    const priceGrids = document.querySelectorAll('[style*="grid-template-columns: 1fr 1fr"]');
-    priceGrids.forEach(grid => {
-      if (grid.innerHTML.includes('À Vista')) {
+  if (currentUser && currentUser.role === "customer") {
+    const priceGrids = document.querySelectorAll(
+      '[style*="grid-template-columns: 1fr 1fr"]',
+    );
+    priceGrids.forEach((grid) => {
+      if (grid.innerHTML.includes("À Vista")) {
         // Mudar para 5 colunas
-        grid.style.gridTemplateColumns = '1fr 1fr 1fr 1fr 1fr';
-        grid.style.gap = '0.25rem';
-        grid.style.fontSize = '0.75rem';
-        
+        grid.style.gridTemplateColumns = "1fr 1fr 1fr 1fr 1fr";
+        grid.style.gap = "0.25rem";
+        grid.style.fontSize = "0.75rem";
+
         // Adicionar a 5ª tabela se não existir
-        if (!grid.innerHTML.includes('30/60/90/120')) {
+        if (!grid.innerHTML.includes("30/60/90/120")) {
           const lastDiv = grid.lastElementChild;
           if (lastDiv) {
-            const newDiv = document.createElement('div');
-            newDiv.style.cssText = 'padding: 0.4rem; background: #ffffff; border-radius: 0.25rem; text-align: center; border: 1px solid #e5e7eb;';
+            const newDiv = document.createElement("div");
+            newDiv.style.cssText =
+              "padding: 0.4rem; background: #ffffff; border-radius: 0.25rem; text-align: center; border: 1px solid #e5e7eb;";
             newDiv.innerHTML = `
               <div style="color: #6b7280; font-size: 0.7rem;">30/60/90/120</div>
               <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">R$</div>
-              <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">${(parseFloat(lastDiv.querySelector('div:last-child').textContent.replace('R$ ', '')) * 1.02).toFixed(2)}</div>
+              <div style="color: #dc2626; font-weight: 600; font-size: 0.8rem;">${(parseFloat(lastDiv.querySelector("div:last-child").textContent.replace("R$ ", "")) * 1.02).toFixed(2)}</div>
             `;
             grid.appendChild(newDiv);
           }
         }
-        
+
         // Ajustar padding e fonte dos elementos existentes
         const divs = grid.querySelectorAll('div[style*="padding: 0.5rem"]');
-        divs.forEach(div => {
-          div.style.padding = '0.4rem';
-          const labels = div.querySelectorAll('div');
-          if (labels[0]) labels[0].style.fontSize = '0.7rem';
-          if (labels[1]) labels[1].style.fontSize = '0.8rem';
+        divs.forEach((div) => {
+          div.style.padding = "0.4rem";
+          const labels = div.querySelectorAll("div");
+          if (labels[0]) labels[0].style.fontSize = "0.7rem";
+          if (labels[1]) labels[1].style.fontSize = "0.8rem";
         });
       }
     });
@@ -3354,74 +3851,83 @@ function fixClientPriceTables() {
 
 // Função para ajustar categorias - LAYOUT HORIZONTAL COMPACTO
 function fixCategoryLayout() {
-  if (currentUser && currentUser.role === 'customer') {
-    const categoryGrid = document.querySelector('[style*="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"]');
+  if (currentUser && currentUser.role === "customer") {
+    const categoryGrid = document.querySelector(
+      '[style*="grid-template-columns: repeat(auto-fill, minmax(150px, 1fr))"]',
+    );
     if (categoryGrid) {
       // Desktop: todas as categorias em uma linha
       if (window.innerWidth >= 768) {
         const categoryCount = systemData.categories.length;
         categoryGrid.style.gridTemplateColumns = `repeat(${categoryCount}, 1fr)`;
-        categoryGrid.style.gap = '1rem';
-      } 
+        categoryGrid.style.gap = "1rem";
+      }
       // Mobile: 3 categorias por linha
       else {
-        categoryGrid.style.gridTemplateColumns = 'repeat(3, 1fr)';
-        categoryGrid.style.gap = '0.5rem';
+        categoryGrid.style.gridTemplateColumns = "repeat(3, 1fr)";
+        categoryGrid.style.gap = "0.5rem";
       }
-      categoryGrid.style.maxWidth = '100%';
+      categoryGrid.style.maxWidth = "100%";
     }
-    
+
     // Ajustar cards das categorias - COMPACTOS COMO NA IMAGEM
-    const categoryCards = document.querySelectorAll('[onclick*="filterByCategory"]');
-    categoryCards.forEach(card => {
-      card.style.padding = '1rem';
-      card.style.minHeight = '120px';
-      card.style.display = 'flex';
-      card.style.flexDirection = 'column';
-      card.style.alignItems = 'center';
-      card.style.justifyContent = 'center';
-      card.style.background = '#f8f9fa';
-      card.style.border = '1px solid #e5e7eb';
-      card.style.borderRadius = '0.5rem';
-      card.style.transition = 'all 0.2s';
-      
+    const categoryCards = document.querySelectorAll(
+      '[onclick*="filterByCategory"]',
+    );
+    categoryCards.forEach((card) => {
+      card.style.padding = "1rem";
+      card.style.minHeight = "120px";
+      card.style.display = "flex";
+      card.style.flexDirection = "column";
+      card.style.alignItems = "center";
+      card.style.justifyContent = "center";
+      card.style.background = "#f8f9fa";
+      card.style.border = "1px solid #e5e7eb";
+      card.style.borderRadius = "0.5rem";
+      card.style.transition = "all 0.2s";
+
       // Hover effect
-      card.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-2px)';
-        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+      card.addEventListener("mouseenter", function () {
+        this.style.transform = "translateY(-2px)";
+        this.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
       });
-      
-      card.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(0)';
-        this.style.boxShadow = 'none';
+
+      card.addEventListener("mouseleave", function () {
+        this.style.transform = "translateY(0)";
+        this.style.boxShadow = "none";
       });
-      
+
       // Ícone maior como na imagem
-      const icon = card.querySelector('div[style*="font-size: 2rem"]') || card.querySelector('div[style*="font-size: 1.5rem"]') || card.querySelector('div[style*="font-size: 1.2rem"]');
+      const icon =
+        card.querySelector('div[style*="font-size: 2rem"]') ||
+        card.querySelector('div[style*="font-size: 1.5rem"]') ||
+        card.querySelector('div[style*="font-size: 1.2rem"]');
       if (icon) {
-        icon.style.fontSize = '2.5rem';
-        icon.style.marginBottom = '0.5rem';
-        icon.style.display = 'block';
+        icon.style.fontSize = "2.5rem";
+        icon.style.marginBottom = "0.5rem";
+        icon.style.display = "block";
       }
-      
+
       // Título compacto
-      const title = card.querySelector('h4');
+      const title = card.querySelector("h4");
       if (title) {
-        title.style.fontSize = '0.9rem';
-        title.style.fontWeight = '600';
-        title.style.color = '#1e293b';
-        title.style.margin = '0';
-        title.style.textAlign = 'center';
-        title.style.lineHeight = '1.2';
+        title.style.fontSize = "0.9rem";
+        title.style.fontWeight = "600";
+        title.style.color = "#1e293b";
+        title.style.margin = "0";
+        title.style.textAlign = "center";
+        title.style.lineHeight = "1.2";
       }
-      
+
       // Adicionar contador de produtos se não existir
       if (!card.querySelector('[style*="color: #6b7280"]')) {
-        const productCount = systemData.products.filter(p => p.category === title.textContent).length;
-        const countDiv = document.createElement('div');
-        countDiv.style.fontSize = '0.75rem';
-        countDiv.style.color = '#6b7280';
-        countDiv.style.marginTop = '0.25rem';
+        const productCount = systemData.products.filter(
+          (p) => p.category === title.textContent,
+        ).length;
+        const countDiv = document.createElement("div");
+        countDiv.style.fontSize = "0.75rem";
+        countDiv.style.color = "#6b7280";
+        countDiv.style.marginTop = "0.25rem";
         countDiv.textContent = `${productCount} produtos`;
         card.appendChild(countDiv);
       }
@@ -3433,76 +3939,103 @@ function fixCategoryLayout() {
 
 // Inicializar aplicação
 // Tratamento global de erros
-window.addEventListener('unhandledrejection', function(event) {
-  console.error('❌ Promise rejeitada:', event.reason);
+window.addEventListener("unhandledrejection", function (event) {
+  console.error("❌ Promise rejeitada:", event.reason);
   event.preventDefault(); // Previne erro no console
 });
 
 // Tratamento de erros globais
-window.addEventListener('error', function(event) {
-  console.error('❌ Erro global:', event.error);
+window.addEventListener("error", function (event) {
+  console.error("❌ Erro global:", event.error);
 });
 
-console.log('✅ Sistema MoveisBonafe completo carregado!');
+console.log("✅ Sistema MoveisBonafe completo carregado!");
 renderApp();
 
 // Aplicar melhorias visuais após carregamento
 setTimeout(() => {
   // Atualizar título para "Móveis Bonafé Catálogo"
-  const headers = document.querySelectorAll('h1, [style*="font-size: 1.5rem"], [style*="font-size: 2rem"]');
-  headers.forEach(header => {
-    if (header.textContent.includes('MoveisBonafe') || header.textContent.includes('Catálogo')) {
-      header.innerHTML = 'Móveis Bonafé Catálogo';
-      header.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
-      header.style.webkitBackgroundClip = 'text';
-      header.style.webkitTextFillColor = 'transparent';
-      header.style.backgroundClip = 'text';
-      header.style.fontWeight = '700';
+  const headers = document.querySelectorAll(
+    'h1, [style*="font-size: 1.5rem"], [style*="font-size: 2rem"]',
+  );
+  headers.forEach((header) => {
+    if (
+      header.textContent.includes("MoveisBonafe") ||
+      header.textContent.includes("Catálogo")
+    ) {
+      header.innerHTML = "Móveis Bonafé Catálogo";
+      header.style.background =
+        "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)";
+      header.style.webkitBackgroundClip = "text";
+      header.style.webkitTextFillColor = "transparent";
+      header.style.backgroundClip = "text";
+      header.style.fontWeight = "700";
     }
   });
-  
+
   // Aplicar cores nas tabelas de preços
-  const priceTables = document.querySelectorAll('[style*="grid-template-columns"]');
-  priceTables.forEach(table => {
-    if (table.innerHTML.includes('À Vista') || table.innerHTML.includes('30 dias')) {
+  const priceTables = document.querySelectorAll(
+    '[style*="grid-template-columns"]',
+  );
+  priceTables.forEach((table) => {
+    if (
+      table.innerHTML.includes("À Vista") ||
+      table.innerHTML.includes("30 dias")
+    ) {
       const priceBoxes = table.children;
       if (priceBoxes.length >= 4) {
         // À Vista - Verde
-        if (priceBoxes[0] && priceBoxes[0].textContent.includes('À Vista')) {
-          priceBoxes[0].style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-          priceBoxes[0].style.color = 'white';
-          priceBoxes[0].style.fontWeight = '700';
+        if (priceBoxes[0] && priceBoxes[0].textContent.includes("À Vista")) {
+          priceBoxes[0].style.background =
+            "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+          priceBoxes[0].style.color = "white";
+          priceBoxes[0].style.fontWeight = "700";
         }
         // 30 dias - Azul
-        if (priceBoxes[1] && (priceBoxes[1].textContent.includes('30 dias') || priceBoxes[1].textContent.includes('30'))) {
-          priceBoxes[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
-          priceBoxes[1].style.color = 'white';
-          priceBoxes[1].style.fontWeight = '700';
+        if (
+          priceBoxes[1] &&
+          (priceBoxes[1].textContent.includes("30 dias") ||
+            priceBoxes[1].textContent.includes("30"))
+        ) {
+          priceBoxes[1].style.background =
+            "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
+          priceBoxes[1].style.color = "white";
+          priceBoxes[1].style.fontWeight = "700";
         }
         // 30/60 - Roxo
-        if (priceBoxes[2] && priceBoxes[2].textContent.includes('30/60')) {
-          priceBoxes[2].style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
-          priceBoxes[2].style.color = 'white';
-          priceBoxes[2].style.fontWeight = '700';
+        if (priceBoxes[2] && priceBoxes[2].textContent.includes("30/60")) {
+          priceBoxes[2].style.background =
+            "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)";
+          priceBoxes[2].style.color = "white";
+          priceBoxes[2].style.fontWeight = "700";
         }
         // 30/60/90 - Laranja
-        if (priceBoxes[3] && priceBoxes[3].textContent.includes('30/60/90')) {
-          priceBoxes[3].style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-          priceBoxes[3].style.color = 'white';
-          priceBoxes[3].style.fontWeight = '700';
+        if (priceBoxes[3] && priceBoxes[3].textContent.includes("30/60/90")) {
+          priceBoxes[3].style.background =
+            "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)";
+          priceBoxes[3].style.color = "white";
+          priceBoxes[3].style.fontWeight = "700";
         }
         // 30/60/90/120 - Vermelho
-        if (priceBoxes[4] && priceBoxes[4].textContent.includes('30/60/90/120')) {
-          priceBoxes[4].style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
-          priceBoxes[4].style.color = 'white';
-          priceBoxes[4].style.fontWeight = '700';
+        if (
+          priceBoxes[4] &&
+          priceBoxes[4].textContent.includes("30/60/90/120")
+        ) {
+          priceBoxes[4].style.background =
+            "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)";
+          priceBoxes[4].style.color = "white";
+          priceBoxes[4].style.fontWeight = "700";
         }
       }
-      
+
       // Adicionar click para modal
-      table.style.cursor = 'pointer';
-      table.onclick = function() {
-        const productIndex = Array.from(document.querySelectorAll('[style*="background: white"][style*="border-radius: 0.5rem"]')).indexOf(table.closest('[style*="background: white"]'));
+      table.style.cursor = "pointer";
+      table.onclick = function () {
+        const productIndex = Array.from(
+          document.querySelectorAll(
+            '[style*="background: white"][style*="border-radius: 0.5rem"]',
+          ),
+        ).indexOf(table.closest('[style*="background: white"]'));
         showProductModal(productIndex);
       };
     }
@@ -3510,83 +4043,89 @@ setTimeout(() => {
 }, 1000);
 
 // Modal profissional para produto expandido
-window.showProductModal = function(productIndex) {
+window.showProductModal = function (productIndex) {
   const product = systemData.products[productIndex];
   if (!product) return;
-  
-  const allImages = product.images ? product.images.filter(img => img && img.trim()) : [];
+
+  const allImages = product.images
+    ? product.images.filter((img) => img && img.trim())
+    : [];
   const hasImages = allImages.length > 0;
-  
+
   // Calcular preços baseados nas configurações do sistema
   const priceTable = {};
-  Object.keys(systemData.priceSettings).forEach(tableName => {
+  Object.keys(systemData.priceSettings).forEach((tableName) => {
     const percentage = systemData.priceSettings[tableName];
-    const multiplier = 1 + (percentage / 100);
+    const multiplier = 1 + percentage / 100;
     priceTable[tableName] = product.base_price * multiplier;
   });
-  
-  const modal = document.createElement('div');
-  modal.id = 'product-modal';
+
+  const modal = document.createElement("div");
+  modal.id = "product-modal";
   modal.style.cssText = `
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: rgba(0,0,0,0.8); display: flex; align-items: center; 
     justify-content: center; z-index: 1000; padding: 1rem;
   `;
-  
+
   modal.innerHTML = `
     <div style="background: white; border-radius: 1rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
       <button onclick="closeProductModal()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; z-index: 10; display: flex; align-items: center; justify-content: center;">×</button>
       
-      ${hasImages ? `
+      ${
+        hasImages
+          ? `
         <div style="height: 300px; background: #f8f9fa; border-radius: 1rem 1rem 0 0; overflow: hidden;">
           <img src="${allImages[0]}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
         </div>
-      ` : `
+      `
+          : `
         <div style="height: 200px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1rem 1rem 0 0; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 3rem;">📷</div>
-      `}
+      `
+      }
       
       <div style="padding: 2rem;">
         <h2 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 1.5rem; font-weight: 700;">${product.name}</h2>
-        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 1rem;">${product.category || 'Categoria'}</p>
+        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 1rem;">${product.category || "Categoria"}</p>
         
-        ${product.description ? `<p style="margin: 0 0 1.5rem; color: #4b5563; line-height: 1.6;">${product.description}</p>` : ''}
+        ${product.description ? `<p style="margin: 0 0 1.5rem; color: #4b5563; line-height: 1.6;">${product.description}</p>` : ""}
         
         <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem;">
           <h3 style="margin: 0 0 1rem; color: #1e293b; font-size: 1.1rem; font-weight: 600;">Tabelas de Preços</h3>
           <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
             <div style="padding: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">À Vista</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['À Vista'] ? (priceTable['À Vista'] || 0).toFixed(2) : (product.base_price || 0).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable["À Vista"] ? (priceTable["À Vista"] || 0).toFixed(2) : (product.base_price || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30 dias</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30'] ? (priceTable['30'] || 0).toFixed(2) : ((product.base_price || 0) * 1.02).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable["30"] ? (priceTable["30"] || 0).toFixed(2) : ((product.base_price || 0) * 1.02).toFixed(2)}</div>
             </div>
             <div style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable['30/60'] ? (priceTable['30/60'] || 0).toFixed(2) : ((product.base_price || 0) * 1.04).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceTable["30/60"] ? (priceTable["30/60"] || 0).toFixed(2) : ((product.base_price || 0) * 1.04).toFixed(2)}</div>
             </div>
             <div style="padding: 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
             </div>
           </div>
           <div style="margin-top: 0.75rem;">
             <div style="padding: 1rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.5rem; text-align: center; color: white;">
               <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90/120</div>
-              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${(priceTable['30/60/90/120'] || 0).toFixed(2)}</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
       </div>
     </div>
   `;
-  
+
   document.body.appendChild(modal);
 };
 
-window.closeProductModal = function() {
-  const modal = document.getElementById('product-modal');
+window.closeProductModal = function () {
+  const modal = document.getElementById("product-modal");
   if (modal) {
     modal.remove();
   }
