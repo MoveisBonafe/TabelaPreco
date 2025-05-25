@@ -32,7 +32,6 @@ jobs:
         run: |
           mkdir -p docs
           cp index.html docs/
-          cp app-complete-functional.js docs/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

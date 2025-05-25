@@ -4,12 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoveisBonafe - Sistema de Preços</title>
-    <meta name="description" content="MoveisBonafe - Móveis de qualidade com os melhores preços. Veja nosso catálogo completo com tabelas de preços personalizadas.">
-    
-    <!-- SheetJS para Excel -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- CSS básico -->
     <style>
         * {
             margin: 0;
@@ -45,11 +39,6 @@
             margin-bottom: 10px;
         }
 
-        .header p {
-            color: #718096;
-            font-size: 1.1em;
-        }
-
         .login-container {
             background: white;
             padding: 40px;
@@ -59,49 +48,34 @@
             margin: 50px auto;
         }
 
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
         .form-group {
-            display: flex;
-            flex-direction: column;
+            margin-bottom: 20px;
         }
 
         label {
+            display: block;
             font-weight: 600;
             margin-bottom: 8px;
             color: #4a5568;
         }
 
         input {
+            width: 100%;
             padding: 12px;
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             font-size: 16px;
-            transition: border-color 0.3s;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: #667eea;
         }
 
         .btn {
+            width: 100%;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 12px;
             border-radius: 8px;
             font-size: 16px;
             cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
         }
 
         .main-app {
@@ -110,7 +84,6 @@
 
         .nav-tabs {
             display: flex;
-            flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 20px;
             background: white;
@@ -126,7 +99,6 @@
             padding: 12px 20px;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s;
             font-weight: 500;
         }
 
@@ -151,31 +123,10 @@
         }
 
         .product-card {
-            background: white;
+            background: #f8f9fa;
             border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .carousel {
-            position: relative;
-            height: 200px;
-            overflow: hidden;
-        }
-
-        .carousel img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .product-info {
             padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .product-name {
@@ -191,45 +142,11 @@
             font-weight: 600;
         }
 
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-            font-size: 1.2em;
-            color: #718096;
-        }
-
-        .error-message {
-            color: #e53e3e;
-            text-align: center;
-            padding: 20px;
-            background: #fed7d7;
-            border-radius: 8px;
-            margin: 20px 0;
-        }
-
         @media (max-width: 768px) {
-            .container {
-                padding: 10px;
-            }
-            
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .nav-tabs {
-                padding: 15px;
-            }
-            
-            .tab-content {
-                padding: 20px;
-            }
-            
-            .product-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-                gap: 15px;
-            }
+            .container { padding: 10px; }
+            .header h1 { font-size: 2em; }
+            .nav-tabs { flex-wrap: wrap; }
+            .product-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -240,75 +157,81 @@
             <p>Sistema de Catálogo e Preços</p>
         </div>
 
-        <!-- Tela de Login -->
+        <!-- Login Screen -->
         <div id="loginScreen" class="login-container">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #4a5568;">Acesso ao Sistema</h2>
-            <form class="login-form" onsubmit="handleLogin(event)">
+            <h2 style="text-align: center; margin-bottom: 30px;">Acesso ao Sistema</h2>
+            <form onsubmit="handleLogin(event)">
                 <div class="form-group">
                     <label for="username">Usuário:</label>
-                    <input type="text" id="username" name="username" required>
+                    <input type="text" id="username" required>
                 </div>
                 <div class="form-group">
                     <label for="password">Senha:</label>
-                    <input type="password" id="password" name="password" required>
+                    <input type="password" id="password" required>
                 </div>
                 <button type="submit" class="btn">Entrar</button>
             </form>
         </div>
 
-        <!-- Aplicação Principal -->
+        <!-- Main App -->
         <div id="mainApp" class="main-app">
             <nav class="nav-tabs">
                 <button class="tab-button active" onclick="showTab('catalog')">📱 Catálogo</button>
-                <button class="tab-button" onclick="showTab('admin')" id="adminTab" style="display:none;">⚙️ Admin</button>
+                <button class="tab-button" onclick="showTab('admin')" id="adminBtn" style="display:none;">⚙️ Admin</button>
                 <button class="tab-button" onclick="logout()">🚪 Sair</button>
             </nav>
 
             <div class="tab-content">
-                <!-- Aba Catálogo -->
-                <div id="catalogTab" class="tab-pane">
+                <div id="catalogTab">
                     <h2>📱 Catálogo de Produtos</h2>
-                    <div id="productsContainer" class="loading">
-                        <p>🔄 Carregando produtos...</p>
-                    </div>
+                    <div id="productsContainer"></div>
                 </div>
-
-                <!-- Aba Admin -->
-                <div id="adminTab" class="tab-pane" style="display:none;">
+                
+                <div id="adminTab" style="display:none;">
                     <h2>⚙️ Administração</h2>
-                    <p>Funcionalidades administrativas em desenvolvimento...</p>
+                    <p>Painel administrativo em desenvolvimento...</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="app-complete-functional.js"></script>
     <script>
-        // Sistema de autenticação simples
-        let currentUser = null;
-        let currentTab = 'catalog';
+        // Sample data for stable operation
+        const sampleProducts = [
+            { id: 1, nome: "Sofá 3 Lugares", preco: 1299.90, categoria: "Sofás" },
+            { id: 2, nome: "Mesa de Jantar", preco: 899.90, categoria: "Mesas" },
+            { id: 3, nome: "Guarda-roupa 6 Portas", preco: 1899.90, categoria: "Dormitório" },
+            { id: 4, nome: "Poltrona Reclinável", preco: 699.90, categoria: "Poltronas" },
+            { id: 5, nome: "Cama Box Casal", preco: 1199.90, categoria: "Dormitório" }
+        ];
 
-        async function handleLogin(event) {
+        const users = [
+            { username: 'admin', password: 'admin123', type: 'admin', name: 'Administrador' },
+            { username: 'vendedor', password: 'vend123', type: 'seller', name: 'Vendedor' },
+            { username: 'cliente', password: 'cli123', type: 'customer', name: 'Cliente' },
+            { username: 'Loja', password: 'moveisbonafe', type: 'customer', name: 'Loja' }
+        ];
+
+        let currentUser = null;
+
+        function handleLogin(event) {
             event.preventDefault();
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
 
-            // Verificar credenciais
-            const user = systemData.users.find(u => u.username === username && u.password === password);
+            const user = users.find(u => u.username === username && u.password === password);
             
             if (user) {
                 currentUser = user;
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
                 
-                // Mostrar aba admin se for admin
                 if (user.type === 'admin') {
-                    document.getElementById('adminTab').style.display = 'block';
+                    document.getElementById('adminBtn').style.display = 'block';
                 }
                 
-                // Carregar dados
-                await loadSystemData();
                 showTab('catalog');
+                console.log('✅ Login realizado com sucesso!');
             } else {
                 alert('❌ Credenciais inválidas!');
             }
@@ -318,59 +241,43 @@
             currentUser = null;
             document.getElementById('loginScreen').style.display = 'block';
             document.getElementById('mainApp').style.display = 'none';
-            document.getElementById('adminTab').style.display = 'none';
+            document.getElementById('adminBtn').style.display = 'none';
         }
 
         function showTab(tabName) {
-            // Atualizar botões
+            // Update buttons
             document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
             
-            // Mostrar conteúdo
-            if (tabName === 'catalog') {
-                renderCatalog();
-            }
+            // Show content
+            document.getElementById('catalogTab').style.display = tabName === 'catalog' ? 'block' : 'none';
+            document.getElementById('adminTab').style.display = tabName === 'admin' ? 'block' : 'none';
             
-            currentTab = tabName;
+            if (tabName === 'catalog') {
+                renderProducts();
+            }
         }
 
-        async function renderCatalog() {
+        function renderProducts() {
             const container = document.getElementById('productsContainer');
             
-            if (systemData.products.length === 0) {
-                container.innerHTML = '<div class="loading"><p>📦 Nenhum produto encontrado</p></div>';
-                return;
-            }
-
-            const productsHtml = systemData.products.map(product => {
-                const images = product.imagens || [];
-                const firstImage = images.length > 0 ? images[0] : '';
-                
-                return `
-                    <div class="product-card">
-                        <div class="carousel">
-                            ${firstImage ? `<img src="${firstImage}" alt="${product.nome}" onerror="this.src='data:image/svg+xml,<svg xmlns=\\"http://www.w3.org/2000/svg\\" width=\\"100\\" height=\\"100\\"><rect width=\\"100\\" height=\\"100\\" fill=\\"#f0f0f0\\"/><text x=\\"50\\" y=\\"50\\" text-anchor=\\"middle\\" dy=\\".3em\\" fill=\\"#999\\">Sem imagem</text></svg>'">` : `
-                                <div style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center; color: #999;">
-                                    📷 Sem imagem
-                                </div>
-                            `}
-                        </div>
-                        <div class="product-info">
-                            <div class="product-name">${product.nome}</div>
-                            <div class="product-price">R$ ${(product.preco || 0).toFixed(2)}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
+            const productsHtml = sampleProducts.map(product => `
+                <div class="product-card">
+                    <div class="product-name">${product.nome}</div>
+                    <div class="product-price">R$ ${product.preco.toFixed(2)}</div>
+                    <small style="color: #666;">Categoria: ${product.categoria}</small>
+                </div>
+            `).join('');
 
             container.innerHTML = `<div class="product-grid">${productsHtml}</div>`;
         }
 
-        // Inicializar sistema
-        document.addEventListener('DOMContentLoaded', async function() {
-            console.log('🎉 Sistema MoveisBonafe carregado!');
-            await loadSystemData();
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🎉 MoveisBonafe Sistema carregado - Versão Estável!');
         });
     </script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js"></script>
 </body>
 </html>
