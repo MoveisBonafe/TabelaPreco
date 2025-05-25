@@ -165,23 +165,6 @@ function updateCarousel(carouselId, totalImages) {
 }
 
 // Funções de touch removidas para otimizar carregamento
-  
-  const deltaX = touchEndX - touchStartX;
-  const deltaY = touchEndY - touchStartY;
-  
-  console.log('Touch end - deltaX:', deltaX, 'deltaY:', deltaY);
-  
-  // Verifica se é um swipe horizontal com movimento mínimo de 30px
-  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-    if (deltaX > 0) {
-      console.log('Swipe direita - imagem anterior');
-      previousImage(carouselId, totalImages);
-    } else {
-      console.log('Swipe esquerda - próxima imagem');
-      nextImage(carouselId, totalImages);
-    }
-  }
-};
 
 // Função de login
 window.login = function() {
