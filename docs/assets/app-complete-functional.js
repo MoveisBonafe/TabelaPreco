@@ -488,7 +488,7 @@ function showProductModal(product = null) {
         
         <div style="display: flex; align-items: center; gap: 0.5rem; padding: 1rem; background: #f0f9ff; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">
           <input type="checkbox" id="product-fixed-price" ${product?.fixed_price ? 'checked' : ''} style="margin: 0;">
-          <label for="product-fixed-price" style="margin: 0; color: #3b82f6; font-weight: 500;">
+          <label for="product-fixed-price" style="margin: 0; color: #1f2937; font-weight: 500;">
             🔒 Preço Fixo - Este produto não será afetado pelo multiplicador de preços dos usuários
           </label>
         </div>
@@ -1553,10 +1553,10 @@ function renderProductsTab() {
           ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #f59e0b;">🔒 Preço Fixo</div>' : ''}
         </td>
         <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</td>
-        <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60/90/120'] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90/120'] || 0).toFixed(2)}</td>
         <td style="padding: 1rem;">
           <button onclick="showEditProductModal(${product.id})" style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem; margin-right: 0.5rem;">
             Editar
@@ -1900,7 +1900,7 @@ function renderBackupTab() {
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
         <div style="text-align: center; padding: 1rem;">
           <div style="font-size: 2rem; margin-bottom: 0.5rem;">📦</div>
-          <div style="font-size: 1.5rem; font-weight: 600; color: #3b82f6;">${systemData.products.length}</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #1f2937;">${systemData.products.length}</div>
           <div style="color: #6b7280;">Produtos</div>
         </div>
         <div style="text-align: center; padding: 1rem;">
@@ -1935,7 +1935,7 @@ function renderMonitoringTab() {
       </div>
       <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid #3b82f6;">
         <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Última Sincronização</h4>
-        <p style="margin: 0; font-size: 1.2rem; color: #3b82f6;">${new Date().toLocaleTimeString()}</p>
+        <p style="margin: 0; font-size: 1.2rem; color: #1f2937;">${new Date().toLocaleTimeString()}</p>
       </div>
       <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid #f59e0b;">
         <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Usuário Ativo</h4>
@@ -2093,15 +2093,15 @@ function renderCatalogView() {
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
-              <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60</div>
-              <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60/90</div>
-              <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -2369,7 +2369,7 @@ function renderAdminView() {
       
       .admin-tab.active {
         border-bottom: 2px solid #3b82f6;
-        color: #3b82f6;
+        color: #1f2937;
       }
       
       .admin-main {
@@ -2677,15 +2677,15 @@ function updateProductsDisplay(productsToShow) {
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
-              <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60</div>
-              <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
             </div>
             <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60/90</div>
-              <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -2727,19 +2727,19 @@ function updateProductsDisplay(productsToShow) {
                 boxes[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
                 boxes[1].style.color = 'white';
                 boxes[1].style.fontWeight = '700';
-                boxes[1].innerHTML = boxes[1].innerHTML.replace('30 dias', '30').replace('color: #6b7280', 'font-weight: 700').replace('color: #3b82f6', 'font-weight: 600');
+                boxes[1].innerHTML = boxes[1].innerHTML.replace('30 dias', '30').replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
               }
               if (boxes[2]) {
                 boxes[2].style.background = 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)';
                 boxes[2].style.color = 'white';
                 boxes[2].style.fontWeight = '700';
-                boxes[2].innerHTML = boxes[2].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #3b82f6', 'font-weight: 600');
+                boxes[2].innerHTML = boxes[2].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
               }
               if (boxes[3]) {
                 boxes[3].style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
                 boxes[3].style.color = 'white';
                 boxes[3].style.fontWeight = '700';
-                boxes[3].innerHTML = boxes[3].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #3b82f6', 'font-weight: 600');
+                boxes[3].innerHTML = boxes[3].innerHTML.replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
               }
               
               // Adicionar 5ª tabela se não existir
