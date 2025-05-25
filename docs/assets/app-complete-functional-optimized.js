@@ -349,12 +349,23 @@ function renderApp() {
   `;
 }
 
+// Variável para filtro de categoria
+let selectedCategory = '';
+
 function renderCatalogView() {
   if (!systemData.products || systemData.products.length === 0) {
     return '<div style="text-align: center; padding: 40px; color: #666;">Nenhum produto encontrado.</div>';
   }
 
-  const productsHtml = systemData.products.map((product, index) => {
+  // Filtrar produtos por categoria se selecionada
+  const productsToShow = selectedCategory ? 
+    systemData.products.filter(product => product.category === selectedCategory) : 
+    systemData.products;
+
+  // Obter categorias únicas
+  const categories = [...new Set(systemData.products.map(p => p.category).filter(Boolean))];
+
+  const productsHtml = productsToShow.map((product, index) => {
     const images = product.images || [];
     const hasImages = images.length > 0;
     const carouselId = `product-${index}`;
@@ -396,24 +407,24 @@ function renderCatalogView() {
         <h3 style="margin: 0 0 5px; color: #1f2937; font-size: 1.1rem; font-weight: 600;">${product.name}</h3>
         <p style="margin: 0 0 10px; color: #6b7280; font-size: 0.9rem;">${product.category || ''}</p>
         
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; font-size: 0.7rem;">
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.25rem; text-align: center; color: white;">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; font-size: 0.7rem;" ${currentUser && currentUser.type === 'customer' ? '' : `onclick="showProductDetails(${index})"`}>
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
             <div style="font-weight: 600;">À Vista</div>
             <div style="font-size: 0.8rem;">R$ ${(product.base_price || 0).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
             <div style="font-weight: 600;">30</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.02).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
             <div style="font-weight: 600;">30/60</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.04).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
             <div style="font-weight: 600;">30/60/90</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.06).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
             <div style="font-weight: 600;">30/60/90/120</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.08).toFixed(2)}</div>
           </div>
@@ -427,6 +438,22 @@ function renderCatalogView() {
   return `
     <div>
       <h2 style="margin: 0 0 20px; color: #1f2937;">Catálogo de Produtos</h2>
+      
+      <!-- Filtros por categoria -->
+      <div style="margin-bottom: 20px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+          <span style="font-weight: 600; color: #374151;">Filtrar por categoria:</span>
+          <button onclick="filterByCategory('')" style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 20px; background: ${!selectedCategory ? '#3b82f6' : 'white'}; color: ${!selectedCategory ? 'white' : '#374151'}; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+            Todas
+          </button>
+          ${categories.map(category => `
+            <button onclick="filterByCategory('${category}')" style="padding: 8px 16px; border: 1px solid #d1d5db; border-radius: 20px; background: ${selectedCategory === category ? '#3b82f6' : 'white'}; color: ${selectedCategory === category ? 'white' : '#374151'}; cursor: pointer; font-size: 14px; transition: all 0.2s;">
+              ${category}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+      
       <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;">
         ${productsHtml}
       </div>
@@ -438,6 +465,112 @@ function renderCatalogView() {
 window.setCarouselIndex = function(carouselId, index, totalImages) {
   carouselStates[carouselId] = { currentIndex: index };
   updateCarousel(carouselId, totalImages);
+};
+
+// Função para mostrar detalhes do produto (apenas visualização para clientes)
+window.showProductDetails = function(productIndex) {
+  if (currentUser && currentUser.type === 'customer') {
+    // Para clientes, mostrar apenas visualização simples
+    showProductViewModal(productIndex);
+  } else {
+    // Para admins, funcionalidade completa (se existir)
+    console.log('Detalhes do produto para admin:', productIndex);
+  }
+};
+
+// Modal de visualização para clientes
+function showProductViewModal(productIndex) {
+  const product = systemData.products[productIndex];
+  if (!product) return;
+  
+  const images = product.images || [];
+  const hasImages = images.length > 0;
+  
+  // Calcular preços
+  const priceAVista = product.base_price || 0;
+  const price30 = priceAVista * 1.02;
+  const price3060 = priceAVista * 1.04;
+  const price306090 = priceAVista * 1.06;
+  const price30606090120 = priceAVista * 1.08;
+  
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+    justify-content: center; z-index: 1000; padding: 1rem;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background: white; border-radius: 1rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+      <button onclick="this.closest('[style*=\"position: fixed\"]').remove()" style="position: absolute; top: 1rem; right: 1rem; background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; z-index: 10; display: flex; align-items: center; justify-content: center;">×</button>
+      
+      ${hasImages ? `
+        <div style="height: 300px; background: #f8f9fa; border-radius: 1rem 1rem 0 0; overflow: hidden;">
+          <img src="${images[0]}" alt="${product.name}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+      ` : `
+        <div style="height: 200px; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 1rem 1rem 0 0; display: flex; align-items: center; justify-content: center; color: #6c757d; font-size: 3rem;">📷</div>
+      `}
+      
+      <div style="padding: 2rem;">
+        <h2 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 1.5rem; font-weight: 700;">${product.name}</h2>
+        <p style="margin: 0 0 1rem; color: #6b7280; font-size: 1rem;">${product.category || 'Categoria'}</p>
+        
+        ${product.description ? `<p style="margin: 0 0 1.5rem; color: #4b5563; line-height: 1.6;">${product.description}</p>` : ''}
+        
+        <div style="background: #f8fafc; border-radius: 0.75rem; padding: 1.5rem;">
+          <h3 style="margin: 0 0 1rem; color: #1e293b; font-size: 1.1rem; font-weight: 600;">Tabelas de Preços</h3>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem;">
+            <div style="padding: 1rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">À Vista</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${priceAVista.toFixed(2)}</div>
+            </div>
+            <div style="padding: 1rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30 dias</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${price30.toFixed(2)}</div>
+            </div>
+            <div style="padding: 1rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${price3060.toFixed(2)}</div>
+            </div>
+            <div style="padding: 1rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${price306090.toFixed(2)}</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.75rem;">
+            <div style="padding: 1rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.5rem; text-align: center; color: white;">
+              <div style="font-weight: 700; margin-bottom: 0.25rem;">30/60/90/120</div>
+              <div style="font-weight: 600; font-size: 1.1rem;">R$ ${price30606090120.toFixed(2)}</div>
+            </div>
+          </div>
+        </div>
+        
+        ${product.fixed_price ? `
+          <div style="margin-top: 1rem; padding: 0.75rem; background: #fef3c7; color: #92400e; border-radius: 0.5rem; text-align: center; font-weight: 600;">
+            🔒 Produto com Preço Fixo
+          </div>
+        ` : ''}
+      </div>
+    </div>
+  `;
+  
+  modal.onclick = function(e) {
+    if (e.target === modal) {
+      document.body.removeChild(modal);
+    }
+  };
+  
+  document.body.appendChild(modal);
+}
+
+// Função para filtrar por categoria
+window.filterByCategory = function(category) {
+  selectedCategory = category;
+  const content = document.getElementById('content');
+  if (content) {
+    content.innerHTML = renderCatalogView();
+  }
 };
 
 // Função de logout
