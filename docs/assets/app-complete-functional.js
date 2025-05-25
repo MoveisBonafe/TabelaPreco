@@ -3057,27 +3057,25 @@ function renderCatalogView() {
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">À Vista</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">30 dias</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: #3b82f6; color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">30/60</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: #8b5cf6; color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30/60</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">30/60/90</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: #f59e0b; color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30/60/90</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
             </div>
-          </div>
-          <div style="margin-top: 0.5rem;">
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280; font-size: 0.8rem;">30/60/90/120</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: #dc2626; color: white; border-radius: 0.25rem; text-align: center; grid-column: 1 / -1;">
+              <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30/60/90/120</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
