@@ -164,24 +164,7 @@ function updateCarousel(carouselId, totalImages) {
   }
 }
 
-// Funções de touch para mobile
-window.handleTouchStart = function(event, carouselId, totalImages) {
-  event.preventDefault();
-  const touch = event.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-  console.log('Touch start:', touchStartX);
-};
-
-window.handleTouchMove = function(event) {
-  event.preventDefault();
-};
-
-window.handleTouchEnd = function(event, carouselId, totalImages) {
-  event.preventDefault();
-  const touch = event.changedTouches[0];
-  const touchEndX = touch.clientX;
-  const touchEndY = touch.clientY;
+// Funções de touch removidas para otimizar carregamento
   
   const deltaX = touchEndX - touchStartX;
   const deltaY = touchEndY - touchStartY;
