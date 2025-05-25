@@ -370,10 +370,11 @@ async function loadSystemData() {
     // Garantir integridade dos dados
     ensureDataIntegrity();
     
-    console.log('✅ Dados carregados:', {
+    console.log('✅ Dados carregados do Supabase:', {
       produtos: systemData.products.length,
       categorias: systemData.categories.length,
-      usuarios: systemData.users.length
+      usuarios: systemData.users.length,
+      promocoes: systemData.promotions.length
     });
   } catch (error) {
     console.error('Erro ao carregar dados:', error);
@@ -1156,7 +1157,7 @@ async function savePromotion(event) {
     
     // Se ativar esta promoção, desativar todas as outras
     if (ativo) {
-      for (const promo of systemData.promotions) {
+      for (const promo of systemData.promotions || []) {
         if (promo.ativo) {
           await supabase.update('promocoes', promo.id, { ativo: false });
         }
@@ -1167,23 +1168,27 @@ async function savePromotion(event) {
       texto,
       descricao,
       cor,
-      ativo
+      ativo,
+      created_at: new Date().toISOString()
     };
     
+    console.log('📤 Salvando promoção no Supabase:', promotionData);
     const result = await supabase.insert('promocoes', promotionData);
     
-    if (result) {
+    if (result && result.length > 0) {
       console.log('✅ Promoção salva com sucesso!');
       await loadSystemData();
       renderTab('promocoes');
       closePromotionModal();
+      alert('Promoção criada com sucesso!');
     } else {
+      console.error('❌ Erro: Resultado vazio do Supabase');
       alert('Erro ao salvar promoção. Tente novamente.');
     }
     
   } catch (error) {
     console.error('❌ Erro ao salvar promoção:', error);
-    alert('Erro ao salvar promoção. Verifique os dados e tente novamente.');
+    alert(`Erro ao salvar promoção: ${error.message || 'Verifique os dados e tente novamente.'}`);
   }
 }
 
@@ -1201,7 +1206,7 @@ async function updatePromotion(id) {
     
     // Se ativar esta promoção, desativar todas as outras
     if (ativo) {
-      for (const promo of systemData.promotions) {
+      for (const promo of systemData.promotions || []) {
         if (promo.id !== id && promo.ativo) {
           await supabase.update('promocoes', promo.id, { ativo: false });
         }
@@ -1212,45 +1217,55 @@ async function updatePromotion(id) {
       texto,
       descricao,
       cor,
-      ativo
+      ativo,
+      updated_at: new Date().toISOString()
     };
     
+    console.log('📤 Atualizando promoção no Supabase:', id, promotionData);
     const result = await supabase.update('promocoes', id, promotionData);
     
-    if (result) {
+    if (result && result.length > 0) {
       console.log('✅ Promoção atualizada com sucesso!');
       await loadSystemData();
       renderTab('promocoes');
       closePromotionModal();
+      alert('Promoção atualizada com sucesso!');
     } else {
+      console.error('❌ Erro: Resultado vazio do Supabase');
       alert('Erro ao atualizar promoção. Tente novamente.');
     }
     
   } catch (error) {
     console.error('❌ Erro ao atualizar promoção:', error);
-    alert('Erro ao atualizar promoção. Verifique os dados e tente novamente.');
+    alert(`Erro ao atualizar promoção: ${error.message || 'Verifique os dados e tente novamente.'}`);
   }
 }
 
 window.deletePromotion = async function(id) {
-  if (!confirm('Tem certeza que deseja excluir esta promoção?')) {
+  const promotion = systemData.promotions?.find(p => p.id === id);
+  const promotionName = promotion ? promotion.texto : 'esta promoção';
+  
+  if (!confirm(`Tem certeza que deseja excluir "${promotionName}"?`)) {
     return;
   }
   
   try {
+    console.log('🗑️ Excluindo promoção do Supabase:', id);
     const result = await supabase.delete('promocoes', id);
     
     if (result) {
       console.log('✅ Promoção excluída com sucesso!');
       await loadSystemData();
       renderTab('promocoes');
+      alert('Promoção excluída com sucesso!');
     } else {
+      console.error('❌ Erro: Falha na exclusão do Supabase');
       alert('Erro ao excluir promoção. Tente novamente.');
     }
     
   } catch (error) {
     console.error('❌ Erro ao excluir promoção:', error);
-    alert('Erro ao excluir promoção. Tente novamente.');
+    alert(`Erro ao excluir promoção: ${error.message || 'Tente novamente.'}`);
   }
 }
 
@@ -2951,6 +2966,7 @@ function renderAdminView() {
         <div id="content-categorias" style="display: none;"></div>
         <div id="content-precos" style="display: none;"></div>
         <div id="content-usuarios" style="display: none;"></div>
+        <div id="content-promocoes" style="display: none;"></div>
         <div id="content-excel" style="display: none;"></div>
         <div id="content-backup" style="display: none;"></div>
         <div id="content-monitoramento" style="display: none;"></div>
