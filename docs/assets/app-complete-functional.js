@@ -1266,7 +1266,28 @@ window.deletePromotion = async function(id) {
     const numericId = parseInt(id);
     console.log('🔢 ID convertido para número:', numericId);
     
-    // Fazer exclusão direta no Supabase
+    // Primeiro verificar se a promoção existe
+    const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    const existingPromotions = await checkResponse.json();
+    console.log('🔍 Promoções encontradas para exclusão:', existingPromotions);
+    
+    if (!existingPromotions || existingPromotions.length === 0) {
+      console.log('⚠️ Promoção não encontrada no banco para exclusão');
+      // Remove da lista local e atualiza tela
+      await loadSystemData();
+      renderTab('promocoes');
+      alert('Promoção removida da lista!');
+      return;
+    }
+    
+    // Fazer exclusão no Supabase
     const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
       method: 'DELETE',
       headers: {
