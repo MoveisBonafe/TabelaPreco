@@ -1262,32 +1262,10 @@ window.deletePromotion = async function(id) {
   try {
     console.log('🗑️ Excluindo promoção do Supabase, ID:', id, 'Tipo:', typeof id);
     
-    // Converter ID para número se necessário
     const numericId = parseInt(id);
     console.log('🔢 ID convertido para número:', numericId);
     
-    // Primeiro verificar se a promoção existe
-    const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
-      headers: {
-        'apikey': SUPABASE_ANON_KEY,
-        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-        'Content-Type': 'application/json'
-      }
-    });
-    
-    const existingPromotions = await checkResponse.json();
-    console.log('🔍 Promoções encontradas para exclusão:', existingPromotions);
-    
-    if (!existingPromotions || existingPromotions.length === 0) {
-      console.log('⚠️ Promoção não encontrada no banco para exclusão');
-      // Remove da lista local e atualiza tela
-      await loadSystemData();
-      renderTab('promocoes');
-      alert('Promoção removida da lista!');
-      return;
-    }
-    
-    // Fazer exclusão no Supabase
+    // Exclusão direta
     const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
       method: 'DELETE',
       headers: {
@@ -1299,20 +1277,30 @@ window.deletePromotion = async function(id) {
     
     console.log('📋 Status da exclusão:', response.status, response.ok);
     
-    if (response.ok) {
-      console.log('✅ Promoção excluída com sucesso do Supabase!');
+    // Verificar se realmente excluiu
+    const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+      }
+    });
+    
+    const remainingPromotions = await checkResponse.json();
+    console.log('🔍 Promoções restantes:', remainingPromotions);
+    
+    if (remainingPromotions.length === 0) {
+      console.log('✅ Promoção realmente excluída!');
       await loadSystemData();
       renderTab('promocoes');
       alert('Promoção excluída com sucesso!');
     } else {
-      const errorText = await response.text();
-      console.error('❌ Erro na exclusão:', response.status, errorText);
-      alert('Erro ao excluir promoção. Tente novamente.');
+      console.log('⚠️ Promoção ainda existe no banco');
+      alert('Erro: Promoção não foi excluída do banco.');
     }
     
   } catch (error) {
     console.error('❌ Erro ao excluir promoção:', error);
-    alert(`Erro ao excluir promoção: ${error.message || 'Tente novamente.'}`);
+    alert(`Erro ao excluir promoção: ${error.message}`);
   }
 }
 
