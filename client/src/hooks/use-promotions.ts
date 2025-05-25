@@ -1,5 +1,6 @@
 
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 export interface Promotion {
   id: string;
@@ -17,69 +18,108 @@ export interface InsertPromotion {
   ativo: boolean;
 }
 
-const STORAGE_KEY = 'promotions';
+async function fetchPromotions(): Promise<Promotion[]> {
+  const response = await fetch('/api/promotions');
+  if (!response.ok) {
+    throw new Error('Failed to fetch promotions');
+  }
+  const data = await response.json();
+  return data.map((p: any) => ({
+    ...p,
+    createdAt: new Date(p.createdAt)
+  }));
+}
+
+async function createPromotionAPI(promotionData: InsertPromotion): Promise<Promotion> {
+  const response = await fetch('/api/promotions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(promotionData),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to create promotion');
+  }
+  
+  const data = await response.json();
+  return {
+    ...data,
+    createdAt: new Date(data.createdAt)
+  };
+}
+
+async function updatePromotionAPI(id: string, promotionData: Partial<InsertPromotion>): Promise<Promotion> {
+  const response = await fetch(`/api/promotions/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(promotionData),
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to update promotion');
+  }
+  
+  const data = await response.json();
+  return {
+    ...data,
+    createdAt: new Date(data.createdAt)
+  };
+}
+
+async function deletePromotionAPI(id: string): Promise<void> {
+  const response = await fetch(`/api/promotions/${id}`, {
+    method: 'DELETE',
+  });
+  
+  if (!response.ok) {
+    throw new Error('Failed to delete promotion');
+  }
+}
 
 export function usePromotions() {
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
 
-  const loadPromotions = () => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      const data = stored ? JSON.parse(stored) : [];
-      setPromotions(data.map((p: any) => ({ ...p, createdAt: new Date(p.createdAt) })));
-    } catch (error) {
-      console.error('Failed to load promotions:', error);
-      setPromotions([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { data: promotions = [], isLoading: loading } = useQuery({
+    queryKey: ['/api/promotions'],
+    queryFn: fetchPromotions,
+  });
 
-  useEffect(() => {
-    loadPromotions();
-  }, []);
+  const createMutation = useMutation({
+    mutationFn: createPromotionAPI,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/promotions'] });
+    },
+  });
 
-  const createPromotion = (promotionData: InsertPromotion): Promotion => {
-    const newPromotion: Promotion = {
-      id: crypto.randomUUID(),
-      ...promotionData,
-      createdAt: new Date(),
-    };
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Partial<InsertPromotion> }) =>
+      updatePromotionAPI(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/promotions'] });
+    },
+  });
 
-    // Se a nova promoção está ativa, desativar todas as outras
-    const updatedPromotions = promotions.map(p => ({
-      ...p,
-      ativo: promotionData.ativo ? false : p.ativo
-    }));
+  const deleteMutation = useMutation({
+    mutationFn: deletePromotionAPI,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/promotions'] });
+    },
+  });
 
-    const allPromotions = [...updatedPromotions, newPromotion];
-    setPromotions(allPromotions);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(allPromotions));
-    
-    return newPromotion;
+  const createPromotion = (promotionData: InsertPromotion) => {
+    return createMutation.mutateAsync(promotionData);
   };
 
   const updatePromotion = (id: string, promotionData: Partial<InsertPromotion>) => {
-    const updatedPromotions = promotions.map(p => {
-      if (p.id === id) {
-        return { ...p, ...promotionData };
-      }
-      // Se a promoção sendo editada está sendo ativada, desativar as outras
-      if (promotionData.ativo === true && p.ativo) {
-        return { ...p, ativo: false };
-      }
-      return p;
-    });
-
-    setPromotions(updatedPromotions);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedPromotions));
+    return updateMutation.mutateAsync({ id, data: promotionData });
   };
 
   const deletePromotion = (id: string) => {
-    const filteredPromotions = promotions.filter(p => p.id !== id);
-    setPromotions(filteredPromotions);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filteredPromotions));
+    return deleteMutation.mutateAsync(id);
   };
 
   const getActivePromotion = (): Promotion | null => {
