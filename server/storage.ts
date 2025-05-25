@@ -1,4 +1,4 @@
-import { users, promotions, type User, type InsertUser, type Promotion, type InsertPromotion } from "@shared/schema";
+import { users, type User, type InsertUser } from "@shared/schema";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -7,10 +7,6 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  getPromotions(): Promise<Promotion[]>;
-  createPromotion(promotion: InsertPromotion): Promise<Promotion>;
-  updatePromotion(id: number, promotion: Partial<InsertPromotion>): Promise<Promotion>;
-  deletePromotion(id: number): Promise<void>;
 }
 
 export class MemStorage implements IStorage {

@@ -3,8 +3,7 @@ import { createServer, type Server } from "http";
 import { WebSocketServer, WebSocket } from "ws";
 import { storage } from "./storage";
 import { productStorage } from "./product-storage";
-import { promotionsStorage } from "./promotions-storage";
-import { insertProductSchema, insertCategorySchema, insertPromotionSchema } from "@shared/schema";
+import { insertProductSchema, insertCategorySchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Product routes
@@ -28,73 +27,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching categories:", error);
       res.status(500).json({ message: "Failed to fetch categories" });
-    }
-  });
-
-  // Promotions routes
-  app.get("/api/promotions", async (req, res) => {
-    try {
-      const promotions = await promotionsStorage.getPromotions();
-      res.json(promotions);
-    } catch (error) {
-      console.error("Error fetching promotions:", error);
-      res.status(500).json({ message: "Failed to fetch promotions" });
-    }
-  });
-
-  app.post("/api/promotions", async (req, res) => {
-    try {
-      const promotionData = insertPromotionSchema.parse(req.body);
-      const promotion = await promotionsStorage.createPromotion(promotionData);
-      
-      // Enviar atualização para todos os clientes
-      broadcastUpdate('promotion_created', promotion);
-      
-      res.json(promotion);
-    } catch (error) {
-      console.error("Error creating promotion:", error);
-      res.status(500).json({ message: "Failed to create promotion" });
-    }
-  });
-
-  app.put("/api/promotions/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      const promotionData = insertPromotionSchema.partial().parse(req.body);
-      const promotion = await promotionsStorage.updatePromotion(id, promotionData);
-      
-      // Enviar atualização para todos os clientes
-      broadcastUpdate('promotion_updated', promotion);
-      
-      res.json(promotion);
-    } catch (error) {
-      console.error("Error updating promotion:", error);
-      res.status(500).json({ message: "Failed to update promotion" });
-    }
-  });
-
-  app.delete("/api/promotions/:id", async (req, res) => {
-    try {
-      const id = parseInt(req.params.id);
-      await promotionsStorage.deletePromotion(id);
-      
-      // Enviar atualização para todos os clientes
-      broadcastUpdate('promotion_deleted', { id });
-      
-      res.json({ message: "Promoção excluída com sucesso" });
-    } catch (error) {
-      console.error("Error deleting promotion:", error);
-      res.status(500).json({ message: "Failed to delete promotion" });
-    }
-  });
-
-  app.get("/api/promotions/active", async (req, res) => {
-    try {
-      const activePromotion = await promotionsStorage.getActivePromotion();
-      res.json(activePromotion);
-    } catch (error) {
-      console.error("Error fetching active promotion:", error);
-      res.status(500).json({ message: "Failed to fetch active promotion" });
     }
   });
 
