@@ -1,5 +1,6 @@
 // MoveisBonafe Sistema Otimizado - Performance Melhorada
 // Carregamento de imagens mais rápido e touch events otimizados
+// Atualizado: 2025-05-25 05:44 - Credenciais Supabase corretas
 
 // Sistema de dados - carregará do Supabase
 let systemData = {
