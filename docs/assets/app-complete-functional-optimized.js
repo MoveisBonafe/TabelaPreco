@@ -231,9 +231,15 @@ function previousImage(carouselId, totalImages) {
   updateCarousel(carouselId, totalImages);
 }
 
-// Função de login otimizada
+// Função de login otimizada com tela de carregamento
 async function trySupabaseLogin(username, password) {
   try {
+    // Mostrar overlay de carregamento completo
+    showFullScreenLoading('Entrando no sistema...');
+    
+    // Aguardar um pouco para dar feedback visual
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     // Verificar nos usuários locais primeiro (mais rápido)
     const localUser = systemData.users.find(user => 
       user.username === username && user.password === password
@@ -242,24 +248,107 @@ async function trySupabaseLogin(username, password) {
     if (localUser) {
       currentUser = localUser;
       console.log('✅ Login local bem-sucedido:', currentUser.name);
+      
+      // Atualizar mensagem de carregamento
+      updateLoadingMessage('Carregando interface...');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      hideFullScreenLoading();
       renderApp();
       return true;
     }
     
     // Se não encontrou localmente, verificar no Supabase
+    updateLoadingMessage('Verificando no servidor...');
     const users = await supabase.query('users', `?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}`);
     
     if (users && users.length > 0) {
       currentUser = users[0];
       console.log('✅ Login Supabase bem-sucedido:', currentUser.name);
+      
+      updateLoadingMessage('Carregando interface...');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      hideFullScreenLoading();
       renderApp();
       return true;
     }
     
+    hideFullScreenLoading();
     return false;
   } catch (error) {
     console.error('❌ Erro no login:', error);
+    hideFullScreenLoading();
     return false;
+  }
+}
+
+// Funções para tela de carregamento completa
+function showFullScreenLoading(message) {
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.id = 'loading-overlay';
+  loadingOverlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(30, 41, 59, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+  `;
+  
+  loadingOverlay.innerHTML = `
+    <div style="text-align: center; color: white;">
+      <div style="margin-bottom: 2rem;">
+        <div style="width: 60px; height: 60px; border: 4px solid rgba(251, 191, 36, 0.3); border-top: 4px solid #fbbf24; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+      </div>
+      
+      <h2 style="margin: 0 0 1rem; font-size: 1.5rem; font-weight: 600;">MoveisBonafe</h2>
+      <p id="loading-message" style="margin: 0; font-size: 1rem; opacity: 0.8;">${message}</p>
+      
+      <div style="margin-top: 2rem; display: flex; gap: 0.5rem; justify-content: center;">
+        <div style="width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite;"></div>
+        <div style="width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite 0.2s;"></div>
+        <div style="width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite 0.4s;"></div>
+      </div>
+    </div>
+    
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      @keyframes pulse {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1.2); opacity: 1; }
+      }
+    </style>
+  `;
+  
+  document.body.appendChild(loadingOverlay);
+}
+
+function updateLoadingMessage(message) {
+  const messageElement = document.getElementById('loading-message');
+  if (messageElement) {
+    messageElement.textContent = message;
+  }
+}
+
+function hideFullScreenLoading() {
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.style.opacity = '0';
+    loadingOverlay.style.transition = 'opacity 0.5s ease-out';
+    setTimeout(() => {
+      loadingOverlay.remove();
+    }, 500);
   }
 }
 
@@ -546,17 +635,45 @@ window.addEventListener('load', function() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('login-error');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         
         if (!username || !password) {
           errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Por favor, preencha todos os campos.</div>';
           return;
         }
         
-        errorDiv.innerHTML = '<div style="color: #3b82f6; font-size: 0.875rem;">Verificando credenciais...</div>';
+        // Mostrar tela de carregamento
+        submitButton.disabled = true;
+        submitButton.innerHTML = '⏳ Carregando...';
+        submitButton.style.background = '#6b7280';
+        errorDiv.innerHTML = `
+          <div style="color: #3b82f6; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <div style="width: 16px; height: 16px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            Verificando credenciais e carregando dados...
+          </div>
+          <style>
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          </style>
+        `;
         
-        const success = await trySupabaseLogin(username, password);
-        if (!success) {
-          errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Usuário ou senha incorretos.</div>';
+        try {
+          const success = await trySupabaseLogin(username, password);
+          if (!success) {
+            // Restaurar botão em caso de erro
+            submitButton.disabled = false;
+            submitButton.innerHTML = '🔐 Entrar';
+            submitButton.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+            errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Usuário ou senha incorretos.</div>';
+          }
+        } catch (error) {
+          // Restaurar botão em caso de erro
+          submitButton.disabled = false;
+          submitButton.innerHTML = '🔐 Entrar';
+          submitButton.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+          errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Erro de conexão. Tente novamente.</div>';
         }
       });
     } else {
