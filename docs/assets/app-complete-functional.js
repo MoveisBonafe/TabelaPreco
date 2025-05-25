@@ -122,6 +122,28 @@ let systemData = {
   }
 };
 
+// Função para garantir integridade dos dados
+function ensureDataIntegrity() {
+  if (!systemData.products || !Array.isArray(systemData.products)) {
+    systemData.products = [];
+  }
+  if (!systemData.categories || !Array.isArray(systemData.categories)) {
+    systemData.categories = [];
+  }
+  if (!systemData.users || !Array.isArray(systemData.users)) {
+    systemData.users = [];
+  }
+  if (!systemData.priceSettings || typeof systemData.priceSettings !== 'object') {
+    systemData.priceSettings = {
+      'A Vista': 0,
+      '30': 2,
+      '30/60': 4,
+      '30/60/90': 6,
+      '30/60/90/120': 8
+    };
+  }
+}
+
 // Array para armazenar imagens selecionadas
 let selectedImages = [];
 
@@ -272,13 +294,26 @@ async function loadSystemData() {
     console.log('📊 Carregando dados do sistema...');
     
     const products = await supabase.query('products');
-    if (products) systemData.products = products;
+    if (products && Array.isArray(products)) {
+      systemData.products = products;
+    } else {
+      systemData.products = [];
+    }
     
     const categories = await supabase.query('categories');
-    if (categories && categories.length > 0) systemData.categories = categories;
+    if (categories && Array.isArray(categories) && categories.length > 0) {
+      systemData.categories = categories;
+    }
     
     const users = await supabase.query('auth_users');
-    if (users) systemData.users = users;
+    if (users && Array.isArray(users)) {
+      systemData.users = users;
+    } else {
+      systemData.users = [];
+    }
+    
+    // Garantir integridade dos dados
+    ensureDataIntegrity();
     
     console.log('✅ Dados carregados:', {
       produtos: systemData.products.length,
@@ -287,6 +322,8 @@ async function loadSystemData() {
     });
   } catch (error) {
     console.error('Erro ao carregar dados:', error);
+    // Em caso de erro, garantir que os dados sejam arrays vazios
+    ensureDataIntegrity();
   }
 }
 
@@ -1507,6 +1544,11 @@ function renderTab(tabName) {
 
 // Renderizar aba de produtos
 function renderProductsTab() {
+  // Verificar se products existe e é um array
+  if (!systemData.products || !Array.isArray(systemData.products)) {
+    systemData.products = [];
+  }
+  
   // Ordenar produtos por nome (alfabética) e depois por categoria
   const sortedProducts = [...systemData.products].sort((a, b) => {
     if (a.category !== b.category) {
