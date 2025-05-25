@@ -5,6 +5,7 @@
 let systemData = {
   products: [],
   categories: [],
+  promotions: [],
   users: [
     { username: 'admin', password: 'admin123', type: 'admin', name: 'Administrador', price_multiplier: 1.0 },
     { username: 'vendedor', password: 'vend123', type: 'seller', name: 'Vendedor', price_multiplier: 1.0 },
@@ -215,20 +216,23 @@ async function loadSystemData() {
   console.log('📊 Carregando dados do sistema...');
   
   try {
-    const [produtos, categorias, usuarios] = await Promise.all([
+    const [produtos, categorias, usuarios, promocoes] = await Promise.all([
       supabase.query('produtos'),
       supabase.query('categorias'),
-      supabase.query('usuarios')
+      supabase.query('usuarios'),
+      supabase.query('promocoes')
     ]);
     
     systemData.products = produtos || [];
     systemData.categories = categorias || [];
     systemData.users = usuarios || [];
+    systemData.promotions = promocoes || [];
     
     console.log('✅ Dados carregados:', {
       produtos: systemData.products.length,
       categorias: systemData.categories.length,
-      usuarios: systemData.users.length
+      usuarios: systemData.users.length,
+      promocoes: systemData.promotions.length
     });
     
   } catch (error) {
@@ -888,6 +892,9 @@ function renderTab(tabName) {
     case 'usuarios':
       renderUsersTab();
       break;
+    case 'promocoes':
+      renderPromotionsTab();
+      break;
     case 'excel':
       renderExcelTab();
       break;
@@ -1525,6 +1532,19 @@ function renderApp() {
 }
 
 // Renderizar visão do catálogo (para clientes)
+// Função para renderizar banner de promoção
+function renderPromotionBanner() {
+  const activePromotion = systemData.promotions.find(p => p.ativo);
+  if (!activePromotion) return '';
+  
+  return `
+    <div style="background: ${activePromotion.cor || 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'}; color: white; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; text-align: center; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+      <div style="font-size: 1.1rem;">🎉 ${activePromotion.texto || 'Promoção Especial!'}</div>
+      ${activePromotion.descricao ? `<div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">${activePromotion.descricao}</div>` : ''}
+    </div>
+  `;
+}
+
 function renderCatalogView() {
   // Buscar o multiplicador atual do usuário na aba de usuários
   let userMultiplier = 1.0;
@@ -1669,6 +1689,7 @@ function renderCatalogView() {
           <h1 style="margin: 0 0 1rem; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 3rem; font-weight: 700;">
             Móveis Bonafé Catálogo
           </h1>
+          ${renderPromotionBanner()}
           <div style="display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 1rem;">
             <span style="color: white; opacity: 0.9;">Bem-vindo, ${currentUser?.name || 'Cliente'}</span>
             <button onclick="currentUser = null; renderApp();" 
