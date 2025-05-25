@@ -3595,14 +3595,68 @@ function updateProductsDisplay(productsToShow) {
     userMultiplier = currentUser.price_multiplier || 1.0;
   }
 
-  const productsHtml = productsToShow
+  // Função para extrair números do nome do produto para ordenação correta
+  function extractNumbersForSort(name) {
+    // Extrai números decimais do nome (ex: "Mesa Bonacor 0,75" -> [0.75])
+    const numbers = (name || "").match(/\d+[,.]?\d*/g);
+    if (numbers && numbers.length > 0) {
+      // Converte vírgula para ponto e transforma em número
+      return numbers.map(num => parseFloat(num.replace(',', '.')));
+    }
+    return [];
+  }
+
+  // Ordenar produtos por categoria e depois por nome (inteligente com números)
+  const sortedProducts = [...productsToShow].sort((a, b) => {
+    if (a.category !== b.category) {
+      return (a.category || "").localeCompare(b.category || "", "pt-BR", {
+        numeric: true,
+      });
+    }
+    
+    const nameA = a.name || "";
+    const nameB = b.name || "";
+    
+    // Extrair números dos nomes
+    const numbersA = extractNumbersForSort(nameA);
+    const numbersB = extractNumbersForSort(nameB);
+    
+    // Se ambos têm números, comparar numericamente
+    if (numbersA.length > 0 && numbersB.length > 0) {
+      // Comparar o primeiro número encontrado
+      const numA = numbersA[0];
+      const numB = numbersB[0];
+      
+      if (numA !== numB) {
+        return numA - numB;
+      }
+      
+      // Se o primeiro número é igual, comparar o segundo (se existir)
+      if (numbersA.length > 1 && numbersB.length > 1) {
+        return numbersA[1] - numbersB[1];
+      }
+    }
+    
+    // Caso contrário, usar ordenação alfabética normal
+    return nameA.localeCompare(nameB, "pt-BR", {
+      numeric: true,
+    });
+  });
+
+  const productsHtml = sortedProducts
     .map((product, index) => {
       const basePrice = product.base_price || 0;
       const priceTable = calculatePriceTable(
         basePrice,
         userMultiplier,
         product.fixed_price,
-      );
+      ) || {
+        "À Vista": 0,
+        30: 0,
+        "30/60": 0,
+        "30/60/90": 0,
+        "30/60/90/120": 0,
+      };
 
       // Pegar todas as imagens com verificação segura
       let allImages = [];
@@ -3693,22 +3747,28 @@ function updateProductsDisplay(productsToShow) {
         <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">${product.category || "Categoria"}</p>
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
+          <div class="price-tables" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
+            <div style="padding: 0.5rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: white; font-weight: 700;">À Vista</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">30 dias</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: white; font-weight: 700;">30</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">30/60</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: white; font-weight: 700;">30/60</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
-              <div style="color: #6b7280;">30/60/90</div>
-              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
+            <div style="padding: 0.5rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: white; font-weight: 700;">30/60/90</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
+            </div>
+          </div>
+          <div style="margin-top: 0.5rem;">
+            <div style="padding: 0.5rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border-radius: 0.25rem; text-align: center;">
+              <div style="color: white; font-weight: 700; font-size: 0.8rem;">30/60/90/120</div>
+              <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</div>
             </div>
           </div>
         </div>
@@ -3726,99 +3786,8 @@ function updateProductsDisplay(productsToShow) {
     '[style*="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr))"]',
   );
   if (productsContainer) {
-    if (productsToShow.length > 0) {
+    if (sortedProducts.length > 0) {
       productsContainer.innerHTML = productsHtml;
-      // Aplicar melhorias visuais após filtrar
-      setTimeout(() => {
-        const priceTables = document.querySelectorAll(
-          '[style*="grid-template-columns: 1fr 1fr"]',
-        );
-        priceTables.forEach((table, tableIndex) => {
-          if (table.innerHTML.includes("À Vista")) {
-            // Atualizar para 5 tabelas coloridas
-            table.style.gridTemplateColumns = "repeat(5, 1fr)";
-            table.style.gap = "0.5rem";
-            table.style.fontSize = "0.75rem";
-            console.log(
-              "🔍 CLIQUE DETECTADO NA TABELA DE PREÇOS - INDEX:",
-              tableIndex,
-            );
-            table.style.cursor = "default";
-            table.onclick = (e) => {
-              console.log("❌ TENTATIVA DE ABRIR MODAL BLOQUEADA PARA CLIENTE");
-              e.preventDefault();
-              e.stopPropagation();
-            };
-
-            const boxes = table.children;
-            if (boxes.length >= 4) {
-              // Aplicar cores corretas
-              if (boxes[0]) {
-                boxes[0].style.background =
-                  "linear-gradient(135deg, #10b981 0%, #059669 100%)";
-                boxes[0].style.color = "white";
-                boxes[0].style.fontWeight = "700";
-                boxes[0].innerHTML = boxes[0].innerHTML
-                  .replace("À Vista", "À Vista")
-                  .replace("color: #6b7280", "font-weight: 700")
-                  .replace("color: #1f2937", "font-weight: 600");
-              }
-              if (boxes[1]) {
-                boxes[1].style.background =
-                  "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
-                boxes[1].style.color = "white";
-                boxes[1].style.fontWeight = "700";
-                boxes[1].innerHTML = boxes[1].innerHTML
-                  .replace("30 dias", "30")
-                  .replace("color: #6b7280", "font-weight: 700")
-                  .replace("color: #1f2937", "font-weight: 600");
-              }
-              if (boxes[2]) {
-                boxes[2].style.background =
-                  "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)";
-                boxes[2].style.color = "white";
-                boxes[2].style.fontWeight = "700";
-                boxes[2].innerHTML = boxes[2].innerHTML
-                  .replace("color: #6b7280", "font-weight: 700")
-                  .replace("color: #1f2937", "font-weight: 600");
-              }
-              if (boxes[3]) {
-                boxes[3].style.background =
-                  "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)";
-                boxes[3].style.color = "white";
-                boxes[3].style.fontWeight = "700";
-                boxes[3].innerHTML = boxes[3].innerHTML
-                  .replace("color: #6b7280", "font-weight: 700")
-                  .replace("color: #1f2937", "font-weight: 600");
-              }
-
-              // Adicionar 5ª tabela se não existir
-              if (boxes.length === 4) {
-                const lastPrice = boxes[3].querySelector(
-                  '[style*="font-weight: 600"]',
-                );
-                const baseValue = lastPrice
-                  ? parseFloat(
-                      lastPrice.textContent
-                        .replace("R$ ", "")
-                        .replace(",", "."),
-                    )
-                  : 0;
-                const newPrice = (baseValue * 1.02).toFixed(2);
-
-                const newBox = document.createElement("div");
-                newBox.style.cssText =
-                  "padding: 0.5rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.375rem; text-align: center; color: white;";
-                newBox.innerHTML = `
-                  <div style="font-weight: 700;">30/60/90/120</div>
-                  <div style="font-weight: 600; font-size: 0.9rem;">R$ ${newPrice}</div>
-                `;
-                table.appendChild(newBox);
-              }
-            }
-          }
-        });
-      }, 100);
     } else {
       productsContainer.innerHTML = `
         <div style="grid-column: 1 / -1; background: white; padding: 3rem; border-radius: 0.5rem; text-align: center; border: 2px dashed #d1d5db;">
