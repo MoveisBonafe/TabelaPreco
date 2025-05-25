@@ -32,25 +32,25 @@ export function Catalog({ onShowAdminLogin }: CatalogProps) {
       const matchesSearch = !searchQuery || 
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         product.description.toLowerCase().includes(searchQuery.toLowerCase());
-      
+
       const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-      
+
       return matchesSearch && matchesCategory;
     })
     .sort((a, b) => {
-      switch (sortBy) {
-        case 'name':
-          return a.name.localeCompare(b.name);
-        case 'price-low':
-          return a.finalPrice - b.finalPrice;
-        case 'price-high':
-          return b.finalPrice - a.finalPrice;
-        case 'category':
-          return a.category.localeCompare(b.category);
-        default:
-          return 0;
-      }
-    });
+    switch (sortBy) {
+      case 'name':
+        return a.name.localeCompare(b.name, 'pt-BR', { numeric: true });
+      case 'price-low':
+        return a.finalPrice - b.finalPrice;
+      case 'price-high':
+        return b.finalPrice - a.finalPrice;
+      case 'category':
+        return a.category.localeCompare(b.category, 'pt-BR', { numeric: true });
+      default:
+        return a.name.localeCompare(b.name, 'pt-BR', { numeric: true });
+    }
+  });
 
   const handleViewProduct = (product: Product) => {
     setSelectedProduct(product);
