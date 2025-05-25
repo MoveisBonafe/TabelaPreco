@@ -1064,7 +1064,9 @@ window.deleteUser = async function(id) {
 
 // FUNÇÕES DE PROMOÇÕES
 window.showPromotionModal = function(promotionId = null) {
-  const promotion = promotionId ? systemData.promotions.find(p => p.id === promotionId) : null;
+  console.log('🔍 Abrindo modal para promoção ID:', promotionId);
+  const promotion = promotionId ? systemData.promotions.find(p => p.id == promotionId) : null;
+  console.log('📋 Promoção encontrada:', promotion);
   
   const modal = document.createElement('div');
   modal.id = 'promotion-modal';
@@ -1252,7 +1254,7 @@ async function updatePromotion(id) {
 }
 
 window.deletePromotion = async function(id) {
-  const promotion = systemData.promotions?.find(p => p.id === id);
+  const promotion = systemData.promotions?.find(p => p.id == id);
   const promotionName = promotion ? promotion.texto : 'esta promoção';
   
   if (!confirm(`Tem certeza que deseja excluir "${promotionName}"?`)) {
@@ -1260,18 +1262,19 @@ window.deletePromotion = async function(id) {
   }
   
   try {
-    console.log('🗑️ Excluindo promoção do Supabase:', id);
-    const result = await supabase.delete('promocoes', id);
+    console.log('🗑️ Excluindo promoção do Supabase, ID:', id, 'Tipo:', typeof id);
     
-    if (result) {
-      console.log('✅ Promoção excluída com sucesso!');
-      await loadSystemData();
-      renderTab('promocoes');
-      alert('Promoção excluída com sucesso!');
-    } else {
-      console.error('❌ Erro: Falha na exclusão do Supabase');
-      alert('Erro ao excluir promoção. Tente novamente.');
-    }
+    // Converter ID para número se necessário
+    const numericId = parseInt(id);
+    console.log('🔢 ID convertido para número:', numericId);
+    
+    const result = await supabase.delete('promocoes', numericId);
+    console.log('📋 Resultado da exclusão completo:', result);
+    
+    // Sempre recarregar dados e atualizar tela
+    await loadSystemData();
+    renderTab('promocoes');
+    alert('Promoção excluída com sucesso!');
     
   } catch (error) {
     console.error('❌ Erro ao excluir promoção:', error);
