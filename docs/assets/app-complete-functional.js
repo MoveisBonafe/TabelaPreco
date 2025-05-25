@@ -1259,59 +1259,28 @@ async function updatePromotion(id) {
     
     console.log('📤 Atualizando promoção no Supabase:', id, promotionData);
     
-    // Criar timeout mais agressivo para update
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(promotionData)
+    });
     
-    try {
-      const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${id}`, {
-        method: 'PATCH',
-        headers: {
-          'apikey': SUPABASE_ANON_KEY,
-          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-          'Content-Type': 'application/json',
-          'Prefer': 'return=representation'
-        },
-        body: JSON.stringify(promotionData),
-        signal: controller.signal
-      });
-      
-      clearTimeout(timeoutId);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      
-      const result = await response.json();
-      
-      if (result && result.length > 0) {
-        console.log('✅ Promoção atualizada com sucesso!');
-        
-        // Se ativar esta promoção, desativar outras localmente
-        if (ativo) {
-          systemData.promotions.forEach(promo => {
-            if (promo.id != id) {
-              promo.ativo = false;
-            }
-          });
-        }
-        
-        // Atualizar dados localmente sem recarregar tudo
-        const promoIndex = systemData.promotions.findIndex(p => p.id == id);
-        if (promoIndex !== -1) {
-          systemData.promotions[promoIndex] = { ...systemData.promotions[promoIndex], ...promotionData };
-        }
-        
-        renderTab('promocoes');
-        closePromotionModal();
-        alert('Promoção atualizada com sucesso!');
-      } else {
-        throw new Error('Resposta vazia do servidor');
-      }
-      
-    } catch (fetchError) {
-      clearTimeout(timeoutId);
-      throw fetchError;
+    console.log('📋 Status da atualização:', response.status, response.ok);
+    
+    if (response.ok) {
+      console.log('✅ Promoção atualizada com sucesso!');
+      await loadSystemData();
+      renderTab('promocoes');
+      closePromotionModal();
+      alert('Promoção atualizada com sucesso!');
+    } else {
+      const errorText = await response.text();
+      console.error('❌ Erro na atualização:', response.status, errorText);
+      alert('Erro ao atualizar promoção. Tente novamente.');
     }
     
   } catch (error) {
