@@ -385,6 +385,11 @@ function renderCatalogView() {
             </div>
             
             ${images.length > 1 ? `
+              <!-- Setas de navegação -->
+              <button onclick="previousImage('${carouselId}', ${images.length})" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 2;">‹</button>
+              <button onclick="nextImage('${carouselId}', ${images.length})" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; z-index: 2;">›</button>
+              
+              <!-- Indicadores -->
               <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px;">
                 ${images.map((_, i) => `
                   <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? 'white' : 'rgba(255,255,255,0.5)'};"></div>
