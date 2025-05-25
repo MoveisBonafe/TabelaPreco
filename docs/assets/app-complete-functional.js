@@ -292,8 +292,8 @@ async function loadSystemData() {
 
 // Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
 function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
-  // Garantir que isFixedPrice seja boolean - CORRIGIDO para todos os tipos
-  const fixedPrice = Boolean(isFixedPrice) && isFixedPrice !== 0 && isFixedPrice !== '0' && isFixedPrice !== 'false';
+  // Garantir que isFixedPrice seja boolean - CORRIGIDO DEFINITIVO
+  const fixedPrice = isFixedPrice === true || isFixedPrice === 1 || isFixedPrice === '1' || isFixedPrice === 'true' || isFixedPrice === 'sim';
   
   if (fixedPrice) {
     // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
@@ -2305,8 +2305,7 @@ function renderCatalogView() {
     </div>
   `;
   
-  // Aplicar correções na tela de clientes
-  applyClientFixes();
+  // Correções removidas - layout já correto
 }
 
 // Renderizar visão admin
@@ -2931,13 +2930,7 @@ function fixCategoryLayout() {
   }
 }
 
-// Aplicar correções após renderização
-function applyClientFixes() {
-  setTimeout(() => {
-    fixClientPriceTables();
-    fixCategoryLayout();
-  }, 100);
-}
+// Função removida - não é mais necessária
 
 // Inicializar aplicação
 console.log('✅ Sistema MoveisBonafe completo carregado!');
