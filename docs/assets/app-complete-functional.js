@@ -1052,7 +1052,7 @@ window.deleteUser = async function(id) {
 };
 
 // FUNÇÕES DE PROMOÇÕES
-function showPromotionModal(promotionId = null) {
+window.showPromotionModal = function(promotionId = null) {
   const promotion = promotionId ? systemData.promotions.find(p => p.id === promotionId) : null;
   
   const modal = document.createElement('div');
@@ -1073,7 +1073,7 @@ function showPromotionModal(promotionId = null) {
           <button onclick="closePromotionModal()" style="background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">×</button>
         </div>
         
-        <form onsubmit="${promotion ? `updatePromotion('${promotion.id}')` : 'savePromotion(event)'}" style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <form onsubmit="handlePromotionSubmit(event, '${promotion?.id || ''}')" style="display: flex; flex-direction: column; gap: 1.5rem;">
           <div>
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Texto da Promoção *</label>
             <input type="text" id="promotion-texto" value="${promotion?.texto || ''}" required
@@ -1123,10 +1123,20 @@ function showPromotionModal(promotionId = null) {
   document.body.appendChild(modal);
 }
 
-function closePromotionModal() {
+window.closePromotionModal = function() {
   const modal = document.getElementById('promotion-modal');
   if (modal) {
     modal.remove();
+  }
+}
+
+window.handlePromotionSubmit = async function(event, promotionId) {
+  event.preventDefault();
+  
+  if (promotionId) {
+    await updatePromotion(promotionId);
+  } else {
+    await savePromotion(event);
   }
 }
 
@@ -1222,7 +1232,7 @@ async function updatePromotion(id) {
   }
 }
 
-async function deletePromotion(id) {
+window.deletePromotion = async function(id) {
   if (!confirm('Tem certeza que deseja excluir esta promoção?')) {
     return;
   }
