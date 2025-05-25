@@ -1180,8 +1180,7 @@ async function savePromotion(event) {
       texto,
       descricao,
       cor,
-      ativo,
-      created_at: new Date().toISOString()
+      ativo
     };
     
     console.log('📤 Salvando promoção no Supabase:', promotionData);
@@ -1229,8 +1228,7 @@ async function updatePromotion(id) {
       texto,
       descricao,
       cor,
-      ativo,
-      updated_at: new Date().toISOString()
+      ativo
     };
     
     console.log('📤 Atualizando promoção no Supabase:', id, promotionData);
