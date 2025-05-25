@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldX, User, Lock, LogIn, Eye } from 'lucide-react';
+import { ShieldX, User, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,6 +13,7 @@ interface LoginModalProps {
 export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModalProps) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -51,13 +52,20 @@ export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModal
             <Label className="block text-sm font-medium text-slate-700 mb-2">Senha</Label>
             <div className="relative">
               <Input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-10 pr-4 py-3"
+                className="w-full pl-10 pr-12 py-3"
                 placeholder="Digite sua senha"
               />
               <Lock className="absolute left-3 top-3.5 h-4 w-4 text-slate-400" />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
           </div>
           
