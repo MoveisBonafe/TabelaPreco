@@ -266,6 +266,76 @@ async function trySupabaseLogin(username, password) {
 // Carregamento de dados otimizado
 async function loadSystemData() {
   try {
+    // Mostrar animação de carregamento elegante
+    const loadingElement = document.querySelector('.loading');
+    if (loadingElement) {
+      loadingElement.innerHTML = `
+        <div style="text-align: center;">
+          <div style="display: inline-block; position: relative; width: 80px; height: 80px; margin-bottom: 20px;">
+            <div style="position: absolute; top: 33px; width: 13px; height: 13px; border-radius: 50%; background: #fbbf24; animation: lds-grid 1.2s linear infinite; animation-delay: -0.576s; left: 8px;"></div>
+            <div style="position: absolute; top: 33px; width: 13px; height: 13px; border-radius: 50%; background: #f59e0b; animation: lds-grid 1.2s linear infinite; animation-delay: -0.432s; left: 32px;"></div>
+            <div style="position: absolute; top: 33px; width: 13px; height: 13px; border-radius: 50%; background: #d97706; animation: lds-grid 1.2s linear infinite; animation-delay: -0.288s; left: 56px;"></div>
+            <div style="position: absolute; top: 57px; width: 13px; height: 13px; border-radius: 50%; background: #92400e; animation: lds-grid 1.2s linear infinite; animation-delay: -0.144s; left: 8px;"></div>
+            <div style="position: absolute; top: 57px; width: 13px; height: 13px; border-radius: 50%; background: #78350f; animation: lds-grid 1.2s linear infinite; animation-delay: 0s; left: 32px;"></div>
+            <div style="position: absolute; top: 57px; width: 13px; height: 13px; border-radius: 50%; background: #451a03; animation: lds-grid 1.2s linear infinite; animation-delay: -0.144s; left: 56px;"></div>
+          </div>
+          <div style="font-size: 1.2rem; font-weight: 600; color: #374151; margin-bottom: 8px;">
+            📦 MoveisBonafe
+          </div>
+          <div style="font-size: 0.9rem; color: #6b7280; margin-bottom: 15px;">
+            Carregando catálogo de produtos...
+          </div>
+          <div style="width: 200px; height: 4px; background: #e5e7eb; border-radius: 2px; margin: 0 auto; overflow: hidden;">
+            <div style="height: 100%; background: linear-gradient(90deg, #fbbf24, #f59e0b); border-radius: 2px; animation: loading-bar 2s ease-in-out infinite;"></div>
+          </div>
+        </div>
+        <style>
+          @keyframes lds-grid {
+            0%, 100% {
+              opacity: 1;
+              transform: scale(1);
+            }
+            50% {
+              opacity: 0.5;
+              transform: scale(0.5);
+            }
+          }
+          @keyframes loading-bar {
+            0% {
+              transform: translateX(-100%);
+            }
+            50% {
+              transform: translateX(0%);
+            }
+            100% {
+              transform: translateX(100%);
+            }
+          }
+          @media (max-width: 768px) {
+            .loading > div {
+              padding: 20px;
+              max-width: 90%;
+            }
+            .loading div[style*="font-size: 1.2rem"] {
+              font-size: 1.1rem !important;
+            }
+            .loading div[style*="width: 80px"] {
+              width: 60px !important;
+              height: 60px !important;
+              margin-bottom: 15px !important;
+            }
+            .loading div[style*="width: 13px"] {
+              width: 10px !important;
+              height: 10px !important;
+            }
+            .loading div[style*="width: 200px"] {
+              width: 150px !important;
+            }
+          }
+        </style>
+      `;
+    }
+    
     console.log('🔄 Carregando dados do Supabase...');
     
     // Carregar dados em paralelo para melhor performance
