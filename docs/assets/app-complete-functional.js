@@ -1051,6 +1051,199 @@ window.deleteUser = async function(id) {
   }
 };
 
+// FUNÇÕES DE PROMOÇÕES
+function showPromotionModal(promotionId = null) {
+  const promotion = promotionId ? systemData.promotions.find(p => p.id === promotionId) : null;
+  
+  const modal = document.createElement('div');
+  modal.id = 'promotion-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.8); display: flex; align-items: center; 
+    justify-content: center; z-index: 1000; padding: 1rem;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background: white; border-radius: 1rem; max-width: 500px; width: 100%; max-height: 90vh; overflow-y: auto; position: relative;">
+      <div style="padding: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+          <h3 style="margin: 0; color: #1e293b; font-size: 1.25rem;">
+            ${promotion ? '🎯 Editar Promoção' : '🎯 Nova Promoção'}
+          </h3>
+          <button onclick="closePromotionModal()" style="background: rgba(0,0,0,0.1); border: none; border-radius: 50%; width: 32px; height: 32px; cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; justify-content: center;">×</button>
+        </div>
+        
+        <form onsubmit="${promotion ? `updatePromotion('${promotion.id}')` : 'savePromotion(event)'}" style="display: flex; flex-direction: column; gap: 1.5rem;">
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Texto da Promoção *</label>
+            <input type="text" id="promotion-texto" value="${promotion?.texto || ''}" required
+                   placeholder="Ex: Desconto Especial de 20%!"
+                   style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem;">
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Descrição (opcional)</label>
+            <textarea id="promotion-descricao" placeholder="Ex: Válido até o final do mês para todos os produtos"
+                      style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; font-size: 1rem; resize: vertical; min-height: 80px;">${promotion?.descricao || ''}</textarea>
+          </div>
+          
+          <div>
+            <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Cor de Fundo</label>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+              <input type="color" id="promotion-cor" value="${promotion?.cor || '#ff6b6b'}"
+                     style="width: 50px; height: 40px; border: 1px solid #d1d5db; border-radius: 0.375rem; cursor: pointer;">
+              <span style="color: #6b7280; font-size: 0.875rem;">Escolha a cor de fundo do banner</span>
+            </div>
+          </div>
+          
+          <div>
+            <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+              <input type="checkbox" id="promotion-ativo" ${promotion?.ativo ? 'checked' : ''}
+                     style="width: 18px; height: 18px; cursor: pointer;">
+              <span style="font-weight: 500; color: #374151;">Ativar esta promoção</span>
+            </label>
+            <p style="margin: 0.5rem 0 0; color: #6b7280; font-size: 0.875rem;">Apenas uma promoção pode estar ativa por vez</p>
+          </div>
+          
+          <div style="display: flex; gap: 1rem; margin-top: 1rem;">
+            <button type="button" onclick="closePromotionModal()" 
+                    style="flex: 1; padding: 0.75rem; background: #f3f4f6; color: #374151; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+              Cancelar
+            </button>
+            <button type="submit" 
+                    style="flex: 1; padding: 0.75rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+              ${promotion ? 'Atualizar' : 'Criar'} Promoção
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+}
+
+function closePromotionModal() {
+  const modal = document.getElementById('promotion-modal');
+  if (modal) {
+    modal.remove();
+  }
+}
+
+async function savePromotion(event) {
+  event.preventDefault();
+  
+  try {
+    const texto = document.getElementById('promotion-texto').value.trim();
+    const descricao = document.getElementById('promotion-descricao').value.trim();
+    const cor = document.getElementById('promotion-cor').value;
+    const ativo = document.getElementById('promotion-ativo').checked;
+    
+    if (!texto) {
+      alert('Por favor, insira o texto da promoção.');
+      return;
+    }
+    
+    // Se ativar esta promoção, desativar todas as outras
+    if (ativo) {
+      for (const promo of systemData.promotions) {
+        if (promo.ativo) {
+          await supabase.update('promocoes', promo.id, { ativo: false });
+        }
+      }
+    }
+    
+    const promotionData = {
+      texto,
+      descricao,
+      cor,
+      ativo
+    };
+    
+    const result = await supabase.insert('promocoes', promotionData);
+    
+    if (result) {
+      console.log('✅ Promoção salva com sucesso!');
+      await loadSystemData();
+      renderTab('promocoes');
+      closePromotionModal();
+    } else {
+      alert('Erro ao salvar promoção. Tente novamente.');
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao salvar promoção:', error);
+    alert('Erro ao salvar promoção. Verifique os dados e tente novamente.');
+  }
+}
+
+async function updatePromotion(id) {
+  try {
+    const texto = document.getElementById('promotion-texto').value.trim();
+    const descricao = document.getElementById('promotion-descricao').value.trim();
+    const cor = document.getElementById('promotion-cor').value;
+    const ativo = document.getElementById('promotion-ativo').checked;
+    
+    if (!texto) {
+      alert('Por favor, insira o texto da promoção.');
+      return;
+    }
+    
+    // Se ativar esta promoção, desativar todas as outras
+    if (ativo) {
+      for (const promo of systemData.promotions) {
+        if (promo.id !== id && promo.ativo) {
+          await supabase.update('promocoes', promo.id, { ativo: false });
+        }
+      }
+    }
+    
+    const promotionData = {
+      texto,
+      descricao,
+      cor,
+      ativo
+    };
+    
+    const result = await supabase.update('promocoes', id, promotionData);
+    
+    if (result) {
+      console.log('✅ Promoção atualizada com sucesso!');
+      await loadSystemData();
+      renderTab('promocoes');
+      closePromotionModal();
+    } else {
+      alert('Erro ao atualizar promoção. Tente novamente.');
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao atualizar promoção:', error);
+    alert('Erro ao atualizar promoção. Verifique os dados e tente novamente.');
+  }
+}
+
+async function deletePromotion(id) {
+  if (!confirm('Tem certeza que deseja excluir esta promoção?')) {
+    return;
+  }
+  
+  try {
+    const result = await supabase.delete('promocoes', id);
+    
+    if (result) {
+      console.log('✅ Promoção excluída com sucesso!');
+      await loadSystemData();
+      renderTab('promocoes');
+    } else {
+      alert('Erro ao excluir promoção. Tente novamente.');
+    }
+    
+  } catch (error) {
+    console.error('❌ Erro ao excluir promoção:', error);
+    alert('Erro ao excluir promoção. Tente novamente.');
+  }
+}
+
 // FUNÇÕES DE PREÇOS
 window.updatePricePercentage = function(table, value) {
   systemData.priceSettings[table] = parseFloat(value);
