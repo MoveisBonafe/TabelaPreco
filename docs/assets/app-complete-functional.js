@@ -226,10 +226,34 @@ window.handleTouchEnd = function(event, carouselId, totalImages) {
 window.login = function() {
   const username = document.getElementById('username').value;
   const password = document.getElementById('password').value;
+  const loginButton = document.querySelector('button[onclick="login()"]');
   
   if (!username || !password) {
     alert('Por favor, preencha usuário e senha!');
     return;
+  }
+
+  // Mostrar loading
+  if (loginButton) {
+    loginButton.disabled = true;
+    loginButton.innerHTML = `
+      <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+        <div style="width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-radius: 50%; border-top-color: white; animation: spin 1s linear infinite;"></div>
+        Entrando...
+      </div>
+    `;
+    
+    // Adicionar CSS da animação se não existir
+    if (!document.getElementById('loading-styles')) {
+      const style = document.createElement('style');
+      style.id = 'loading-styles';
+      style.textContent = `
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
   }
 
   console.log('🔍 Verificando credenciais para:', username);
@@ -268,6 +292,15 @@ window.login = function() {
   trySupabaseLogin(username, password);
 };
 
+// Função para restaurar botão de login
+function restoreLoginButton() {
+  const loginButton = document.querySelector('button[onclick="login()"]');
+  if (loginButton) {
+    loginButton.disabled = false;
+    loginButton.innerHTML = 'Entrar';
+  }
+}
+
 // Função auxiliar para tentar login no Supabase
 async function trySupabaseLogin(username, password) {
   try {
@@ -280,10 +313,12 @@ async function trySupabaseLogin(username, password) {
       await loadSystemData();
       renderApp();
     } else {
+      restoreLoginButton();
       alert('Usuário ou senha incorretos!');
     }
   } catch (error) {
     console.error('Erro no login Supabase:', error);
+    restoreLoginButton();
     alert('Usuário ou senha incorretos!');
   }
 }
