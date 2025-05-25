@@ -163,17 +163,6 @@ function updateCarousel(carouselId, totalImages) {
 }
 
 // Touch events removidos para melhor performance
-  
-  
-  // Verifica se é um swipe horizontal com movimento mínimo de 30px
-      console.log('Swipe direita - imagem anterior');
-      previousImage(carouselId, totalImages);
-    } else {
-      console.log('Swipe esquerda - próxima imagem');
-      nextImage(carouselId, totalImages);
-    }
-  }
-};
 
 // Função de login
 window.login = function() {
