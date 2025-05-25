@@ -3129,4 +3129,3 @@ window.closeProductModal = function() {
     modal.remove();
   }
 };
-
