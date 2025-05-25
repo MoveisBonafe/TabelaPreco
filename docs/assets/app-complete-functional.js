@@ -2104,6 +2104,12 @@ function renderCatalogView() {
               <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
             </div>
           </div>
+          <div style="margin-top: 0.5rem;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
+              <div style="color: #6b7280; font-size: 0.8rem;">30/60/90/120</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['30/60/90/120'] || 0).toFixed(2)}</div>
+            </div>
+          </div>
         </div>
         
         ${product.description ? `<p style="margin: 1rem 0 0; color: #6b7280; font-size: 0.875rem; line-height: 1.4;">${product.description}</p>` : ''}
