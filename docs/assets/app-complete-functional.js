@@ -2810,8 +2810,13 @@ function updateProductsDisplay(productsToShow) {
             table.style.gridTemplateColumns = 'repeat(5, 1fr)';
             table.style.gap = '0.5rem';
             table.style.fontSize = '0.75rem';
-            table.style.cursor = 'pointer';
-            table.onclick = () => showProductModal(tableIndex);
+            console.log('🔍 CLIQUE DETECTADO NA TABELA DE PREÇOS - INDEX:', tableIndex);
+            table.style.cursor = 'default';
+            table.onclick = (e) => {
+              console.log('❌ TENTATIVA DE ABRIR MODAL BLOQUEADA PARA CLIENTE');
+              e.preventDefault();
+              e.stopPropagation();
+            };
             
             const boxes = table.children;
             if (boxes.length >= 4) {
