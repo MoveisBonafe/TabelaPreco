@@ -1794,6 +1794,10 @@ function renderAdminView() {
                   style="padding: 1rem 1.5rem; border: none; background: #f3f4f6; color: #374151; cursor: pointer; white-space: nowrap; font-weight: 600;">
             👥 Usuários
           </button>
+          <button class="tab-button" onclick="renderTab('promocoes')" 
+                  style="padding: 1rem 1.5rem; border: none; background: #f3f4f6; color: #374151; cursor: pointer; white-space: nowrap; font-weight: 600;">
+            🎯 Promoções
+          </button>
           <button class="tab-button" onclick="renderTab('excel')" 
                   style="padding: 1rem 1.5rem; border: none; background: #f3f4f6; color: #374151; cursor: pointer; white-space: nowrap; font-weight: 600;">
             📊 Excel
