@@ -424,7 +424,17 @@ function renderCatalogView() {
     return '<div style="text-align: center; padding: 40px; color: #666;">Nenhum produto encontrado.</div>';
   }
 
-  const productsHtml = systemData.products.map((product, index) => {
+  // Ordenar produtos por categoria e depois por nome (ordem alfabética crescente)
+  const sortedProducts = [...systemData.products].sort((a, b) => {
+    // Primeiro ordenar por categoria
+    if (a.category !== b.category) {
+      return (a.category || '').localeCompare(b.category || '', 'pt-BR');
+    }
+    // Depois ordenar por nome dentro da mesma categoria
+    return (a.name || '').localeCompare(b.name || '', 'pt-BR');
+  });
+
+  const productsHtml = sortedProducts.map((product, index) => {
     const images = product.images || [];
     const hasImages = images.length > 0;
     const carouselId = `product-${index}`;
