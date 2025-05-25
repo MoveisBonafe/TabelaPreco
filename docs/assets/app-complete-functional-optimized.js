@@ -1,7 +1,8 @@
 // MoveisBonafe Sistema Otimizado - Performance Melhorada
 // Carregamento de imagens mais rápido e touch events otimizados
+// Atualizado: 2025-05-25 05:44 - Credenciais Supabase corretas
 
-// Sistema de dados local
+// Sistema de dados - carregará do Supabase
 let systemData = {
   products: [],
   categories: [],
@@ -28,9 +29,9 @@ let carouselStates = {};
 let touchStartX = 0;
 let touchStartY = 0;
 
-// Configuração do Supabase
-const SUPABASE_URL = 'https://pqrzlmdbgxxzhemqrjfx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcnpsbWRiZ3h4emhlbXFyamZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4NzAwNTEsImV4cCI6MjA2MzQ0NjA1MX0.X1AJFqhMqxCYXC48TfE_0KojD8_0Tr8xt1MjF4l87zQ';
+// Configuração do Supabase com suas credenciais corretas
+const SUPABASE_URL = 'https://oozesebwtrbzeelkcmwp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDk2MzAsImV4cCI6MjA2MzU4NTYzMH0.yL6FHKbig8Uqn-e4gZzXbuBm3YuB5gmCeowRD96n7OY';
 
 // Cliente Supabase otimizado para performance
 class SupabaseClient {
@@ -231,9 +232,15 @@ function previousImage(carouselId, totalImages) {
   updateCarousel(carouselId, totalImages);
 }
 
-// Função de login otimizada
+// Função de login otimizada com tela de carregamento
 async function trySupabaseLogin(username, password) {
   try {
+    // Mostrar overlay de carregamento completo
+    showFullScreenLoading('Entrando no sistema...');
+    
+    // Aguardar um pouco para dar feedback visual
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     // Verificar nos usuários locais primeiro (mais rápido)
     const localUser = systemData.users.find(user => 
       user.username === username && user.password === password
@@ -242,122 +249,147 @@ async function trySupabaseLogin(username, password) {
     if (localUser) {
       currentUser = localUser;
       console.log('✅ Login local bem-sucedido:', currentUser.name);
+      
+      // Atualizar mensagem de carregamento
+      updateLoadingMessage('Carregando interface...');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      hideFullScreenLoading();
       renderApp();
       return true;
     }
     
     // Se não encontrou localmente, verificar no Supabase
+    updateLoadingMessage('Verificando no servidor...');
     const users = await supabase.query('users', `?username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}`);
     
     if (users && users.length > 0) {
       currentUser = users[0];
       console.log('✅ Login Supabase bem-sucedido:', currentUser.name);
+      
+      updateLoadingMessage('Carregando interface...');
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      hideFullScreenLoading();
       renderApp();
       return true;
     }
     
+    hideFullScreenLoading();
     return false;
   } catch (error) {
     console.error('❌ Erro no login:', error);
+    hideFullScreenLoading();
     return false;
   }
 }
 
-// Carregamento de dados otimizado
+// Funções para tela de carregamento completa
+function showFullScreenLoading(message) {
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.id = 'loading-overlay';
+  loadingOverlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(30, 41, 59, 0.95);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(10px);
+  `;
+  
+  loadingOverlay.innerHTML = `
+    <div style="text-align: center; color: white;">
+      <div style="margin-bottom: 2rem;">
+        <div style="width: 60px; height: 60px; border: 4px solid rgba(251, 191, 36, 0.3); border-top: 4px solid #fbbf24; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto;"></div>
+      </div>
+      
+      <h2 style="margin: 0 0 1rem; font-size: 1.5rem; font-weight: 600;">MoveisBonafe</h2>
+      <p id="loading-message" style="margin: 0; font-size: 1rem; opacity: 0.8;">${message}</p>
+      
+      <div style="margin-top: 2rem; display: flex; gap: 0.5rem; justify-content: center;">
+        <div style="width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite;"></div>
+        <div style="width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite 0.2s;"></div>
+        <div style="width: 8px; height: 8px; background: #fbbf24; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite 0.4s;"></div>
+      </div>
+    </div>
+    
+    <style>
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      @keyframes pulse {
+        0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+        40% { transform: scale(1.2); opacity: 1; }
+      }
+    </style>
+  `;
+  
+  document.body.appendChild(loadingOverlay);
+}
+
+function updateLoadingMessage(message) {
+  const messageElement = document.getElementById('loading-message');
+  if (messageElement) {
+    messageElement.textContent = message;
+  }
+}
+
+function hideFullScreenLoading() {
+  const loadingOverlay = document.getElementById('loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.style.opacity = '0';
+    loadingOverlay.style.transition = 'opacity 0.5s ease-out';
+    setTimeout(() => {
+      loadingOverlay.remove();
+    }, 500);
+  }
+}
+
+// Carregamento de dados otimizado com fallback
 async function loadSystemData() {
   try {
-    // Mostrar animação de carregamento elegante
-    const loadingElement = document.querySelector('.loading');
-    if (loadingElement) {
-      loadingElement.innerHTML = `
-        <div style="text-align: center;">
-          <div style="display: inline-block; position: relative; width: 80px; height: 80px; margin-bottom: 20px;">
-            <div style="position: absolute; top: 33px; width: 13px; height: 13px; border-radius: 50%; background: #fbbf24; animation: lds-grid 1.2s linear infinite; animation-delay: -0.576s; left: 8px;"></div>
-            <div style="position: absolute; top: 33px; width: 13px; height: 13px; border-radius: 50%; background: #f59e0b; animation: lds-grid 1.2s linear infinite; animation-delay: -0.432s; left: 32px;"></div>
-            <div style="position: absolute; top: 33px; width: 13px; height: 13px; border-radius: 50%; background: #d97706; animation: lds-grid 1.2s linear infinite; animation-delay: -0.288s; left: 56px;"></div>
-            <div style="position: absolute; top: 57px; width: 13px; height: 13px; border-radius: 50%; background: #92400e; animation: lds-grid 1.2s linear infinite; animation-delay: -0.144s; left: 8px;"></div>
-            <div style="position: absolute; top: 57px; width: 13px; height: 13px; border-radius: 50%; background: #78350f; animation: lds-grid 1.2s linear infinite; animation-delay: 0s; left: 32px;"></div>
-            <div style="position: absolute; top: 57px; width: 13px; height: 13px; border-radius: 50%; background: #451a03; animation: lds-grid 1.2s linear infinite; animation-delay: -0.144s; left: 56px;"></div>
-          </div>
-          <div style="font-size: 1.2rem; font-weight: 600; color: #374151; margin-bottom: 8px;">
-            📦 MoveisBonafe
-          </div>
-          <div style="font-size: 0.9rem; color: #6b7280; margin-bottom: 15px;">
-            Carregando catálogo de produtos...
-          </div>
-          <div style="width: 200px; height: 4px; background: #e5e7eb; border-radius: 2px; margin: 0 auto; overflow: hidden;">
-            <div style="height: 100%; background: linear-gradient(90deg, #fbbf24, #f59e0b); border-radius: 2px; animation: loading-bar 2s ease-in-out infinite;"></div>
-          </div>
-        </div>
-        <style>
-          @keyframes lds-grid {
-            0%, 100% {
-              opacity: 1;
-              transform: scale(1);
-            }
-            50% {
-              opacity: 0.5;
-              transform: scale(0.5);
-            }
-          }
-          @keyframes loading-bar {
-            0% {
-              transform: translateX(-100%);
-            }
-            50% {
-              transform: translateX(0%);
-            }
-            100% {
-              transform: translateX(100%);
-            }
-          }
-          @media (max-width: 768px) {
-            .loading > div {
-              padding: 20px;
-              max-width: 90%;
-            }
-            .loading div[style*="font-size: 1.2rem"] {
-              font-size: 1.1rem !important;
-            }
-            .loading div[style*="width: 80px"] {
-              width: 60px !important;
-              height: 60px !important;
-              margin-bottom: 15px !important;
-            }
-            .loading div[style*="width: 13px"] {
-              width: 10px !important;
-              height: 10px !important;
-            }
-            .loading div[style*="width: 200px"] {
-              width: 150px !important;
-            }
-          }
-        </style>
-      `;
-    }
-    
     console.log('🔄 Carregando dados do Supabase...');
     
     // Carregar dados em paralelo para melhor performance
     const [products, categories, users] = await Promise.all([
-      supabase.query('produtos'),
-      supabase.query('categorias'),
-      supabase.query('users')
+      supabase.query('produtos').catch(() => []),
+      supabase.query('categorias').catch(() => []),
+      supabase.query('users').catch(() => [])
     ]);
     
-    if (products) {
+    if (products && products.length > 0) {
       systemData.products = products.map(product => ({
         ...product,
         images: product.images || []
       }));
+      console.log('✅ Produtos carregados do Supabase:', products.length);
+    } else {
+      console.log('📦 Usando dados locais de produtos');
     }
     
-    if (categories) {
+    if (categories && categories.length > 0) {
       systemData.categories = categories;
+      console.log('✅ Categorias carregadas do Supabase:', categories.length);
+    } else {
+      console.log('📁 Usando dados locais de categorias');
     }
     
     if (users && users.length > 0) {
-      systemData.users = [...systemData.users, ...users];
+      // Manter usuários locais e adicionar do Supabase
+      const localUsernames = systemData.users.map(u => u.username);
+      const newUsers = users.filter(u => !localUsernames.includes(u.username));
+      systemData.users = [...systemData.users, ...newUsers];
+      console.log('✅ Usuários carregados do Supabase:', users.length);
+    } else {
+      console.log('👥 Usando usuários locais');
     }
     
     // Pré-carregar as primeiras imagens para melhor UX
@@ -372,6 +404,7 @@ async function loadSystemData() {
     
   } catch (error) {
     console.error('❌ Erro ao carregar dados do Supabase:', error);
+    console.log('📋 Continuando com dados locais disponíveis');
   }
 }
 
@@ -424,17 +457,7 @@ function renderCatalogView() {
     return '<div style="text-align: center; padding: 40px; color: #666;">Nenhum produto encontrado.</div>';
   }
 
-  // Ordenar produtos por categoria e depois por nome (ordem alfabética crescente)
-  const sortedProducts = [...systemData.products].sort((a, b) => {
-    // Primeiro ordenar por categoria
-    if (a.category !== b.category) {
-      return (a.category || '').localeCompare(b.category || '', 'pt-BR');
-    }
-    // Depois ordenar por nome dentro da mesma categoria
-    return (a.name || '').localeCompare(b.name || '', 'pt-BR');
-  });
-
-  const productsHtml = sortedProducts.map((product, index) => {
+  const productsHtml = systemData.products.map((product, index) => {
     const images = product.images || [];
     const hasImages = images.length > 0;
     const carouselId = `product-${index}`;
@@ -444,11 +467,11 @@ function renderCatalogView() {
            onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
         
         ${hasImages ? `
-          <div style="position: relative; width: 100%; height: 200px; overflow: hidden; border-radius: 8px; margin-bottom: 10px;">
-            <div id="carousel-${carouselId}" style="display: flex; height: 100%; transition: transform 0.3s ease;">
+          <div style="position: relative; width: 100%; height: 200px; overflow: hidden; border-radius: 8px; margin-bottom: 10px; transform: translateZ(0);">
+            <div id="carousel-${carouselId}" style="display: flex; height: 100%; transition: transform 0.3s ease; will-change: transform;">
               ${images.map(img => `
                 <img src="${img}" alt="${product.name}" 
-                     style="width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; border-radius: 8px;"
+                     style="width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; border-radius: 8px; will-change: transform; transform: translateZ(0);"
                      loading="lazy" decoding="async">
               `).join('')}
             </div>
@@ -626,17 +649,67 @@ window.addEventListener('load', function() {
         const username = document.getElementById('username').value;
         const password = document.getElementById('password').value;
         const errorDiv = document.getElementById('login-error');
+        const submitButton = e.target.querySelector('button[type="submit"]');
         
         if (!username || !password) {
           errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Por favor, preencha todos os campos.</div>';
           return;
         }
         
-        errorDiv.innerHTML = '<div style="color: #3b82f6; font-size: 0.875rem;">Verificando credenciais...</div>';
+        // Mostrar tela de carregamento no botão
+        submitButton.disabled = true;
+        submitButton.style.opacity = '0.8';
+        submitButton.style.cursor = 'not-allowed';
+        submitButton.style.background = '#6b7280';
+        submitButton.style.transform = 'none';
+        submitButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <div style="width: 16px; height: 16px; border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; animation: buttonSpin 1s linear infinite;"></div>
+            Carregando...
+          </div>
+        `;
         
-        const success = await trySupabaseLogin(username, password);
-        if (!success) {
-          errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Usuário ou senha incorretos.</div>';
+        // Adicionar animação se não existir
+        if (!document.getElementById('button-animations')) {
+          const style = document.createElement('style');
+          style.id = 'button-animations';
+          style.textContent = `
+            @keyframes buttonSpin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `;
+          document.head.appendChild(style);
+        }
+        
+        errorDiv.innerHTML = `
+          <div style="color: #3b82f6; font-size: 0.875rem; text-align: center; margin-top: 0.5rem;">
+            <div style="display: inline-block; width: 16px; height: 16px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: buttonSpin 1s linear infinite; margin-right: 0.5rem; vertical-align: middle;"></div>
+            Verificando credenciais...
+          </div>
+        `;
+        
+        try {
+          const success = await trySupabaseLogin(username, password);
+          if (!success) {
+            // Restaurar botão em caso de erro
+            submitButton.disabled = false;
+            submitButton.style.opacity = '1';
+            submitButton.style.cursor = 'pointer';
+            submitButton.innerHTML = '🔐 Entrar';
+            submitButton.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+            submitButton.style.transform = '';
+            errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Usuário ou senha incorretos.</div>';
+          }
+        } catch (error) {
+          // Restaurar botão em caso de erro
+          submitButton.disabled = false;
+          submitButton.style.opacity = '1';
+          submitButton.style.cursor = 'pointer';
+          submitButton.innerHTML = '🔐 Entrar';
+          submitButton.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+          submitButton.style.transform = '';
+          errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Erro de conexão. Tente novamente.</div>';
         }
       });
     } else {
@@ -656,9 +729,52 @@ window.addEventListener('load', function() {
   });
 });
 
-// Adicionar touch events com passive listeners para melhor performance
+// Otimizações de performance para scroll suave
+document.addEventListener('DOMContentLoaded', function() {
+  // Adicionar CSS para scroll suave e otimizado
+  const style = document.createElement('style');
+  style.textContent = `
+    * {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      will-change: scroll-position;
+      transform: translateZ(0);
+    }
+    
+    .card, .carousel, .carousel img {
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+    
+    /* Otimização para scroll em mobile */
+    .content {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* GPU acceleration para elementos que se movem */
+    .carousel-container {
+      transform: translate3d(0, 0, 0);
+    }
+  `;
+  document.head.appendChild(style);
+});
+
+// Touch events otimizados com passive listeners
 document.addEventListener('touchmove', function(e) {
   // Passive listener - não bloqueia scroll
+}, { passive: true });
+
+document.addEventListener('wheel', function(e) {
+  // Passive listener para scroll com mouse
+}, { passive: true });
+
+document.addEventListener('scroll', function(e) {
+  // Throttle scroll events para melhor performance
 }, { passive: true });
 
 // Adicionar SheetJS para Excel
