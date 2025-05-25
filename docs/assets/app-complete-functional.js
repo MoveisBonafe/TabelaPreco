@@ -222,6 +222,20 @@ window.handleTouchEnd = function(event, carouselId, totalImages) {
   }
 };
 
+// Função para alternar visibilidade da senha
+window.togglePasswordVisibility = function() {
+  const passwordInput = document.getElementById('password');
+  const toggleButton = document.getElementById('togglePassword');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleButton.textContent = '🙈';
+  } else {
+    passwordInput.type = 'password';
+    toggleButton.textContent = '👁️';
+  }
+};
+
 // Função de login
 window.login = function() {
   const username = document.getElementById('username').value;
@@ -2049,7 +2063,10 @@ function renderApp() {
           </div>
           
           <div style="margin-bottom: 2rem;">
-            <input type="password" id="password" placeholder="Digite sua senha" style="width: 100%; padding: 0.9rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;">
+            <div style="position: relative;">
+              <input type="password" id="password" placeholder="Digite sua senha" style="width: 100%; padding: 0.9rem 3rem 0.9rem 0.9rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;">
+              <button type="button" id="togglePassword" onclick="togglePasswordVisibility()" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #6b7280; font-size: 1.2rem; padding: 0.25rem;">👁️</button>
+            </div>
           </div>
           
           <button onclick="login()" style="width: 100%; background: linear-gradient(135deg, #DAA520 0%, #FFD700 50%, #FFA500 100%); color: white; padding: 0.9rem; border: none; border-radius: 0.75rem; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4);" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(218, 165, 32, 0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(218, 165, 32, 0.4)'">
