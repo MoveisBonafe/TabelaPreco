@@ -127,8 +127,6 @@ let selectedImages = [];
 
 // Variáveis para controle do carrossel
 let carouselStates = {};
-let touchStartX = 0;
-let touchStartY = 0;
 let categoryImageData = '';
 
 // Funções do carrossel de imagens
@@ -164,33 +162,10 @@ function updateCarousel(carouselId, totalImages) {
   }
 }
 
-// Funções de touch para mobile
-window.handleTouchStart = function(event, carouselId, totalImages) {
-  event.preventDefault();
-  const touch = event.touches[0];
-  touchStartX = touch.clientX;
-  touchStartY = touch.clientY;
-  console.log('Touch start:', touchStartX);
-};
-
-window.handleTouchMove = function(event) {
-  event.preventDefault();
-};
-
-window.handleTouchEnd = function(event, carouselId, totalImages) {
-  event.preventDefault();
-  const touch = event.changedTouches[0];
-  const touchEndX = touch.clientX;
-  const touchEndY = touch.clientY;
+// Touch events removidos para melhor performance
   
-  const deltaX = touchEndX - touchStartX;
-  const deltaY = touchEndY - touchStartY;
-  
-  console.log('Touch end - deltaX:', deltaX, 'deltaY:', deltaY);
   
   // Verifica se é um swipe horizontal com movimento mínimo de 30px
-  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) {
-    if (deltaX > 0) {
       console.log('Swipe direita - imagem anterior');
       previousImage(carouselId, totalImages);
     } else {
