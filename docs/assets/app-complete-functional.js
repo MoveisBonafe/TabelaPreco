@@ -350,17 +350,7 @@ async function trySupabaseLogin(username, password) {
       currentUser = users[0];
       console.log('✅ Login Supabase realizado:', currentUser.name, 'Tipo:', currentUser.role);
       currentView = currentUser.role === 'customer' ? 'catalog' : 'admin';
-      
-      // Carregar dados do sistema e verificar conectividade
-      const loadResult = await loadSystemData();
-      
-      // Se for cliente e houve falha nos produtos
-      if (currentUser.role === 'customer' && loadResult && loadResult.products === false) {
-        restoreLoginButton();
-        alert('⚠️ Sistema temporariamente indisponível\n\nNão foi possível conectar ao catálogo de produtos após várias tentativas.\n\nTente novamente em alguns minutos ou entre em contato com o suporte.');
-        return;
-      }
-      
+      await loadSystemData();
       renderApp();
     } else {
       restoreLoginButton();
@@ -420,10 +410,7 @@ async function loadSystemData(maxRetries = 3) {
         promocoes: systemData.promotions.length
       });
       
-      // Verificar se produtos carregaram com sucesso
-      const productsSuccess = products.status === 'fulfilled' && Array.isArray(products.value);
-      return { success: true, products: productsSuccess };
-      
+      return; // Sucesso, sair do loop
       
     } catch (error) {
       console.error(`❌ Erro ao carregar dados (tentativa ${attempt}):`, error);
@@ -431,7 +418,6 @@ async function loadSystemData(maxRetries = 3) {
       if (attempt === maxRetries) {
         console.error('❌ Todas as tentativas falharam, usando dados padrão');
         ensureDataIntegrity();
-        return { success: false, products: false };
       } else {
         // Aguardar antes de tentar novamente
         await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
@@ -440,9 +426,6 @@ async function loadSystemData(maxRetries = 3) {
       attempt++;
     }
   }
-  
-  return { success: false, products: false };
-}
 }
 
 // Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
