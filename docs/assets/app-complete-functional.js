@@ -297,11 +297,12 @@ function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false
     basePrice,
     userMultiplier,
     isFixedPrice,
-    tipo: typeof isFixedPrice
+    tipo: typeof isFixedPrice,
+    valor_exato: JSON.stringify(isFixedPrice)
   });
   
-  // Garantir que isFixedPrice seja boolean
-  const fixedPrice = isFixedPrice === true || isFixedPrice === 1 || isFixedPrice === '1' || isFixedPrice === 'true';
+  // Garantir que isFixedPrice seja boolean - CORRIGIDO para todos os tipos
+  const fixedPrice = Boolean(isFixedPrice) && isFixedPrice !== 0 && isFixedPrice !== '0' && isFixedPrice !== 'false';
   
   if (fixedPrice) {
     console.log('✅ Aplicando preço fixo!');
