@@ -98,6 +98,7 @@ let systemData = {
     { id: 4, name: 'Escritório', icon: '💼', color: '#8b5cf6', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop' }
   ],
   users: [],
+  promotions: [],
   priceSettings: {
     'A Vista': 0,
     '30': 2,
@@ -284,6 +285,12 @@ async function loadSystemData() {
       systemData.users = users;
     }
     
+    // Carregar promoções
+    const promotions = await supabase.query('promotions');
+    if (promotions && promotions.length > 0) {
+      systemData.promotions = promotions;
+    }
+    
     console.log('✅ Dados carregados do Supabase:', {
       produtos: systemData.products.length,
       categorias: systemData.categories.length
@@ -318,6 +325,220 @@ window.logout = function() {
   currentUser = null;
   currentView = 'login';
   renderApp();
+};
+
+// FUNÇÕES DE PROMOÇÕES
+window.showPromotionModal = function(promotionId = null) {
+  const isEdit = !!promotionId;
+  const promotion = isEdit ? systemData.promotions?.find(p => p.id === promotionId) : null;
+  
+  const modal = document.createElement('div');
+  modal.id = 'promotion-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+    background: rgba(0,0,0,0.5); display: flex; align-items: center; 
+    justify-content: center; z-index: 1000;
+  `;
+  
+  modal.innerHTML = `
+    <div style="background: white; border-radius: 0.5rem; padding: 2rem; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2 style="margin: 0; color: #1e293b;">${isEdit ? 'Editar' : 'Nova'} Promoção</h2>
+        <button onclick="closePromotionModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer;">×</button>
+      </div>
+      
+      <form id="promotion-form" style="display: grid; gap: 1rem;">
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Texto da Promoção</label>
+          <input type="text" id="promotion-text" value="${promotion?.texto || ''}" placeholder="Ex: SUPER OFERTA!" 
+                 style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
+        </div>
+        
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Descrição</label>
+          <textarea id="promotion-description" placeholder="Descrição da promoção..." 
+                    style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box; min-height: 80px;" required>${promotion?.descricao || ''}</textarea>
+        </div>
+        
+        <div>
+          <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Cor de Fundo</label>
+          <input type="color" id="promotion-color" value="${promotion?.cor || '#ff6b6b'}" 
+                 style="width: 60px; height: 40px; border: 1px solid #d1d5db; border-radius: 0.375rem; cursor: pointer;">
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <input type="checkbox" id="promotion-active" ${promotion?.ativo ? 'checked' : ''} 
+                 style="width: 18px; height: 18px; cursor: pointer;">
+          <label for="promotion-active" style="font-weight: 500; color: #374151; cursor: pointer;">Ativar promoção</label>
+        </div>
+        
+        <div style="padding: 1rem; background: #f0f9ff; border-radius: 0.375rem; border-left: 4px solid #3b82f6;">
+          <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Preview</h4>
+          <div id="promotion-preview" style="padding: 0.75rem 1rem; color: white; border-radius: 0.375rem; text-align: center; background: ${promotion?.cor || '#ff6b6b'};">
+            <div style="font-weight: 600; font-size: 1rem;">${promotion?.texto || 'SUPER OFERTA!'}</div>
+            <div style="font-size: 0.875rem; margin-top: 0.25rem;">${promotion?.descricao || 'Descrição da promoção...'}</div>
+          </div>
+        </div>
+        
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1rem;">
+          <button type="button" onclick="closePromotionModal()" style="padding: 0.75rem 1.5rem; background: #6b7280; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">
+            Cancelar
+          </button>
+          <button type="submit" style="padding: 0.75rem 1.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+            ${isEdit ? 'Atualizar' : 'Criar'} Promoção
+          </button>
+        </div>
+      </form>
+    </div>
+  `;
+  
+  document.body.appendChild(modal);
+  
+  // Atualizar preview em tempo real
+  const updatePreview = () => {
+    const text = document.getElementById('promotion-text').value || 'SUPER OFERTA!';
+    const description = document.getElementById('promotion-description').value || 'Descrição da promoção...';
+    const color = document.getElementById('promotion-color').value;
+    
+    const preview = document.getElementById('promotion-preview');
+    preview.style.background = color;
+    preview.innerHTML = `
+      <div style="font-weight: 600; font-size: 1rem;">${text}</div>
+      <div style="font-size: 0.875rem; margin-top: 0.25rem;">${description}</div>
+    `;
+  };
+  
+  document.getElementById('promotion-text').addEventListener('input', updatePreview);
+  document.getElementById('promotion-description').addEventListener('input', updatePreview);
+  document.getElementById('promotion-color').addEventListener('input', updatePreview);
+  
+  // Event listener do formulário
+  document.getElementById('promotion-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    if (isEdit) {
+      updatePromotion(promotionId);
+    } else {
+      savePromotion();
+    }
+  });
+};
+
+window.closePromotionModal = function() {
+  const modal = document.getElementById('promotion-modal');
+  if (modal) {
+    modal.remove();
+  }
+};
+
+// Salvar nova promoção
+async function savePromotion() {
+  const texto = document.getElementById('promotion-text').value.trim();
+  const descricao = document.getElementById('promotion-description').value.trim();
+  const cor = document.getElementById('promotion-color').value;
+  const ativo = document.getElementById('promotion-active').checked;
+  
+  if (!texto || !descricao) {
+    alert('Por favor, preencha todos os campos obrigatórios!');
+    return;
+  }
+  
+  if (!systemData.promotions) {
+    systemData.promotions = [];
+  }
+  
+  // Se esta promoção está sendo ativada, desativar todas as outras
+  if (ativo) {
+    systemData.promotions.forEach(p => p.ativo = false);
+  }
+  
+  const newPromotion = {
+    id: Date.now().toString(),
+    texto,
+    descricao,
+    cor,
+    ativo,
+    createdAt: new Date().toISOString()
+  };
+  
+  systemData.promotions.push(newPromotion);
+  
+  // Tentar salvar no Supabase
+  try {
+    await supabase.insert('promotions', newPromotion);
+    console.log('✅ Promoção salva no Supabase');
+  } catch (error) {
+    console.error('❌ Erro ao salvar no Supabase:', error);
+  }
+  
+  closePromotionModal();
+  renderTab('promocoes');
+  alert(`Promoção "${texto}" criada com sucesso!`);
+}
+
+// Atualizar promoção existente
+async function updatePromotion(promotionId) {
+  const texto = document.getElementById('promotion-text').value.trim();
+  const descricao = document.getElementById('promotion-description').value.trim();
+  const cor = document.getElementById('promotion-color').value;
+  const ativo = document.getElementById('promotion-active').checked;
+  
+  if (!texto || !descricao) {
+    alert('Por favor, preencha todos os campos obrigatórios!');
+    return;
+  }
+  
+  // Se esta promoção está sendo ativada, desativar todas as outras
+  if (ativo) {
+    systemData.promotions.forEach(p => {
+      if (p.id !== promotionId) {
+        p.ativo = false;
+      }
+    });
+  }
+  
+  const promotionIndex = systemData.promotions.findIndex(p => p.id === promotionId);
+  if (promotionIndex !== -1) {
+    systemData.promotions[promotionIndex] = {
+      ...systemData.promotions[promotionIndex],
+      texto,
+      descricao,
+      cor,
+      ativo
+    };
+    
+    // Tentar atualizar no Supabase
+    try {
+      await supabase.update('promotions', promotionId, { texto, descricao, cor, ativo });
+      console.log('✅ Promoção atualizada no Supabase');
+    } catch (error) {
+      console.error('❌ Erro ao atualizar no Supabase:', error);
+    }
+  }
+  
+  closePromotionModal();
+  renderTab('promocoes');
+  alert(`Promoção "${texto}" atualizada com sucesso!`);
+}
+
+// Excluir promoção
+window.deletePromotion = async function(promotionId) {
+  const promotion = systemData.promotions?.find(p => p.id === promotionId);
+  if (!promotion) return;
+  
+  if (confirm(`Tem certeza que deseja excluir a promoção "${promotion.texto}"?`)) {
+    systemData.promotions = systemData.promotions.filter(p => p.id !== promotionId);
+    
+    // Tentar excluir do Supabase
+    try {
+      await supabase.delete('promotions', promotionId);
+      console.log('✅ Promoção excluída do Supabase');
+    } catch (error) {
+      console.error('❌ Erro ao excluir do Supabase:', error);
+    }
+    
+    renderTab('promocoes');
+    alert(`Promoção "${promotion.texto}" excluída com sucesso!`);
+  }
 };
 
 // FUNÇÕES DE PREÇOS
@@ -633,6 +854,85 @@ function renderCatalogView() {
   `;
 }
 
+// Renderizar aba de promoções
+function renderPromotionsTab() {
+  const promotions = systemData.promotions || [];
+  
+  const promotionsHtml = promotions.map(promotion => `
+    <tr>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+        <div style="padding: 0.5rem 1rem; color: white; border-radius: 0.375rem; text-align: center; background: ${promotion.cor}; min-width: 200px;">
+          <div style="font-weight: 600; font-size: 0.9rem;">${promotion.texto}</div>
+          <div style="font-size: 0.75rem; margin-top: 0.25rem; opacity: 0.9;">${promotion.descricao}</div>
+        </div>
+      </td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.texto}</td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.descricao}</td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+        <span style="padding: 0.25rem 0.5rem; background: ${promotion.ativo ? '#10b981' : '#ef4444'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
+          ${promotion.ativo ? 'Ativa' : 'Inativa'}
+        </span>
+      </td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="showPromotionModal('${promotion.id}')" style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
+            Editar
+          </button>
+          <button onclick="deletePromotion('${promotion.id}')" style="padding: 0.25rem 0.5rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
+            Excluir
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="margin: 0; font-size: 1.5rem; font-weight: 600; color: #1e293b;">🎯 Gerenciar Promoções</h2>
+      <button onclick="showPromotionModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+        + Nova Promoção
+      </button>
+    </div>
+    
+    <div style="background: white; border-radius: 0.5rem; padding: 2rem; border: 1px solid #e5e7eb; margin-bottom: 2rem;">
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead style="background: #f9fafb;">
+            <tr>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Preview</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Texto</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Descrição</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Status</th>
+              <th style="padding: 1rem; text-align: left; font-weight: 600; color: #1e293b;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${promotions.length > 0 ? promotionsHtml : `
+              <tr>
+                <td colspan="5" style="padding: 2rem; text-align: center; color: #6b7280;">
+                  <div style="font-size: 2rem; margin-bottom: 1rem;">🎯</div>
+                  <h3 style="margin: 0 0 0.5rem; color: #1e293b;">Nenhuma promoção cadastrada</h3>
+                  <p style="margin: 0;">Clique em "Nova Promoção" para começar</p>
+                </td>
+              </tr>
+            `}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+    <div style="background: #f0f9ff; border-radius: 0.5rem; padding: 1.5rem; border: 1px solid #3b82f6;">
+      <h4 style="margin: 0 0 1rem; color: #1e293b;">💡 Como Funciona</h4>
+      <ul style="margin: 0; color: #6b7280; line-height: 1.6;">
+        <li><strong>Preview:</strong> Visualize como a promoção aparecerá</li>
+        <li><strong>Status:</strong> Apenas uma promoção pode estar ativa por vez</li>
+        <li><strong>Cor:</strong> Personalize a cor de fundo da promoção</li>
+        <li><strong>Ativar:</strong> Ativar uma promoção desativa automaticamente as outras</li>
+      </ul>
+    </div>
+  `;
+}
+
 // Renderizar aba de preços
 function renderPricesTab() {
   const tablesArray = Object.entries(systemData.priceSettings);
@@ -793,18 +1093,38 @@ function renderApp() {
 function renderTab(tabName) {
   if (tabName === 'precos') {
     document.getElementById('admin-content').innerHTML = renderPricesTab();
+  } else if (tabName === 'promocoes') {
+    document.getElementById('admin-content').innerHTML = renderPromotionsTab();
   }
 }
 
 // Renderizar view admin (simplificado)
 function renderAdminView() {
   document.body.innerHTML = `
-    <div>
-      <h1>Admin Panel - ${currentUser.name}</h1>
-      <div id="admin-content">
-        ${renderPricesTab()}
-      </div>
-      <button onclick="logout()">Sair</button>
+    <div style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
+      <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h1 style="margin: 0; font-size: 1.5rem; color: #1e293b;">Admin Panel - ${currentUser.name}</h1>
+          <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer;">Sair</button>
+        </div>
+      </header>
+      
+      <nav style="background: white; border-bottom: 1px solid #e2e8f0; padding: 0 1.5rem;">
+        <div style="display: flex; gap: 2rem;">
+          <button onclick="renderTab('precos')" style="padding: 1rem 0; background: none; border: none; border-bottom: 2px solid #3b82f6; color: #3b82f6; cursor: pointer; font-weight: 500;">
+            Preços
+          </button>
+          <button onclick="renderTab('promocoes')" style="padding: 1rem 0; background: none; border: none; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500;">
+            Promoções
+          </button>
+        </div>
+      </nav>
+      
+      <main style="padding: 1.5rem;">
+        <div id="admin-content">
+          ${renderPricesTab()}
+        </div>
+      </main>
     </div>
   `;
 }
