@@ -406,24 +406,24 @@ function renderCatalogView() {
         <h3 style="margin: 0 0 5px; color: #1f2937; font-size: 1.1rem; font-weight: 600;">${product.name}</h3>
         <p style="margin: 0 0 10px; color: #6b7280; font-size: 0.9rem;">${product.category || ''}</p>
         
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; font-size: 0.7rem;">
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.25rem; text-align: center; color: white;">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; font-size: 0.7rem;" onclick="console.log('CLIQUE DETECTADO NA TABELA DE PREÇOS - PRODUTO:', '${product.name}', 'INDEX:', ${index}); event.stopPropagation();">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.25rem; text-align: center; color: white;" onclick="console.log('CLIQUE À VISTA'); event.stopPropagation();">
             <div style="font-weight: 600;">À Vista</div>
             <div style="font-size: 0.8rem;">R$ ${(product.base_price || 0).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.25rem; text-align: center; color: white;" onclick="console.log('CLIQUE 30 DIAS'); event.stopPropagation();">
             <div style="font-weight: 600;">30</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.02).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.25rem; text-align: center; color: white;" onclick="console.log('CLIQUE 30/60'); event.stopPropagation();">
             <div style="font-weight: 600;">30/60</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.04).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.25rem; text-align: center; color: white;" onclick="console.log('CLIQUE 30/60/90'); event.stopPropagation();">
             <div style="font-weight: 600;">30/60/90</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.06).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.25rem; text-align: center; color: white;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.25rem; text-align: center; color: white;" onclick="console.log('CLIQUE 30/60/90/120'); event.stopPropagation();">
             <div style="font-weight: 600;">30/60/90/120</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.08).toFixed(2)}</div>
           </div>
