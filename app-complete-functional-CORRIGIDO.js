@@ -231,8 +231,17 @@ async function loadSystemData() {
       usuarios: systemData.users.length
     });
     
+    // Forçar renderização após carregar dados
+    if (currentUser) {
+      renderApp();
+    }
+    
   } catch (error) {
     console.error('❌ Erro ao carregar dados:', error);
+    // Mesmo com erro, garantir que o layout apareça
+    if (currentUser) {
+      renderApp();
+    }
   }
 }
 
@@ -2014,12 +2023,21 @@ window.addEventListener('load', function() {
   console.log('🚀 SEM WEBSOCKET - Apenas Supabase puro!');
   console.log('🔄 Sincronização ativada entre navegadores');
   
-  // Verificar dados no Supabase
-  loadSystemData().then(() => {
+  // Verificar dados no Supabase com timeout
+  Promise.race([
+    loadSystemData(),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+  ]).then(() => {
     console.log('✅ Dados carregados do Supabase:', {
       produtos: systemData.products.length,
       categorias: systemData.categories.length
     });
+  }).catch(error => {
+    console.log('⚠️ Timeout no carregamento, usando dados locais');
+    // Garantir que a interface apareça mesmo com erro
+    if (currentUser) {
+      renderApp();
+    }
   });
 });
 
