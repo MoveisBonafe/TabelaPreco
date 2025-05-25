@@ -2238,14 +2238,50 @@ function renderProductsTab() {
     systemData.products = [];
   }
 
-  // Ordenar produtos por nome (alfabética) e depois por categoria
+  // Função para extrair números do nome do produto para ordenação correta
+  function extractNumbersForSort(name) {
+    // Extrai números decimais do nome (ex: "Mesa Bonacor 0,75" -> [0.75])
+    const numbers = (name || "").match(/\d+[,.]?\d*/g);
+    if (numbers && numbers.length > 0) {
+      // Converte vírgula para ponto e transforma em número
+      return numbers.map(num => parseFloat(num.replace(',', '.')));
+    }
+    return [];
+  }
+
+  // Ordenar produtos por categoria e depois por nome (inteligente com números)
   const sortedProducts = [...systemData.products].sort((a, b) => {
     if (a.category !== b.category) {
       return (a.category || "").localeCompare(b.category || "", "pt-BR", {
         numeric: true,
       });
     }
-    return (a.name || "").localeCompare(b.name || "", "pt-BR", {
+    
+    const nameA = a.name || "";
+    const nameB = b.name || "";
+    
+    // Extrair números dos nomes
+    const numbersA = extractNumbersForSort(nameA);
+    const numbersB = extractNumbersForSort(nameB);
+    
+    // Se ambos têm números, comparar numericamente
+    if (numbersA.length > 0 && numbersB.length > 0) {
+      // Comparar o primeiro número encontrado
+      const numA = numbersA[0];
+      const numB = numbersB[0];
+      
+      if (numA !== numB) {
+        return numA - numB;
+      }
+      
+      // Se o primeiro número é igual, comparar o segundo (se existir)
+      if (numbersA.length > 1 && numbersB.length > 1) {
+        return numbersA[1] - numbersB[1];
+      }
+    }
+    
+    // Caso contrário, usar ordenação alfabética normal
+    return nameA.localeCompare(nameB, "pt-BR", {
       numeric: true,
     });
   });
@@ -2868,14 +2904,50 @@ function renderCatalogView() {
     userMultiplier = currentUser.price_multiplier || 1.0;
   }
 
-  // Ordenar produtos por categoria (alfabética) e depois por nome (alfabética)
+  // Função para extrair números do nome do produto para ordenação correta
+  function extractNumbersForSort(name) {
+    // Extrai números decimais do nome (ex: "Mesa Bonacor 0,75" -> [0.75])
+    const numbers = (name || "").match(/\d+[,.]?\d*/g);
+    if (numbers && numbers.length > 0) {
+      // Converte vírgula para ponto e transforma em número
+      return numbers.map(num => parseFloat(num.replace(',', '.')));
+    }
+    return [];
+  }
+
+  // Ordenar produtos por categoria (alfabética) e depois por nome (inteligente com números)
   const sortedProducts = [...systemData.products].sort((a, b) => {
     if (a.category !== b.category) {
       return (a.category || "").localeCompare(b.category || "", "pt-BR", {
         numeric: true,
       });
     }
-    return (a.name || "").localeCompare(b.name || "", "pt-BR", {
+    
+    const nameA = a.name || "";
+    const nameB = b.name || "";
+    
+    // Extrair números dos nomes
+    const numbersA = extractNumbersForSort(nameA);
+    const numbersB = extractNumbersForSort(nameB);
+    
+    // Se ambos têm números, comparar numericamente
+    if (numbersA.length > 0 && numbersB.length > 0) {
+      // Comparar o primeiro número encontrado
+      const numA = numbersA[0];
+      const numB = numbersB[0];
+      
+      if (numA !== numB) {
+        return numA - numB;
+      }
+      
+      // Se o primeiro número é igual, comparar o segundo (se existir)
+      if (numbersA.length > 1 && numbersB.length > 1) {
+        return numbersA[1] - numbersB[1];
+      }
+    }
+    
+    // Caso contrário, usar ordenação alfabética normal
+    return nameA.localeCompare(nameB, "pt-BR", {
       numeric: true,
     });
   });
