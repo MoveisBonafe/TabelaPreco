@@ -1,7 +1,7 @@
 // MoveisBonafe Sistema Otimizado - Performance Melhorada
 // Carregamento de imagens mais rápido e touch events otimizados
 
-// Sistema de dados local
+// Sistema de dados - carregará do Supabase
 let systemData = {
   products: [],
   categories: [],
@@ -28,9 +28,9 @@ let carouselStates = {};
 let touchStartX = 0;
 let touchStartY = 0;
 
-// Configuração do Supabase
-const SUPABASE_URL = 'https://pqrzlmdbgxxzhemqrjfx.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxcnpsbWRiZ3h4emhlbXFyamZ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDc4NzAwNTEsImV4cCI6MjA2MzQ0NjA1MX0.X1AJFqhMqxCYXC48TfE_0KojD8_0Tr8xt1MjF4l87zQ';
+// Configuração do Supabase com suas credenciais corretas
+const SUPABASE_URL = 'https://oozesebwtrbzeelkcmwp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9vemVzZWJ3dHJiemVlbGtjbXdwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwMDk2MzAsImV4cCI6MjA2MzU4NTYzMH0.yL6FHKbig8Uqn-e4gZzXbuBm3YuB5gmCeowRD96n7OY';
 
 // Cliente Supabase otimizado para performance
 class SupabaseClient {
@@ -352,31 +352,43 @@ function hideFullScreenLoading() {
   }
 }
 
-// Carregamento de dados otimizado
+// Carregamento de dados otimizado com fallback
 async function loadSystemData() {
   try {
     console.log('🔄 Carregando dados do Supabase...');
     
     // Carregar dados em paralelo para melhor performance
     const [products, categories, users] = await Promise.all([
-      supabase.query('produtos'),
-      supabase.query('categorias'),
-      supabase.query('users')
+      supabase.query('produtos').catch(() => []),
+      supabase.query('categorias').catch(() => []),
+      supabase.query('users').catch(() => [])
     ]);
     
-    if (products) {
+    if (products && products.length > 0) {
       systemData.products = products.map(product => ({
         ...product,
         images: product.images || []
       }));
+      console.log('✅ Produtos carregados do Supabase:', products.length);
+    } else {
+      console.log('📦 Usando dados locais de produtos');
     }
     
-    if (categories) {
+    if (categories && categories.length > 0) {
       systemData.categories = categories;
+      console.log('✅ Categorias carregadas do Supabase:', categories.length);
+    } else {
+      console.log('📁 Usando dados locais de categorias');
     }
     
     if (users && users.length > 0) {
-      systemData.users = [...systemData.users, ...users];
+      // Manter usuários locais e adicionar do Supabase
+      const localUsernames = systemData.users.map(u => u.username);
+      const newUsers = users.filter(u => !localUsernames.includes(u.username));
+      systemData.users = [...systemData.users, ...newUsers];
+      console.log('✅ Usuários carregados do Supabase:', users.length);
+    } else {
+      console.log('👥 Usando usuários locais');
     }
     
     // Pré-carregar as primeiras imagens para melhor UX
@@ -391,6 +403,7 @@ async function loadSystemData() {
     
   } catch (error) {
     console.error('❌ Erro ao carregar dados do Supabase:', error);
+    console.log('📋 Continuando com dados locais disponíveis');
   }
 }
 
