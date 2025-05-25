@@ -642,21 +642,37 @@ window.addEventListener('load', function() {
           return;
         }
         
-        // Mostrar tela de carregamento
+        // Mostrar tela de carregamento no botão
         submitButton.disabled = true;
-        submitButton.innerHTML = '⏳ Carregando...';
+        submitButton.style.opacity = '0.8';
+        submitButton.style.cursor = 'not-allowed';
         submitButton.style.background = '#6b7280';
-        errorDiv.innerHTML = `
-          <div style="color: #3b82f6; font-size: 0.875rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-            <div style="width: 16px; height: 16px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            Verificando credenciais e carregando dados...
+        submitButton.style.transform = 'none';
+        submitButton.innerHTML = `
+          <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+            <div style="width: 16px; height: 16px; border: 2px solid white; border-top: 2px solid transparent; border-radius: 50%; animation: buttonSpin 1s linear infinite;"></div>
+            Carregando...
           </div>
-          <style>
-            @keyframes spin {
+        `;
+        
+        // Adicionar animação se não existir
+        if (!document.getElementById('button-animations')) {
+          const style = document.createElement('style');
+          style.id = 'button-animations';
+          style.textContent = `
+            @keyframes buttonSpin {
               0% { transform: rotate(0deg); }
               100% { transform: rotate(360deg); }
             }
-          </style>
+          `;
+          document.head.appendChild(style);
+        }
+        
+        errorDiv.innerHTML = `
+          <div style="color: #3b82f6; font-size: 0.875rem; text-align: center; margin-top: 0.5rem;">
+            <div style="display: inline-block; width: 16px; height: 16px; border: 2px solid #3b82f6; border-top: 2px solid transparent; border-radius: 50%; animation: buttonSpin 1s linear infinite; margin-right: 0.5rem; vertical-align: middle;"></div>
+            Verificando credenciais...
+          </div>
         `;
         
         try {
@@ -664,15 +680,21 @@ window.addEventListener('load', function() {
           if (!success) {
             // Restaurar botão em caso de erro
             submitButton.disabled = false;
+            submitButton.style.opacity = '1';
+            submitButton.style.cursor = 'pointer';
             submitButton.innerHTML = '🔐 Entrar';
             submitButton.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+            submitButton.style.transform = '';
             errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Usuário ou senha incorretos.</div>';
           }
         } catch (error) {
           // Restaurar botão em caso de erro
           submitButton.disabled = false;
+          submitButton.style.opacity = '1';
+          submitButton.style.cursor = 'pointer';
           submitButton.innerHTML = '🔐 Entrar';
           submitButton.style.background = 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)';
+          submitButton.style.transform = '';
           errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Erro de conexão. Tente novamente.</div>';
         }
       });
