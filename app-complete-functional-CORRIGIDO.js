@@ -1936,9 +1936,16 @@ window.addEventListener('load', function() {
   console.log('🔄 Conectando ao Supabase...');
   console.log('🔄 Sistema configurado para usar Supabase via HTTP (sincronização manual)');
   
-  // Verificar se há usuário logado
-  if (!currentUser) {
-    // Mostrar tela de login
+  // Carregar dados primeiro, depois mostrar interface
+  loadSystemData().then(() => {
+    console.log('✅ Dados carregados do Supabase:', {
+      produtos: systemData.products.length,
+      categorias: systemData.categories.length
+    });
+    
+    // Após carregar dados, verificar se há usuário logado
+    if (!currentUser) {
+      // Mostrar tela de login
     document.body.innerHTML = `
       <div style="min-height: 100vh; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); display: flex; align-items: center; justify-content: center; padding: 1rem;">
         <div style="background: white; border-radius: 1rem; padding: 3rem; box-shadow: 0 25px 50px rgba(0,0,0,0.25); width: 100%; max-width: 400px;">
@@ -2003,23 +2010,85 @@ window.addEventListener('load', function() {
         errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Usuário ou senha incorretos.</div>';
       }
     });
-  } else {
-    renderApp();
-  }
-  
-  console.log('✅ Conexão Supabase ativa via HTTP');
-  console.log('🎉 CÓDIGO NOVO FUNCIONANDO! Sistema rodando exclusivamente com Supabase');
-  console.log('🔗 Supabase configurado:', !!supabase);
-  console.log('⚡ Build timestamp:', new Date().toISOString());
-  console.log('🚀 SEM WEBSOCKET - Apenas Supabase puro!');
-  console.log('🔄 Sincronização ativada entre navegadores');
-  
-  // Verificar dados no Supabase
-  loadSystemData().then(() => {
-    console.log('✅ Dados carregados do Supabase:', {
-      produtos: systemData.products.length,
-      categorias: systemData.categories.length
-    });
+    } else {
+      renderApp();
+    }
+    
+    console.log('✅ Conexão Supabase ativa via HTTP');
+    console.log('🎉 CÓDIGO NOVO FUNCIONANDO! Sistema rodando exclusivamente com Supabase');
+    console.log('🔗 Supabase configurado:', !!supabase);
+    console.log('⚡ Build timestamp:', new Date().toISOString());
+    console.log('🚀 SEM WEBSOCKET - Apenas Supabase puro!');
+    console.log('🔄 Sincronização ativada entre navegadores');
+  }).catch(error => {
+    console.error('❌ Erro ao carregar dados:', error);
+    // Mostrar tela de login mesmo em caso de erro
+    if (!currentUser) {
+      document.body.innerHTML = `
+        <div style="min-height: 100vh; background: linear-gradient(135deg, #1e293b 0%, #334155 100%); display: flex; align-items: center; justify-content: center; padding: 1rem;">
+          <div style="background: white; border-radius: 1rem; padding: 3rem; box-shadow: 0 25px 50px rgba(0,0,0,0.25); width: 100%; max-width: 400px;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+              <h1 style="margin: 0 0 0.5rem; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-size: 2rem; font-weight: 700;">
+                Móveis Bonafé
+              </h1>
+              <p style="margin: 0; color: #6b7280;">Sistema de Catálogo</p>
+            </div>
+            
+            <form id="login-form" style="display: grid; gap: 1.5rem;">
+              <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Usuário</label>
+                <input type="text" id="username" placeholder="Digite seu usuário" 
+                       style="width: 100%; padding: 0.9rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;"
+                       onfocus="this.style.borderColor='#fbbf24'" onblur="this.style.borderColor='#e5e7eb'">
+              </div>
+              
+              <div>
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: 600; color: #374151;">Senha</label>
+                <input type="password" id="password" placeholder="Digite sua senha" 
+                       style="width: 100%; padding: 0.9rem; border: 2px solid #e5e7eb; border-radius: 0.75rem; font-size: 1rem; box-sizing: border-box; transition: border-color 0.2s;"
+                       onfocus="this.style.borderColor='#fbbf24'" onblur="this.style.borderColor='#e5e7eb'">
+              </div>
+              
+              <button type="submit" 
+                      style="width: 100%; padding: 1rem; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; border: none; border-radius: 0.75rem; font-size: 1rem; font-weight: 600; cursor: pointer; transition: transform 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"
+                      onmouseover="this.style.transform='translateY(-1px)'" onmouseout="this.style.transform='translateY(0)'">
+                🔐 Entrar
+              </button>
+            </form>
+            
+            <div id="login-error" style="margin-top: 1rem; text-align: center;"></div>
+            
+            <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e5e7eb; text-align: center;">
+              <p style="margin: 0 0 1rem; color: #6b7280; font-size: 0.875rem;">Usuários de exemplo:</p>
+              <div style="display: grid; gap: 0.5rem; font-size: 0.75rem; color: #6b7280;">
+                <div><strong>admin</strong> / admin123 (Administrador)</div>
+                <div><strong>Loja</strong> / moveisbonafe (Cliente)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      // Event listener para o form de login
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const errorDiv = document.getElementById('login-error');
+        
+        if (!username || !password) {
+          errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Por favor, preencha todos os campos.</div>';
+          return;
+        }
+        
+        errorDiv.innerHTML = '<div style="color: #3b82f6; font-size: 0.875rem;">Verificando credenciais...</div>';
+        
+        const success = await trySupabaseLogin(username, password);
+        if (!success) {
+          errorDiv.innerHTML = '<div style="color: #dc2626; font-size: 0.875rem;">Usuário ou senha incorretos.</div>';
+        }
+      });
+    }
   });
 });
 
