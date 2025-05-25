@@ -1268,13 +1268,28 @@ window.deletePromotion = async function(id) {
     const numericId = parseInt(id);
     console.log('🔢 ID convertido para número:', numericId);
     
-    const result = await supabase.delete('promocoes', numericId);
-    console.log('📋 Resultado da exclusão completo:', result);
+    // Fazer exclusão direta no Supabase
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${numericId}`, {
+      method: 'DELETE',
+      headers: {
+        'apikey': SUPABASE_ANON_KEY,
+        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    });
     
-    // Sempre recarregar dados e atualizar tela
-    await loadSystemData();
-    renderTab('promocoes');
-    alert('Promoção excluída com sucesso!');
+    console.log('📋 Status da exclusão:', response.status, response.ok);
+    
+    if (response.ok) {
+      console.log('✅ Promoção excluída com sucesso do Supabase!');
+      await loadSystemData();
+      renderTab('promocoes');
+      alert('Promoção excluída com sucesso!');
+    } else {
+      const errorText = await response.text();
+      console.error('❌ Erro na exclusão:', response.status, errorText);
+      alert('Erro ao excluir promoção. Tente novamente.');
+    }
     
   } catch (error) {
     console.error('❌ Erro ao excluir promoção:', error);
@@ -2388,10 +2403,11 @@ function renderApp() {
 // Função para renderizar banner de promoção
 function renderPromotionBanner() {
   console.log('🎯 Verificando promoções ativas:', systemData.promotions);
-  const activePromotion = systemData.promotions?.find(p => p.ativo);
+  const activePromotion = systemData.promotions?.find(p => p.ativo === true);
   
   if (!activePromotion) {
     console.log('❌ Nenhuma promoção ativa encontrada');
+    console.log('📋 Promoções disponíveis:', systemData.promotions.map(p => ({id: p.id, texto: p.texto, ativo: p.ativo})));
     return '';
   }
   
