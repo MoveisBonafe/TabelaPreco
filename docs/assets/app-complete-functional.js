@@ -229,7 +229,7 @@ window.togglePasswordVisibility = function() {
   
   if (passwordInput.type === 'password') {
     passwordInput.type = 'text';
-    toggleButton.textContent = '🙈';
+    toggleButton.textContent = '🔒';
   } else {
     passwordInput.type = 'password';
     toggleButton.textContent = '👁️';
