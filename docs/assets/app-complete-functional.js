@@ -88,10 +88,20 @@ class SupabaseClient {
         headers: {
           'apikey': this.key,
           'Authorization': `Bearer ${this.key}`,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
         }
       });
-      return response.ok;
+      
+      if (!response.ok) {
+        const error = await response.text();
+        console.error('Erro HTTP na exclusão:', response.status, error);
+        return false;
+      }
+      
+      const result = await response.text();
+      console.log('🗑️ Resultado da exclusão:', result);
+      return true;
     } catch (error) {
       console.error('Erro ao excluir:', error);
       return false;
@@ -2374,8 +2384,15 @@ function renderApp() {
 
 // Função para renderizar banner de promoção
 function renderPromotionBanner() {
-  const activePromotion = systemData.promotions.find(p => p.ativo);
-  if (!activePromotion) return '';
+  console.log('🎯 Verificando promoções ativas:', systemData.promotions);
+  const activePromotion = systemData.promotions?.find(p => p.ativo);
+  
+  if (!activePromotion) {
+    console.log('❌ Nenhuma promoção ativa encontrada');
+    return '';
+  }
+  
+  console.log('✅ Promoção ativa encontrada:', activePromotion);
   
   return `
     <div style="background: ${activePromotion.cor || 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'}; color: white; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; text-align: center; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative;">
