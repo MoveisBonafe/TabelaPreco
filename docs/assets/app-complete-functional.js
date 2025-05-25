@@ -292,20 +292,10 @@ async function loadSystemData() {
 
 // Calcular preços com incrementos das tabelas - CORRIGIDO para preço fixo
 function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false) {
-  // Debug do preço fixo
-  console.log('🔍 Debug preço fixo:', {
-    basePrice,
-    userMultiplier,
-    isFixedPrice,
-    tipo: typeof isFixedPrice,
-    valor_exato: JSON.stringify(isFixedPrice)
-  });
-  
   // Garantir que isFixedPrice seja boolean - CORRIGIDO para todos os tipos
   const fixedPrice = Boolean(isFixedPrice) && isFixedPrice !== 0 && isFixedPrice !== '0' && isFixedPrice !== 'false';
   
   if (fixedPrice) {
-    console.log('✅ Aplicando preço fixo!');
     // Preço fixo: todas as tabelas têm o mesmo preço base (à vista)
     return {
       'À Vista': basePrice,
@@ -315,7 +305,6 @@ function calculatePriceTable(basePrice, userMultiplier = 1, isFixedPrice = false
       '30/60/90/120': basePrice
     };
   } else {
-    console.log('📊 Aplicando multiplicadores normais');
     return {
       'À Vista': basePrice * userMultiplier * 1.0,
       '30': basePrice * userMultiplier * 1.02,
