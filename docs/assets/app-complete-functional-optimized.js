@@ -387,15 +387,9 @@ function renderCatalogView() {
             ${images.length > 1 ? `
               <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; gap: 5px;">
                 ${images.map((_, i) => `
-                  <div class="carousel-dot" onclick="setCarouselIndex('${carouselId}', ${i}, ${images.length})"
-                       style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? 'white' : 'rgba(255,255,255,0.5)'}; cursor: pointer; transition: background 0.3s;"></div>
+                  <div style="width: 8px; height: 8px; border-radius: 50%; background: ${i === 0 ? 'white' : 'rgba(255,255,255,0.5)'};"></div>
                 `).join('')}
               </div>
-              
-              <div ontouchstart="handleTouchStart(event, '${carouselId}', ${images.length})" 
-                   ontouchmove="handleTouchMove(event)" 
-                   ontouchend="handleTouchEnd(event, '${carouselId}', ${images.length})"
-                   style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1;"></div>
             ` : ''}
           </div>
         ` : `
@@ -407,24 +401,24 @@ function renderCatalogView() {
         <h3 style="margin: 0 0 5px; color: #1f2937; font-size: 1.1rem; font-weight: 600;">${product.name}</h3>
         <p style="margin: 0 0 10px; color: #6b7280; font-size: 0.9rem;">${product.category || ''}</p>
         
-        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; font-size: 0.7rem;" ${currentUser && currentUser.type === 'customer' ? '' : `onclick="showProductDetails(${index})"`}>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
+        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.25rem; font-size: 0.7rem;">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #10b981 0%, #059669 100%); border-radius: 0.25rem; text-align: center; color: white;">
             <div style="font-weight: 600;">À Vista</div>
             <div style="font-size: 0.8rem;">R$ ${(product.base_price || 0).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border-radius: 0.25rem; text-align: center; color: white;">
             <div style="font-weight: 600;">30</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.02).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border-radius: 0.25rem; text-align: center; color: white;">
             <div style="font-weight: 600;">30/60</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.04).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border-radius: 0.25rem; text-align: center; color: white;">
             <div style="font-weight: 600;">30/60/90</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.06).toFixed(2)}</div>
           </div>
-          <div style="padding: 0.4rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.25rem; text-align: center; color: white; ${currentUser && currentUser.type === 'customer' ? 'cursor: default;' : 'cursor: pointer;'}">
+          <div style="padding: 0.4rem; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); border-radius: 0.25rem; text-align: center; color: white;">
             <div style="font-weight: 600;">30/60/90/120</div>
             <div style="font-size: 0.8rem;">R$ ${((product.base_price || 0) * 1.08).toFixed(2)}</div>
           </div>
