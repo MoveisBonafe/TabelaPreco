@@ -1552,7 +1552,7 @@ function renderProductsTab() {
           <div style="font-size: 0.875rem; color: #6b7280;">${product.category || 'N/A'}</div>
           ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #f59e0b;">🔒 Preço Fixo</div>' : ''}
         </td>
-        <td style="padding: 1rem; color: #10b981; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</td>
+        <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</td>
         <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</td>
         <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</td>
         <td style="padding: 1rem; color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</td>
@@ -1719,7 +1719,7 @@ function renderPricesTab() {
                            style="width: 80px; padding: 0.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; text-align: center;">
                   </td>
                   <td style="padding: 1rem; color: #6b7280; font-family: monospace;">${multiplier}x</td>
-                  <td style="padding: 1rem; color: #10b981; font-weight: 600;">R$ ${example}</td>
+                  <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${example}</td>
                   <td style="padding: 1rem;">
                     <div style="display: flex; gap: 0.5rem;">
                       <button onclick="showEditPriceTableModal('${tableName}')" 
@@ -1905,7 +1905,7 @@ function renderBackupTab() {
         </div>
         <div style="text-align: center; padding: 1rem;">
           <div style="font-size: 2rem; margin-bottom: 0.5rem;">📁</div>
-          <div style="font-size: 1.5rem; font-weight: 600; color: #10b981;">${systemData.categories.length}</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #1f2937;">${systemData.categories.length}</div>
           <div style="color: #6b7280;">Categorias</div>
         </div>
         <div style="text-align: center; padding: 1rem;">
@@ -1915,7 +1915,7 @@ function renderBackupTab() {
         </div>
         <div style="text-align: center; padding: 1rem;">
           <div style="font-size: 2rem; margin-bottom: 0.5rem;">☁️</div>
-          <div style="font-size: 1.5rem; font-weight: 600; color: #10b981;">Conectado</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #1f2937;">Conectado</div>
           <div style="color: #6b7280;">Supabase</div>
         </div>
       </div>
@@ -1931,7 +1931,7 @@ function renderMonitoringTab() {
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
       <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid #10b981;">
         <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Status Supabase</h4>
-        <p style="margin: 0; font-size: 1.2rem; color: #10b981;">🟢 Conectado</p>
+        <p style="margin: 0; font-size: 1.2rem; color: #1f2937;">🟢 Conectado</p>
       </div>
       <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid #3b82f6;">
         <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Última Sincronização</h4>
@@ -2087,19 +2087,19 @@ function renderCatalogView() {
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
-            <div style="padding: 0.5rem; background: #f0fdf4; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #10b981; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
               <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60</div>
               <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60/90</div>
               <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
             </div>
@@ -2671,19 +2671,19 @@ function updateProductsDisplay(productsToShow) {
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
-            <div style="padding: 0.5rem; background: #f0fdf4; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">À Vista</div>
-              <div style="color: #10b981; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</div>
+              <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30 dias</div>
               <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60</div>
               <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60'] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #eff6ff; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
               <div style="color: #6b7280;">30/60/90</div>
               <div style="color: #3b82f6; font-weight: 600;">R$ ${(priceTable['30/60/90'] || 0).toFixed(2)}</div>
             </div>
@@ -2721,7 +2721,7 @@ function updateProductsDisplay(productsToShow) {
                 boxes[0].style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
                 boxes[0].style.color = 'white';
                 boxes[0].style.fontWeight = '700';
-                boxes[0].innerHTML = boxes[0].innerHTML.replace('À Vista', 'À Vista').replace('color: #6b7280', 'font-weight: 700').replace('color: #10b981', 'font-weight: 600');
+                boxes[0].innerHTML = boxes[0].innerHTML.replace('À Vista', 'À Vista').replace('color: #6b7280', 'font-weight: 700').replace('color: #1f2937', 'font-weight: 600');
               }
               if (boxes[1]) {
                 boxes[1].style.background = 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
