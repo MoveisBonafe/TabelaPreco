@@ -42,8 +42,18 @@ export const productSchema = z.object({
   createdAt: z.date(),
 });
 
+export const promotionSchema = z.object({
+  id: z.string(),
+  texto: z.string(),
+  descricao: z.string(),
+  cor: z.string(),
+  ativo: z.boolean(),
+  createdAt: z.date(),
+});
+
 export const insertProductSchema = productSchema.omit({ id: true, createdAt: true, finalPrice: true, price30: true, price30_60: true, price30_60_90: true, price30_60_90_120: true });
 export const insertCategorySchema = categorySchema.omit({ id: true, productCount: true });
+export const insertPromotionSchema = promotionSchema.omit({ id: true, createdAt: true });
 
 // Database tables
 export const categories = pgTable("categories", {
@@ -78,7 +88,18 @@ export const products = pgTable("products", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const promotions = pgTable("promotions", {
+  id: serial("id").primaryKey(),
+  texto: varchar("texto", { length: 255 }).notNull(),
+  descricao: text("descricao").default(""),
+  cor: varchar("cor", { length: 50 }).notNull(),
+  ativo: boolean("ativo").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export type Product = z.infer<typeof productSchema>;
 export type Category = z.infer<typeof categorySchema>;
+export type Promotion = z.infer<typeof promotionSchema>;
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
+export type InsertPromotion = z.infer<typeof insertPromotionSchema>;
