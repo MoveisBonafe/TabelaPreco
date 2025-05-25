@@ -2189,15 +2189,15 @@ function renderPromotionsTab() {
         </button>
       </div>
       
-      <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div class="table-container" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
+        <table style="width: 100%; min-width: 600px; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
           <thead style="background: #f8f9fa;">
             <tr>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Texto</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Descrição</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Cor</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Status</th>
-              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Ações</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 150px;">Texto</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 200px;">Descrição</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 60px;">Cor</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 80px;">Status</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151; min-width: 120px;">Ações</th>
             </tr>
           </thead>
           <tbody>
