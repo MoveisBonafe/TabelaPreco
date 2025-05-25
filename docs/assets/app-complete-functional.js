@@ -113,6 +113,7 @@ let systemData = {
     { id: 4, name: 'Escritório', icon: '💼', color: '#8b5cf6', image: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=200&fit=crop' }
   ],
   users: [],
+  promotions: [],
   priceSettings: {
     'A Vista': 0,
     '30': 2,
@@ -357,8 +358,13 @@ async function loadSystemData() {
     const users = await supabase.query('auth_users');
     if (users && Array.isArray(users)) {
       systemData.users = users;
+    }
+    
+    const promotions = await supabase.query('promocoes');
+    if (promotions && Array.isArray(promotions)) {
+      systemData.promotions = promotions;
     } else {
-      systemData.users = [];
+      systemData.promotions = [];
     }
     
     // Garantir integridade dos dados
@@ -2080,6 +2086,19 @@ function renderApp() {
   } else if (currentView === 'admin') {
     renderAdminView();
   }
+}
+
+// Função para renderizar banner de promoção
+function renderPromotionBanner() {
+  const activePromotion = systemData.promotions.find(p => p.ativo);
+  if (!activePromotion) return '';
+  
+  return `
+    <div style="background: ${activePromotion.cor || 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)'}; color: white; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; text-align: center; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative;">
+      <div style="font-size: 1.1rem;">🎉 ${activePromotion.texto || 'Promoção Especial!'}</div>
+      ${activePromotion.descricao ? `<div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">${activePromotion.descricao}</div>` : ''}
+    </div>
+  `;
 }
 
 // Renderizar visão do catálogo (para clientes)
