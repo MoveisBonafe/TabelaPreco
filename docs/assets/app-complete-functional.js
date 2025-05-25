@@ -1272,7 +1272,7 @@ async function updatePromotion(id) {
     console.log('📋 Status da atualização:', response.status, response.ok);
     
     if (response.ok) {
-      console.log('✅ Promoção atualizada com sucesso!');
+      console.log('✅ Promoção atualizada com sucesso! Status:', response.status);
       await loadSystemData();
       renderTab('promocoes');
       closePromotionModal();
