@@ -8,6 +8,7 @@ interface AdminTabsProps {
 const tabs = [
   { id: 'products', label: 'Produtos', icon: Box },
   { id: 'categories', label: 'Categorias', icon: Tags },
+  { id: 'promotions', label: 'Promoções', icon: DollarSign },
   { id: 'pricing', label: 'Preços', icon: DollarSign },
   { id: 'users', label: 'Usuários', icon: Users },
   { id: 'excel', label: 'Excel', icon: FileSpreadsheet },
@@ -16,7 +17,7 @@ const tabs = [
 ];
 
 export function AdminTabs({ activeTab, onTabChange }: AdminTabsProps) {
-  
+
   return (
     <div className="mb-8">
       <div className="border-b border-slate-200">
@@ -24,7 +25,7 @@ export function AdminTabs({ activeTab, onTabChange }: AdminTabsProps) {
           {tabs.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
-            
+
             return (
               <button
                 key={tab.id}
