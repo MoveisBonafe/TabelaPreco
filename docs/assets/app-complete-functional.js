@@ -14,17 +14,32 @@ class SupabaseClient {
 
   async query(table, query = '') {
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+      
       const response = await fetch(`${this.url}/rest/v1/${table}${query}`, {
         headers: {
           'apikey': this.key,
           'Authorization': `Bearer ${this.key}`,
           'Content-Type': 'application/json',
           'Prefer': 'return=representation'
-        }
+        },
+        signal: controller.signal
       });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
       return await response.json();
     } catch (error) {
-      console.error('Erro na consulta:', error);
+      if (error.name === 'AbortError') {
+        console.error('⏰ Timeout na consulta Supabase:', table);
+      } else {
+        console.error('❌ Erro na consulta:', error);
+      }
       return [];
     }
   }
@@ -348,48 +363,68 @@ async function trySupabaseLogin(username, password) {
   }
 }
 
-// Carregar dados do sistema
-async function loadSystemData() {
-  try {
-    console.log('📊 Carregando dados do sistema...');
-    
-    const products = await supabase.query('products');
-    if (products && Array.isArray(products)) {
-      systemData.products = products;
-    } else {
-      systemData.products = [];
+// Carregar dados do sistema com retry
+async function loadSystemData(maxRetries = 3) {
+  let attempt = 1;
+  
+  while (attempt <= maxRetries) {
+    try {
+      console.log(`📊 Carregando dados do sistema... (tentativa ${attempt}/${maxRetries})`);
+      
+      // Carregar dados com timeout menor para cada tabela
+      const [products, categories, users, promotions] = await Promise.allSettled([
+        supabase.query('products'),
+        supabase.query('categories'), 
+        supabase.query('auth_users'),
+        supabase.query('promocoes')
+      ]);
+      
+      // Processar resultados
+      if (products.status === 'fulfilled' && Array.isArray(products.value)) {
+        systemData.products = products.value;
+      } else {
+        systemData.products = [];
+      }
+      
+      if (categories.status === 'fulfilled' && Array.isArray(categories.value) && categories.value.length > 0) {
+        systemData.categories = categories.value;
+      }
+      
+      if (users.status === 'fulfilled' && Array.isArray(users.value)) {
+        systemData.users = users.value;
+      }
+      
+      if (promotions.status === 'fulfilled' && Array.isArray(promotions.value)) {
+        systemData.promotions = promotions.value;
+      } else {
+        systemData.promotions = [];
+      }
+      
+      // Garantir integridade dos dados
+      ensureDataIntegrity();
+      
+      console.log('✅ Dados carregados do Supabase:', {
+        produtos: systemData.products.length,
+        categorias: systemData.categories.length,
+        usuarios: systemData.users.length,
+        promocoes: systemData.promotions.length
+      });
+      
+      return; // Sucesso, sair do loop
+      
+    } catch (error) {
+      console.error(`❌ Erro ao carregar dados (tentativa ${attempt}):`, error);
+      
+      if (attempt === maxRetries) {
+        console.error('❌ Todas as tentativas falharam, usando dados padrão');
+        ensureDataIntegrity();
+      } else {
+        // Aguardar antes de tentar novamente
+        await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+      }
+      
+      attempt++;
     }
-    
-    const categories = await supabase.query('categories');
-    if (categories && Array.isArray(categories) && categories.length > 0) {
-      systemData.categories = categories;
-    }
-    
-    const users = await supabase.query('auth_users');
-    if (users && Array.isArray(users)) {
-      systemData.users = users;
-    }
-    
-    const promotions = await supabase.query('promocoes');
-    if (promotions && Array.isArray(promotions)) {
-      systemData.promotions = promotions;
-    } else {
-      systemData.promotions = [];
-    }
-    
-    // Garantir integridade dos dados
-    ensureDataIntegrity();
-    
-    console.log('✅ Dados carregados do Supabase:', {
-      produtos: systemData.products.length,
-      categorias: systemData.categories.length,
-      usuarios: systemData.users.length,
-      promocoes: systemData.promotions.length
-    });
-  } catch (error) {
-    console.error('Erro ao carregar dados:', error);
-    // Em caso de erro, garantir que os dados sejam arrays vazios
-    ensureDataIntegrity();
   }
 }
 
@@ -1215,15 +1250,6 @@ async function updatePromotion(id) {
       return;
     }
     
-    // Se ativar esta promoção, desativar todas as outras
-    if (ativo) {
-      for (const promo of systemData.promotions || []) {
-        if (promo.id !== id && promo.ativo) {
-          await supabase.update('promocoes', promo.id, { ativo: false });
-        }
-      }
-    }
-    
     const promotionData = {
       texto,
       descricao,
@@ -1232,22 +1258,69 @@ async function updatePromotion(id) {
     };
     
     console.log('📤 Atualizando promoção no Supabase:', id, promotionData);
-    const result = await supabase.update('promocoes', id, promotionData);
     
-    if (result && result.length > 0) {
-      console.log('✅ Promoção atualizada com sucesso!');
-      await loadSystemData();
-      renderTab('promocoes');
-      closePromotionModal();
-      alert('Promoção atualizada com sucesso!');
-    } else {
-      console.error('❌ Erro: Resultado vazio do Supabase');
-      alert('Erro ao atualizar promoção. Tente novamente.');
+    // Criar timeout mais agressivo para update
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 segundos
+    
+    try {
+      const response = await fetch(`${SUPABASE_URL}/rest/v1/promocoes?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=representation'
+        },
+        body: JSON.stringify(promotionData),
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const result = await response.json();
+      
+      if (result && result.length > 0) {
+        console.log('✅ Promoção atualizada com sucesso!');
+        
+        // Se ativar esta promoção, desativar outras localmente
+        if (ativo) {
+          systemData.promotions.forEach(promo => {
+            if (promo.id != id) {
+              promo.ativo = false;
+            }
+          });
+        }
+        
+        // Atualizar dados localmente sem recarregar tudo
+        const promoIndex = systemData.promotions.findIndex(p => p.id == id);
+        if (promoIndex !== -1) {
+          systemData.promotions[promoIndex] = { ...systemData.promotions[promoIndex], ...promotionData };
+        }
+        
+        renderTab('promocoes');
+        closePromotionModal();
+        alert('Promoção atualizada com sucesso!');
+      } else {
+        throw new Error('Resposta vazia do servidor');
+      }
+      
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      throw fetchError;
     }
     
   } catch (error) {
     console.error('❌ Erro ao atualizar promoção:', error);
-    alert(`Erro ao atualizar promoção: ${error.message || 'Verifique os dados e tente novamente.'}`);
+    if (error.name === 'AbortError') {
+      alert('Timeout: A operação demorou muito. Tente novamente.');
+    } else {
+      alert(`Erro ao atualizar promoção: ${error.message || 'Verifique sua conexão e tente novamente.'}`);
+    }
   }
 }
 
@@ -3390,6 +3463,17 @@ function fixCategoryLayout() {
 // Função removida - não é mais necessária
 
 // Inicializar aplicação
+// Tratamento global de erros
+window.addEventListener('unhandledrejection', function(event) {
+  console.error('❌ Promise rejeitada:', event.reason);
+  event.preventDefault(); // Previne erro no console
+});
+
+// Tratamento de erros globais
+window.addEventListener('error', function(event) {
+  console.error('❌ Erro global:', event.error);
+});
+
 console.log('✅ Sistema MoveisBonafe completo carregado!');
 renderApp();
 
