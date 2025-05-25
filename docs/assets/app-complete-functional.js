@@ -1550,7 +1550,7 @@ function renderProductsTab() {
         <td style="padding: 1rem;">
           <div style="font-weight: 600; color: #1e293b;">${product.name}</div>
           <div style="font-size: 0.875rem; color: #6b7280;">${product.category || 'N/A'}</div>
-          ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #f59e0b;">🔒 Preço Fixo</div>' : ''}
+          ${product.fixed_price ? '<div style="font-size: 0.75rem; color: #1f2937;">🔒 Preço Fixo</div>' : ''}
         </td>
         <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['À Vista'] || 0).toFixed(2)}</td>
         <td style="padding: 1rem; color: #1f2937; font-weight: 600;">R$ ${(priceTable['30'] || 0).toFixed(2)}</td>
@@ -1767,7 +1767,7 @@ function renderUsersTab() {
           ${user.role === 'admin' ? 'Admin' : user.role === 'seller' ? 'Vendedor' : 'Cliente'}
         </span>
       </td>
-      <td style="padding: 1rem; color: #f59e0b; font-weight: 600;">
+      <td style="padding: 1rem; color: #1f2937; font-weight: 600;">
         x${(user.price_multiplier || 1.0).toFixed(2)}
       </td>
       <td style="padding: 1rem;">
@@ -1910,7 +1910,7 @@ function renderBackupTab() {
         </div>
         <div style="text-align: center; padding: 1rem;">
           <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
-          <div style="font-size: 1.5rem; font-weight: 600; color: #f59e0b;">${systemData.users.length}</div>
+          <div style="font-size: 1.5rem; font-weight: 600; color: #1f2937;">${systemData.users.length}</div>
           <div style="color: #6b7280;">Usuários</div>
         </div>
         <div style="text-align: center; padding: 1rem;">
@@ -1939,7 +1939,7 @@ function renderMonitoringTab() {
       </div>
       <div style="background: white; padding: 1.5rem; border-radius: 0.5rem; border: 1px solid #e5e7eb; border-left: 4px solid #f59e0b;">
         <h4 style="margin: 0 0 0.5rem; color: #1e293b;">Usuário Ativo</h4>
-        <p style="margin: 0; font-size: 1.2rem; color: #f59e0b;">${currentUser ? currentUser.name : 'N/A'}</p>
+        <p style="margin: 0; font-size: 1.2rem; color: #1f2937;">${currentUser ? currentUser.name : 'N/A'}</p>
       </div>
     </div>
     
