@@ -1585,6 +1585,9 @@ function renderTab(tabName) {
     case 'usuarios':
       content.innerHTML = renderUsersTab();
       break;
+    case 'promocoes':
+      content.innerHTML = renderPromotionsTab();
+      break;
     case 'excel':
       content.innerHTML = renderExcelTab();
       break;
@@ -1849,6 +1852,69 @@ function renderPricesTab() {
         <li><strong>À Vista:</strong> Sempre 0% - é o preço base de referência</li>
         <li><strong>Exemplo:</strong> Com 2%, um produto de R$ 100 fica R$ 102</li>
       </ul>
+    </div>
+  `;
+}
+
+// Renderizar aba de promoções
+function renderPromotionsTab() {
+  const promotions = systemData.promotions || [];
+  
+  const promotionsHtml = promotions.map(promotion => `
+    <tr>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.texto || ''}</td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">${promotion.descricao || ''}</td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+        <div style="width: 30px; height: 20px; background: ${promotion.cor || '#ff6b6b'}; border-radius: 4px; border: 1px solid #ddd;"></div>
+      </td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+        <span style="padding: 0.25rem 0.5rem; background: ${promotion.ativo ? '#10b981' : '#ef4444'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
+          ${promotion.ativo ? 'Ativa' : 'Inativa'}
+        </span>
+      </td>
+      <td style="padding: 0.75rem; border-bottom: 1px solid #e5e7eb;">
+        <div style="display: flex; gap: 0.5rem;">
+          <button onclick="showPromotionModal('${promotion.id}')" style="padding: 0.25rem 0.5rem; background: #3b82f6; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
+            Editar
+          </button>
+          <button onclick="deletePromotion('${promotion.id}')" style="padding: 0.25rem 0.5rem; background: #ef4444; color: white; border: none; border-radius: 0.25rem; cursor: pointer; font-size: 0.75rem;">
+            Excluir
+          </button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  return `
+    <div style="background: white; padding: 2rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h2 style="margin: 0; color: #1e293b; font-size: 1.5rem;">🎯 Gerenciar Promoções</h2>
+        <button onclick="showPromotionModal()" style="padding: 0.5rem 1rem; background: #3b82f6; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
+          + Nova Promoção
+        </button>
+      </div>
+      
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 0.5rem; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+          <thead style="background: #f8f9fa;">
+            <tr>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Texto</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Descrição</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Cor</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Status</th>
+              <th style="padding: 1rem; text-align: left; border-bottom: 2px solid #e5e7eb; font-weight: 600; color: #374151;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${promotionsHtml || '<tr><td colspan="5" style="padding: 2rem; text-align: center; color: #6b7280;">Nenhuma promoção cadastrada</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+      
+      <div style="margin-top: 1.5rem; padding: 1rem; background: #f0f9ff; border-radius: 0.5rem; border-left: 4px solid #3b82f6;">
+        <h4 style="margin: 0 0 0.5rem; color: #1e40af;">💡 Dica:</h4>
+        <p style="margin: 0; color: #1e40af; font-size: 0.875rem;">Apenas uma promoção pode estar ativa por vez. Ao ativar uma nova promoção, as outras serão automaticamente desativadas.</p>
+      </div>
     </div>
   `;
 }
@@ -2247,6 +2313,8 @@ function renderCatalogView() {
       </header>
       
       <main style="padding: 1.5rem; max-width: 1200px; margin: 0 auto;">
+        ${renderPromotionBanner()}
+        
         <div style="text-align: center; margin-bottom: 2rem;">
           <h2 style="margin: 0 0 0.5rem; color: #1e293b; font-size: 2rem;">Nossos Produtos</h2>
           <p style="margin: 0; color: #6b7280;">Explore nossa coleção completa de móveis com preços especiais para você</p>
@@ -2659,6 +2727,9 @@ function renderAdminView() {
           </button>
           <button onclick="showTab('usuarios')" id="tab-usuarios" class="admin-tab">
             👥 <span>Usuários</span>
+          </button>
+          <button onclick="showTab('promocoes')" id="tab-promocoes" class="admin-tab">
+            🎯 <span>Promoções</span>
           </button>
           <button onclick="showTab('excel')" id="tab-excel" class="admin-tab">
             📊 <span>Excel</span>
