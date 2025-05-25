@@ -453,11 +453,11 @@ function renderCatalogView() {
            onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
         
         ${hasImages ? `
-          <div style="position: relative; width: 100%; height: 200px; overflow: hidden; border-radius: 8px; margin-bottom: 10px;">
-            <div id="carousel-${carouselId}" style="display: flex; height: 100%; transition: transform 0.3s ease;">
+          <div style="position: relative; width: 100%; height: 200px; overflow: hidden; border-radius: 8px; margin-bottom: 10px; transform: translateZ(0);">
+            <div id="carousel-${carouselId}" style="display: flex; height: 100%; transition: transform 0.3s ease; will-change: transform;">
               ${images.map(img => `
                 <img src="${img}" alt="${product.name}" 
-                     style="width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; border-radius: 8px;"
+                     style="width: 100%; height: 100%; object-fit: cover; flex-shrink: 0; border-radius: 8px; will-change: transform; transform: translateZ(0);"
                      loading="lazy" decoding="async">
               `).join('')}
             </div>
@@ -715,9 +715,52 @@ window.addEventListener('load', function() {
   });
 });
 
-// Adicionar touch events com passive listeners para melhor performance
+// Otimizações de performance para scroll suave
+document.addEventListener('DOMContentLoaded', function() {
+  // Adicionar CSS para scroll suave e otimizado
+  const style = document.createElement('style');
+  style.textContent = `
+    * {
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      will-change: scroll-position;
+      transform: translateZ(0);
+    }
+    
+    .card, .carousel, .carousel img {
+      will-change: transform;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+    
+    /* Otimização para scroll em mobile */
+    .content {
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    /* GPU acceleration para elementos que se movem */
+    .carousel-container {
+      transform: translate3d(0, 0, 0);
+    }
+  `;
+  document.head.appendChild(style);
+});
+
+// Touch events otimizados com passive listeners
 document.addEventListener('touchmove', function(e) {
   // Passive listener - não bloqueia scroll
+}, { passive: true });
+
+document.addEventListener('wheel', function(e) {
+  // Passive listener para scroll com mouse
+}, { passive: true });
+
+document.addEventListener('scroll', function(e) {
+  // Throttle scroll events para melhor performance
 }, { passive: true });
 
 // Adicionar SheetJS para Excel
