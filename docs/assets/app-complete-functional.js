@@ -490,7 +490,7 @@ window.logout = function() {
 
 // Função para trocar abas
 window.showTab = function(tabName) {
-  const allTabs = ['produtos', 'categorias', 'precos', 'usuarios', 'excel', 'backup', 'monitoramento'];
+  const allTabs = ['produtos', 'categorias', 'precos', 'usuarios', 'promocoes', 'excel', 'backup', 'monitoramento'];
   allTabs.forEach(tab => {
     const content = document.getElementById('content-' + tab);
     const button = document.getElementById('tab-' + tab);
