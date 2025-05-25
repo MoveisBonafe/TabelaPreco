@@ -34,7 +34,7 @@
     </style>
 </head>
 <body>
-    <div id="root">
+    <div id="app">
         <div class="loading">
             🔄 Carregando MoveisBonafe...
         </div>
@@ -44,14 +44,14 @@
     <script>
         // Carregar o sistema principal
         const script = document.createElement('script');
-        script.src = './assets/app-complete-functional.js';
+        script.src = './assets/app-sistema-promocoes-final.js';
         script.type = 'module';
         script.onload = function() {
             console.log('✅ Sistema MoveisBonafe carregado!');
         };
         script.onerror = function() {
             console.error('❌ Erro ao carregar sistema');
-            document.getElementById('root').innerHTML = `
+            document.getElementById('app').innerHTML = `
                 <div style="padding: 2rem; text-align: center;">
                     <h1>MoveisBonafe</h1>
                     <p>Erro ao carregar o sistema. Verifique sua conexão.</p>
