@@ -1140,52 +1140,7 @@ window.handlePromotionSubmit = async function(event, promotionId) {
   }
 }
 
-async function savePromotion(event) {
-  event.preventDefault();
-  
-  try {
-    const texto = document.getElementById('promotion-texto').value.trim();
-    const descricao = document.getElementById('promotion-descricao').value.trim();
-    const cor = document.getElementById('promotion-cor').value;
-    const ativo = document.getElementById('promotion-ativo').checked;
-    
-    if (!texto) {
-      alert('Por favor, insira o texto da promoção.');
-      return;
-    }
-    
-    // Se ativar esta promoção, desativar todas as outras
-    if (ativo) {
-      for (const promo of systemData.promotions) {
-        if (promo.ativo) {
-          await supabase.update('promocoes', promo.id, { ativo: false });
-        }
-      }
-    }
-    
-    const promotionData = {
-      texto,
-      descricao,
-      cor,
-      ativo
-    };
-    
-    const result = await supabase.insert('promocoes', promotionData);
-    
-    if (result) {
-      console.log('✅ Promoção salva com sucesso!');
-      await loadSystemData();
-      renderTab('promocoes');
-      closePromotionModal();
-    } else {
-      alert('Erro ao salvar promoção. Tente novamente.');
-    }
-    
-  } catch (error) {
-    console.error('❌ Erro ao salvar promoção:', error);
-    alert('Erro ao salvar promoção. Verifique os dados e tente novamente.');
-  }
-}
+// Função duplicada removida - usando versão mais completa abaixo
 
 async function updatePromotion(id) {
   try {
