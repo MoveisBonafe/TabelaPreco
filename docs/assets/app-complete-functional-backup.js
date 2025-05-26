@@ -243,7 +243,7 @@ window.togglePasswordVisibility = function() {
     toggleButton.textContent = '🔒';
   } else {
     passwordInput.type = 'password';
-    toggleButton.textContent = '👁️';
+    toggleButton.textContent = '🔓';
   }
 };
 
