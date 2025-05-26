@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShieldX, User, Lock, LogIn, Eye, EyeOff } from 'lucide-react';
+import { ShieldX, User, Lock, LogIn, Unlock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -64,7 +64,7 @@ export function LoginModal({ onAdminLogin, onPublicView, isVisible }: LoginModal
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-3.5 text-slate-400 hover:text-slate-600"
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
               </button>
             </div>
           </div>

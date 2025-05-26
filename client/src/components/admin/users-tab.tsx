@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Edit, Trash2, Save, X, Eye, EyeOff } from 'lucide-react';
+import { Plus, Edit, Trash2, Save, X, Lock, Unlock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -352,7 +352,7 @@ export function UsersTab() {
                           onClick={() => togglePasswordVisibility(user.id)}
                           className="text-slate-400 hover:text-slate-600"
                         >
-                          {showPasswords[user.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPasswords[user.id] ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}
                         </button>
                       </div>
                     )}
