@@ -2868,7 +2868,7 @@ function renderPromotionBanner() {
 
   return `
     <div style="background: ${activePromotion.cor || "linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)"}; color: white; padding: 1rem; margin-bottom: 1rem; border-radius: 0.5rem; text-align: center; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.1); position: relative;">
-      <div style="font-size: 1.1rem;">⚠️ ${activePromotion.texto || "Promoção Especial!"}</div>
+      <div style="font-size: 1.1rem;">${activePromotion.texto || "Promoção Especial!"}</div>
       ${activePromotion.descricao ? `<div style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.9;">${activePromotion.descricao}</div>` : ""}
     </div>
   `;
@@ -3341,7 +3341,7 @@ function renderCatalogView() {
       
       <!-- Footer -->
       <footer style="background: white; border-top: 1px solid #e5e7eb; padding: 2rem 1.5rem; margin-top: 3rem; text-align: center;">
-        <p style="margin: 0; color: #6b7280;">© 2024 MoveisBonafe - Móveis de qualidade com os melhores preços</p>
+        <p style="margin: 0; color: #6b7280;">© 2025 MoveisBonafe - Móveis de qualidade com os melhores preços</p>
       </footer>
     </div>
   `;
