@@ -360,7 +360,7 @@ window.login = function () {
     );
 
     // Define a view baseada no tipo de usuário
-    if (currentUser.role === "customer") {
+    if (currentUser.role === "customer" || currentUser.role === "customer_restaurant") {
       currentView = "catalog";
     } else {
       currentView = "admin";
@@ -408,7 +408,7 @@ async function trySupabaseLogin(username, password) {
         "Tipo:",
         currentUser.role,
       );
-      currentView = currentUser.role === "customer" ? "catalog" : "admin";
+      currentView = (currentUser.role === "customer" || currentUser.role === "customer_restaurant") ? "catalog" : "admin";
       await loadSystemData();
       renderApp();
     } else {
@@ -1133,7 +1133,7 @@ function showUserModal(user = null) {
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Função</label>
             <select id="user-role" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
               <option value="customer" ${user?.role === "customer" ? "selected" : ""}>Cliente</option>
-              <option value="restaurant" ${user?.role === "restaurant" ? "selected" : ""}>Restaurante</option>
+              <option value="customer_restaurant" ${user?.role === "customer_restaurant" ? "selected" : ""}>Restaurante</option>
               <option value="seller" ${user?.role === "seller" ? "selected" : ""}>Vendedor</option>
               <option value="admin" ${user?.role === "admin" ? "selected" : ""}>Admin</option>
             </select>
