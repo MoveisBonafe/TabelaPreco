@@ -1133,6 +1133,7 @@ function showUserModal(user = null) {
             <label style="display: block; margin-bottom: 0.5rem; font-weight: 500; color: #374151;">Função</label>
             <select id="user-role" style="width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; box-sizing: border-box;" required>
               <option value="customer" ${user?.role === "customer" ? "selected" : ""}>Cliente</option>
+              <option value="restaurant" ${user?.role === "restaurant" ? "selected" : ""}>Restaurante</option>
               <option value="seller" ${user?.role === "seller" ? "selected" : ""}>Vendedor</option>
               <option value="admin" ${user?.role === "admin" ? "selected" : ""}>Admin</option>
             </select>
@@ -2615,8 +2616,8 @@ function renderUsersTab() {
       <td style="padding: 1rem; color: #1e293b;">${user.name}</td>
       <td style="padding: 1rem; color: #1e293b;">@${user.username}</td>
       <td style="padding: 1rem;">
-        <span style="padding: 0.25rem 0.5rem; background: ${user.role === "admin" ? "#dc2626" : user.role === "seller" ? "#3b82f6" : "#10b981"}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
-          ${user.role === "admin" ? "Admin" : user.role === "seller" ? "Vendedor" : "Cliente"}
+        <span style="padding: 0.25rem 0.5rem; background: ${user.role === "admin" ? "#dc2626" : user.role === "seller" ? "#3b82f6" : user.role === "restaurant" ? "#f59e0b" : "#10b981"}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">
+          ${user.role === "admin" ? "Admin" : user.role === "seller" ? "Vendedor" : user.role === "restaurant" ? "Restaurante" : "Cliente"}
         </span>
       </td>
       <td style="padding: 1rem; color: #1f2937; font-weight: 600;">
@@ -3076,7 +3077,7 @@ function renderCatalogView() {
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <h1 style="margin: 0; font-size: 1.25rem; background: linear-gradient(135deg, #8B4513 0%, #DAA520 50%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">Móveis Bonafé Catálogo</h1>
-            <span style="padding: 0.25rem 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; font-size: 0.75rem;">Cliente - ${currentUser.name}</span>
+            <span style="padding: 0.25rem 0.5rem; background: ${currentUser.role === 'restaurant' ? '#f59e0b' : '#10b981'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">${currentUser.role === 'restaurant' ? 'Restaurante' : 'Cliente'} - ${currentUser.name}</span>
           </div>
           <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
             Sair
