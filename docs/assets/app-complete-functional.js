@@ -3111,8 +3111,11 @@ function renderCatalogView() {
 
   // Aplicar correção para usuários Restaurante após renderização
   setTimeout(() => {
-    if (currentUser.role === 'customer_restaurant') {
+    if (currentUser && currentUser.role === 'customer_restaurant') {
+      console.log('🍽️ Aplicando correção para usuário Restaurante');
       const priceGrids = document.querySelectorAll('div[style*="grid-template-columns: 1fr 1fr"]');
+      let corrected = 0;
+      
       priceGrids.forEach(grid => {
         if (grid.innerHTML.includes('À Vista') && grid.innerHTML.includes('30')) {
           const avistaElement = grid.querySelector('div:first-child div:last-child');
@@ -3126,10 +3129,13 @@ function renderCatalogView() {
             </div>
           `;
           grid.style.gridTemplateColumns = '1fr';
+          corrected++;
         }
       });
+      
+      console.log(`✅ ${corrected} grids de preço corrigidos para usuário Restaurante`);
     }
-  }, 100);
+  }, 500);
 
   document.body.innerHTML = `
     <div style="min-height: 100vh; background: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;">
