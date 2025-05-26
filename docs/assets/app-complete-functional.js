@@ -2244,7 +2244,7 @@ function renderProductsTab() {
     const numbers = (name || "").match(/\d+[,.]?\d*/g);
     if (numbers && numbers.length > 0) {
       // Converte vírgula para ponto e transforma em número
-      return numbers.map(num => parseFloat(num.replace(',', '.')));
+      return numbers.map((num) => parseFloat(num.replace(",", ".")));
     }
     return [];
   }
@@ -2256,30 +2256,30 @@ function renderProductsTab() {
         numeric: true,
       });
     }
-    
+
     const nameA = a.name || "";
     const nameB = b.name || "";
-    
+
     // Extrair números dos nomes
     const numbersA = extractNumbersForSort(nameA);
     const numbersB = extractNumbersForSort(nameB);
-    
+
     // Se ambos têm números, comparar numericamente
     if (numbersA.length > 0 && numbersB.length > 0) {
       // Comparar o primeiro número encontrado
       const numA = numbersA[0];
       const numB = numbersB[0];
-      
+
       if (numA !== numB) {
         return numA - numB;
       }
-      
+
       // Se o primeiro número é igual, comparar o segundo (se existir)
       if (numbersA.length > 1 && numbersB.length > 1) {
         return numbersA[1] - numbersB[1];
       }
     }
-    
+
     // Caso contrário, usar ordenação alfabética normal
     return nameA.localeCompare(nameB, "pt-BR", {
       numeric: true,
@@ -2910,7 +2910,7 @@ function renderCatalogView() {
     const numbers = (name || "").match(/\d+[,.]?\d*/g);
     if (numbers && numbers.length > 0) {
       // Converte vírgula para ponto e transforma em número
-      return numbers.map(num => parseFloat(num.replace(',', '.')));
+      return numbers.map((num) => parseFloat(num.replace(",", ".")));
     }
     return [];
   }
@@ -2922,30 +2922,30 @@ function renderCatalogView() {
         numeric: true,
       });
     }
-    
+
     const nameA = a.name || "";
     const nameB = b.name || "";
-    
+
     // Extrair números dos nomes
     const numbersA = extractNumbersForSort(nameA);
     const numbersB = extractNumbersForSort(nameB);
-    
+
     // Se ambos têm números, comparar numericamente
     if (numbersA.length > 0 && numbersB.length > 0) {
       // Comparar o primeiro número encontrado
       const numA = numbersA[0];
       const numB = numbersB[0];
-      
+
       if (numA !== numB) {
         return numA - numB;
       }
-      
+
       // Se o primeiro número é igual, comparar o segundo (se existir)
       if (numbersA.length > 1 && numbersB.length > 1) {
         return numbersA[1] - numbersB[1];
       }
     }
-    
+
     // Caso contrário, usar ordenação alfabética normal
     return nameA.localeCompare(nameB, "pt-BR", {
       numeric: true,
@@ -3057,23 +3057,23 @@ function renderCatalogView() {
         
         <div style="border-top: 1px solid #e5e7eb; padding-top: 1rem;">
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
-            <div style="padding: 0.5rem; background: #10b981; color: white; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: #ffffff; color: white; border-radius: 0.25rem; text-align: center;">
               <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">À Vista</div>
               <div style="color: white; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #3b82f6; color: white; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: #ffffff; color: white; border-radius: 0.25rem; text-align: center;">
               <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30</div>
               <div style="color: white; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #8b5cf6; color: white; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: #ffffff; color: white; border-radius: 0.25rem; text-align: center;">
               <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30/60</div>
               <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #f59e0b; color: white; border-radius: 0.25rem; text-align: center;">
+            <div style="padding: 0.5rem; background: #ffffff; color: white; border-radius: 0.25rem; text-align: center;">
               <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30/60/90</div>
               <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
             </div>
-            <div style="padding: 0.5rem; background: #dc2626; color: white; border-radius: 0.25rem; text-align: center; grid-column: 1 / -1;">
+            <div style="padding: 0.5rem; background: #ffffff; color: white; border-radius: 0.25rem; text-align: center; grid-column: 1 / -1;">
               <div style="color: rgba(255,255,255,0.9); font-size: 0.8rem;">30/60/90/120</div>
               <div style="color: white; font-weight: 600;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</div>
             </div>
@@ -3599,7 +3599,7 @@ function updateProductsDisplay(productsToShow) {
     const numbers = (name || "").match(/\d+[,.]?\d*/g);
     if (numbers && numbers.length > 0) {
       // Converte vírgula para ponto e transforma em número
-      return numbers.map(num => parseFloat(num.replace(',', '.')));
+      return numbers.map((num) => parseFloat(num.replace(",", ".")));
     }
     return [];
   }
@@ -3611,30 +3611,30 @@ function updateProductsDisplay(productsToShow) {
         numeric: true,
       });
     }
-    
+
     const nameA = a.name || "";
     const nameB = b.name || "";
-    
+
     // Extrair números dos nomes
     const numbersA = extractNumbersForSort(nameA);
     const numbersB = extractNumbersForSort(nameB);
-    
+
     // Se ambos têm números, comparar numericamente
     if (numbersA.length > 0 && numbersB.length > 0) {
       // Comparar o primeiro número encontrado
       const numA = numbersA[0];
       const numB = numbersB[0];
-      
+
       if (numA !== numB) {
         return numA - numB;
       }
-      
+
       // Se o primeiro número é igual, comparar o segundo (se existir)
       if (numbersA.length > 1 && numbersB.length > 1) {
         return numbersA[1] - numbersB[1];
       }
     }
-    
+
     // Caso contrário, usar ordenação alfabética normal
     return nameA.localeCompare(nameB, "pt-BR", {
       numeric: true,
