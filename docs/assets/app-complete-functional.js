@@ -340,31 +340,13 @@ window.login = function () {
   const defaultUsers = {
     admin: {
       id: 1,
-      username: "admin",
-      password: "admin123",
+      username: "Pedro",
+      password: "503725",
       role: "admin",
       name: "Administrador",
       price_multiplier: 1.0,
       active: true,
-    },
-    vendedor: {
-      id: 2,
-      username: "vendedor",
-      password: "venda123",
-      role: "seller",
-      name: "Vendedor",
-      price_multiplier: 1.0,
-      active: true,
-    },
-    cliente: {
-      id: 3,
-      username: "cliente",
-      password: "cliente123",
-      role: "customer",
-      name: "Cliente Teste",
-      price_multiplier: 1.0,
-      active: true,
-    },
+    }
   };
 
   const defaultUser = defaultUsers[username];
