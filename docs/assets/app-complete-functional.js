@@ -3119,10 +3119,17 @@ function renderCatalogView() {
       priceGrids.forEach(grid => {
         if (grid.innerHTML.includes('À Vista') && grid.innerHTML.includes('30')) {
           const avistaElement = grid.querySelector('div:first-child div:last-child');
-          const price = avistaElement ? avistaElement.textContent : 'R$ 0,00';
+          let price = avistaElement ? avistaElement.textContent : 'R$ 0,00';
+          
+          // Arredondamento especial para restaurantes
+          if (price.includes('R$')) {
+            const numericValue = parseFloat(price.replace('R$', '').replace(',', '.').trim());
+            const roundedValue = Math.round(numericValue);
+            price = `R$ ${roundedValue.toFixed(2).replace('.', ',')}`;
+          }
           
           grid.innerHTML = `
-            <div style="padding: 1rem; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); border-radius: 0.5rem; text-align: center; color: white; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);">
+            <div style="padding: 1rem; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 0.5rem; text-align: center; color: white; box-shadow: 0 4px 6px rgba(251, 191, 36, 0.3);">
               <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">🍽️ Preço Especial Restaurante</div>
               <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">${price}</div>
               <div style="font-size: 0.75rem; opacity: 0.8;">Pagamento À Vista</div>
