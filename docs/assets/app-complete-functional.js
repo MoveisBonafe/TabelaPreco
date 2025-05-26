@@ -3840,6 +3840,41 @@ function updateProductsDisplay(productsToShow) {
   if (productsContainer) {
     if (sortedProducts.length > 0) {
       productsContainer.innerHTML = productsHtml;
+      
+      // Aplicar correção para usuários Restaurante após filtrar produtos
+      setTimeout(() => {
+        if (currentUser && currentUser.role === 'customer_restaurant') {
+          console.log('🍽️ Aplicando correção para usuário Restaurante após filtro');
+          const priceGrids = document.querySelectorAll('div[style*="grid-template-columns: 1fr 1fr"]');
+          let corrected = 0;
+          
+          priceGrids.forEach(grid => {
+            if (grid.innerHTML.includes('À Vista') && grid.innerHTML.includes('30')) {
+              const avistaElement = grid.querySelector('div:first-child div:last-child');
+              let price = avistaElement ? avistaElement.textContent : 'R$ 0,00';
+              
+              // Arredondamento especial para restaurantes
+              if (price.includes('R$')) {
+                const numericValue = parseFloat(price.replace('R$', '').replace(',', '.').trim());
+                const roundedValue = Math.round(numericValue);
+                price = `R$ ${roundedValue.toFixed(2).replace('.', ',')}`;
+              }
+              
+              grid.innerHTML = `
+                <div style="padding: 1rem; background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); border-radius: 0.5rem; text-align: center; color: white; box-shadow: 0 4px 6px rgba(251, 191, 36, 0.3);">
+                  <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">🍽️ Preço Especial Restaurante</div>
+                  <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">${price}</div>
+                  <div style="font-size: 0.75rem; opacity: 0.8;">Pagamento À Vista</div>
+                </div>
+              `;
+              grid.style.gridTemplateColumns = '1fr';
+              corrected++;
+            }
+          });
+          
+          console.log(`✅ ${corrected} grids de preço corrigidos após filtro para usuário Restaurante`);
+        }
+      }, 300);
     } else {
       productsContainer.innerHTML = `
         <div style="grid-column: 1 / -1; background: white; padding: 3rem; border-radius: 0.5rem; text-align: center; border: 2px dashed #d1d5db;">
