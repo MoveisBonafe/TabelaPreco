@@ -2887,6 +2887,44 @@ function renderCatalogView() {
     userMultiplier = currentUser.price_multiplier || 1.0;
   }
 
+  // Função para renderizar preços baseado no tipo de usuário
+  function renderPriceDisplay(priceTable) {
+    if (currentUser.role === 'customer_restaurant') {
+      return `
+        <div style="padding: 1rem; background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%); border-radius: 0.5rem; text-align: center; color: white; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2);">
+          <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 0.25rem;">🍽️ Preço Especial Restaurante</div>
+          <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
+          <div style="font-size: 0.75rem; opacity: 0.8;">Pagamento À Vista</div>
+        </div>
+      `;
+    } else {
+      return `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.875rem;">
+          <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.8rem;">À Vista</div>
+            <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["À Vista"] || 0).toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.8rem;">30</div>
+            <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30"] || 0).toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.8rem;">30/60</div>
+            <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60"] || 0).toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center;">
+            <div style="color: #6b7280; font-size: 0.8rem;">30/60/90</div>
+            <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90"] || 0).toFixed(2)}</div>
+          </div>
+          <div style="padding: 0.5rem; background: white; border: 1px solid #e5e7eb; border-radius: 0.25rem; text-align: center; grid-column: 1 / -1;">
+            <div style="color: #6b7280; font-size: 0.8rem;">30/60/90/120</div>
+            <div style="color: #1f2937; font-weight: 600;">R$ ${(priceTable["30/60/90/120"] || 0).toFixed(2)}</div>
+          </div>
+        </div>
+      `;
+    }
+  }
+
   // Função para extrair números do nome do produto para ordenação correta
   function extractNumbersForSort(name) {
     // Extrai números decimais do nome (ex: "Mesa Bonacor 0,75" -> [0.75])
