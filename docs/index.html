@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MoveisBonafe - Catálogo de Móveis</title>
     <meta name="description" content="MoveisBonafe - Móveis de qualidade com os melhores preços. Veja nosso catálogo completo com tabelas de preços personalizadas.">
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="./favicon.ico">
-    
+
     <!-- SheetJS para Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
+
     <!-- CSS básico -->
     <style>
         * {
@@ -19,13 +19,13 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
             background: #f8fafc;
             line-height: 1.6;
         }
-        
+
         .loading {
             display: flex;
             justify-content: center;
@@ -42,7 +42,7 @@
             🔄 Carregando MoveisBonafe...
         </div>
     </div>
-    
+
     <!-- Sistema principal -->
     <script>
         // Carregar o sistema principal
@@ -65,7 +65,7 @@
             `;
         };
         document.head.appendChild(script);
-        
+
         // Carregar CSS
         const link = document.createElement('link');
         link.rel = 'stylesheet';
@@ -74,6 +74,19 @@
             console.warn('CSS não carregado, usando estilos básicos');
         };
         document.head.appendChild(link);
+
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.getElementById('togglePassword');
+
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.innerHTML = '🔓';
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.innerHTML = '🔒';
+            }
+        }
     </script>
 </body>
 </html>
