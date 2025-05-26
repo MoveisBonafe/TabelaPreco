@@ -3077,7 +3077,7 @@ function renderCatalogView() {
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <h1 style="margin: 0; font-size: 1.25rem; background: linear-gradient(135deg, #8B4513 0%, #DAA520 50%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">Móveis Bonafé Catálogo</h1>
-            <span style="padding: 0.25rem 0.5rem; background: ${currentUser.role === 'restaurant' ? '#f59e0b' : '#10b981'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">${currentUser.role === 'restaurant' ? 'Restaurante' : 'Cliente'} - ${currentUser.name}</span>
+            <span style="padding: 0.25rem 0.5rem; background: ${currentUser.role === 'customer_restaurant' ? '#f59e0b' : '#10b981'}; color: white; border-radius: 0.25rem; font-size: 0.75rem;">${currentUser.role === 'customer_restaurant' ? 'Restaurante' : 'Cliente'} - ${currentUser.name}</span>
           </div>
           <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
             Sair
