@@ -18,8 +18,10 @@ class SupabaseClient {
   async query(table, query = "") {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 segundos timeout
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos timeout
 
+      console.log(`🔍 Consultando tabela: ${table}${query}`);
+      
       const response = await fetch(`${this.url}/rest/v1/${table}${query}`, {
         headers: {
           apikey: this.key,
@@ -32,16 +34,30 @@ class SupabaseClient {
 
       clearTimeout(timeoutId);
 
+      console.log(`📊 Status da consulta ${table}: ${response.status}`);
+
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        const errorText = await response.text();
+        console.error(`❌ Erro HTTP ${response.status} na tabela ${table}:`, errorText);
+        
+        // Se for erro 500, tentar novamente após delay
+        if (response.status === 500) {
+          console.log("🔄 Tentando novamente após erro 500...");
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return []; // Retorna array vazio em vez de falhar
+        }
+        
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      console.log(`✅ Dados recebidos da tabela ${table}:`, data.length || 0, "registros");
+      return data;
     } catch (error) {
       if (error.name === "AbortError") {
         console.error("⏰ Timeout na consulta Supabase:", table);
       } else {
-        console.error("❌ Erro na consulta:", error);
+        console.error(`❌ Erro na consulta da tabela ${table}:`, error.message);
       }
       return [];
     }
@@ -432,42 +448,24 @@ async function loadSystemData(maxRetries = 3) {
         `📊 Carregando dados do sistema... (tentativa ${attempt}/${maxRetries})`,
       );
 
-      // Carregar dados com timeout menor para cada tabela
-      const [products, categories, users, promotions] =
-        await Promise.allSettled([
-          supabase.query("products"),
-          supabase.query("categories"),
-          supabase.query("auth_users"),
-          supabase.query("promocoes"),
-        ]);
+      // Carregar uma tabela por vez para melhor debug
+      console.log("🔍 Carregando produtos...");
+      const products = await supabase.query("products");
+      
+      console.log("🔍 Carregando categorias...");
+      const categories = await supabase.query("categories");
+      
+      console.log("🔍 Carregando usuários...");
+      const users = await supabase.query("auth_users");
+      
+      console.log("🔍 Carregando promoções...");
+      const promotions = await supabase.query("promocoes");
 
       // Processar resultados
-      if (products.status === "fulfilled" && Array.isArray(products.value)) {
-        systemData.products = products.value;
-      } else {
-        systemData.products = [];
-      }
-
-      if (
-        categories.status === "fulfilled" &&
-        Array.isArray(categories.value) &&
-        categories.value.length > 0
-      ) {
-        systemData.categories = categories.value;
-      }
-
-      if (users.status === "fulfilled" && Array.isArray(users.value)) {
-        systemData.users = users.value;
-      }
-
-      if (
-        promotions.status === "fulfilled" &&
-        Array.isArray(promotions.value)
-      ) {
-        systemData.promotions = promotions.value;
-      } else {
-        systemData.promotions = [];
-      }
+      systemData.products = Array.isArray(products) ? products : [];
+      systemData.categories = Array.isArray(categories) && categories.length > 0 ? categories : systemData.categories;
+      systemData.users = Array.isArray(users) ? users : [];
+      systemData.promotions = Array.isArray(promotions) ? promotions : [];
 
       // Garantir integridade dos dados
       ensureDataIntegrity();
@@ -488,6 +486,7 @@ async function loadSystemData(maxRetries = 3) {
         ensureDataIntegrity();
       } else {
         // Aguardar antes de tentar novamente
+        console.log(`⏳ Aguardando ${2000 * attempt}ms antes da próxima tentativa...`);
         await new Promise((resolve) => setTimeout(resolve, 2000 * attempt));
       }
 
