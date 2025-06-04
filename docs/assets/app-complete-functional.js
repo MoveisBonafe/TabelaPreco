@@ -2818,7 +2818,7 @@ function renderApp() {
         <div style="background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8); max-width: 420px; width: 100%; margin: 1rem;">
           <div style="text-align: center; margin-bottom: 2.5rem;">
             <h1 style="font-size: 2.5rem; font-weight: 700; background: linear-gradient(135deg, #8B4513 0%, #DAA520 50%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0;">Móveis Bonafé</h1>
-            <p style="color: #6b7280; margin: 0.5rem 0 0; font-size: 1.1rem;">Catálogo</p>
+            <p style="color: #6b7280; margin: 0.5rem 0 0; font-size: 1.1rem;">Tabela Preço</p>
           </div>
           
           <div style="margin-bottom: 1.2rem;">
@@ -3148,7 +3148,7 @@ function renderCatalogView() {
       <header style="background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <h1 style="margin: 0; font-size: 1.25rem; background: linear-gradient(135deg, #8B4513 0%, #DAA520 50%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">Móveis Bonafé Catálogo</h1>
+            <h1 style="margin: 0; font-size: 1.25rem; background: linear-gradient(135deg, #8B4513 0%, #DAA520 50%, #FFD700 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700;">Móveis Bonafé Tabela Preço</h1>
           </div>
           <button onclick="logout()" style="padding: 0.5rem 1rem; background: #ef4444; color: white; border: none; border-radius: 0.375rem; cursor: pointer; font-weight: 500;">
             Sair
@@ -4080,16 +4080,17 @@ renderApp();
 
 // Aplicar melhorias visuais após carregamento
 setTimeout(() => {
-  // Atualizar título para "Móveis Bonafé Catálogo"
+  // Atualizar título para "Móveis Bonafé Tabela Preço"
   const headers = document.querySelectorAll(
     'h1, [style*="font-size: 1.5rem"], [style*="font-size: 2rem"]',
   );
   headers.forEach((header) => {
     if (
       header.textContent.includes("MoveisBonafe") ||
-      header.textContent.includes("Catálogo")
+      header.textContent.includes("Catálogo") ||
+      header.textContent.includes("Tabela Preço")
     ) {
-      header.innerHTML = "Móveis Bonafé Catálogo";
+      header.innerHTML = "Móveis Bonafé Tabela Preço";
       header.style.background =
         "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)";
       header.style.webkitBackgroundClip = "text";
